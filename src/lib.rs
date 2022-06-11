@@ -1,5 +1,5 @@
-#![no_std]
-#![deny(warnings, missing_docs, rustdoc::missing_doc_code_examples)]
+#![cfg_attr(not(feature = "std"), no_std)]
+#![deny(warnings, missing_docs)]
 
 //! Eidetic is a simple pure rust library for neural networks and deep learning.
 //! Implemented alongside working through the "Deep learning from scratch in Python" book in order to get hands on with it.
@@ -10,4 +10,9 @@
 //! 4. **Correctness** - We make use of unit testing and documentation testing to verify that the API is correct and functions as expected. Any example code in documentation will be correct and compile
 //! 5. **Well Documented** - Every function, type, module should be documented and where possible include code example/documentation tests.
 
-pub mod tensor;
+mod error;
+mod tensor;
+
+// re-exports
+pub use error::Error;
+pub use tensor::Tensor2;
