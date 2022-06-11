@@ -56,7 +56,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_correct_tensor2_internals() {
+    fn test_correct_tensor2() {
         // Arrange
         let input = [1, 2, 3, 4, 5, 6, 7, 8, 9];
         let expected = Array::from_iter([1, 2, 3, 4, 5, 6, 7, 8, 9])
@@ -68,5 +68,23 @@ mod tests {
 
         // Assert
         assert_eq!(tensor.0, expected);
+    }
+
+    #[test]
+    fn test_incorrect_tensor2() {
+        // Arrange
+        let input = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+        // Act
+        let err = Tensor2::try_from_iter((3, 2), input).unwrap_err();
+
+        // Assert
+        assert_eq!(
+            err,
+            Error::TensorTryFromIterError {
+                expected: 6,
+                actual: 9
+            }
+        );
     }
 }
