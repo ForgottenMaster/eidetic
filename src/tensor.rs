@@ -49,6 +49,62 @@ impl<T> Tensor2<T> {
             Ok(Self(reshaped_array))
         }
     }
+
+    /// Obtains an iterator over references to the elements of the Tensor2 in the same ordering as they were
+    /// provided in try_from_iter for construction (row-major).
+    ///
+    /// # Examples
+    /// ```
+    /// use eidetic::Tensor2;
+    /// let tensor = Tensor2::try_from_iter((2, 3), [1, 2, 3, 4, 5, 6]).unwrap();
+    /// let mut iter = tensor.iter();
+    /// assert_eq!(iter.next().unwrap(), &1);
+    /// assert_eq!(iter.next().unwrap(), &2);
+    /// assert_eq!(iter.next().unwrap(), &3);
+    /// assert_eq!(iter.next().unwrap(), &4);
+    /// assert_eq!(iter.next().unwrap(), &5);
+    /// assert_eq!(iter.next().unwrap(), &6);
+    /// ```
+    pub fn iter(&self) -> impl Iterator<Item = &T> {
+        self.0.iter()
+    }
+
+    /// Obtains an iterator over **mutable** references to the elements of the Tensor2 in the same ordering as they were
+    /// provided in try_from_iter for construction (row-major).
+    ///
+    /// # Examples
+    /// ```
+    /// use eidetic::Tensor2;
+    /// let mut tensor = Tensor2::try_from_iter((2, 3), [1, 2, 3, 4, 5, 6]).unwrap();
+    /// let mut iter = tensor.iter_mut();
+    /// assert_eq!(iter.next().unwrap(), &mut 1);
+    /// assert_eq!(iter.next().unwrap(), &mut 2);
+    /// assert_eq!(iter.next().unwrap(), &mut 3);
+    /// assert_eq!(iter.next().unwrap(), &mut 4);
+    /// assert_eq!(iter.next().unwrap(), &mut 5);
+    /// assert_eq!(iter.next().unwrap(), &mut 6);
+    /// ```
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut T> {
+        self.0.iter_mut()
+    }
+}
+
+pub struct Tensor2Iterator<T>(<Array<T, Ix2> as IntoIterator>::IntoIter);
+
+impl<T> IntoIterator for Tensor2<T> {
+    type Item = T;
+    type IntoIter = Tensor2Iterator<T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Tensor2Iterator(self.0.into_iter())
+    }
+}
+
+impl<T> Iterator for Tensor2Iterator<T> {
+    type Item = T;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.next()
+    }
 }
 
 #[cfg(test)]
@@ -86,5 +142,53 @@ mod tests {
                 actual: 9
             }
         );
+    }
+
+    #[test]
+    fn test_tensor_2_iter() {
+        // Arrange
+        let tensor = Tensor2::try_from_iter((3, 3), [1, 2, 3, 4, 5, 6, 7, 8, 9]).unwrap();
+
+        // Act
+        let mut iter = tensor.iter();
+
+        // Assert
+        assert_eq!(iter.next().unwrap(), &1);
+        assert_eq!(iter.next().unwrap(), &2);
+        assert_eq!(iter.next().unwrap(), &3);
+        assert_eq!(iter.next().unwrap(), &4);
+        assert_eq!(iter.next().unwrap(), &5);
+    }
+
+    #[test]
+    fn test_tensor_2_iter_mut() {
+        // Arrange
+        let mut tensor = Tensor2::try_from_iter((3, 3), [1, 2, 3, 4, 5, 6, 7, 8, 9]).unwrap();
+
+        // Act
+        let mut iter = tensor.iter_mut();
+
+        // Assert
+        assert_eq!(iter.next().unwrap(), &mut 1);
+        assert_eq!(iter.next().unwrap(), &mut 2);
+        assert_eq!(iter.next().unwrap(), &mut 3);
+        assert_eq!(iter.next().unwrap(), &mut 4);
+        assert_eq!(iter.next().unwrap(), &mut 5);
+    }
+
+    #[test]
+    fn test_tensor_2_into_iter() {
+        // Arrange
+        let tensor = Tensor2::try_from_iter((3, 3), [1, 2, 3, 4, 5, 6, 7, 8, 9]).unwrap();
+
+        // Act
+        let mut iter = tensor.into_iter();
+
+        // Assert
+        assert_eq!(iter.next().unwrap(), 1);
+        assert_eq!(iter.next().unwrap(), 2);
+        assert_eq!(iter.next().unwrap(), 3);
+        assert_eq!(iter.next().unwrap(), 4);
+        assert_eq!(iter.next().unwrap(), 5);
     }
 }
