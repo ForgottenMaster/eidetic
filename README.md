@@ -6,8 +6,6 @@
 # Eidetic
 A pure Rust library for creating, training, and using neural networks. Created as hands-on practice as I work my way through [Deep Learning From Scratch In Python](https://www.amazon.co.uk/Deep-Learning-Scratch-Building-Principles/dp/1492041416) and converting over to Rust as I go.
 
-Eidetic is a simple pure rust library for neural networks and deep learning.
-Implemented alongside working through the "Deep learning from scratch in Python" book in order to get hands on with it.
 This API is implemented with the following pillars:
 1. **Stability** - No dependency is included in the public API unless it has reached 1.0. This ensures that users have a stable public API to work with
 2. **Embeddable** - The library doesn't use the standard library or a runtime so can be used in embedded environments
