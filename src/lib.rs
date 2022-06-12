@@ -11,8 +11,11 @@
 //! 5. **Well Documented** - Every function, type, module should be documented and where possible include code example/documentation tests.
 
 mod error;
+mod marker;
+mod ops;
 mod tensor;
 
 // re-exports
-pub use error::Error;
+pub use error::InvalidSizeError;
+pub use ops::OperationImplementation;
 pub use tensor::Tensor2;

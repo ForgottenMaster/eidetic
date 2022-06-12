@@ -4,7 +4,7 @@
 //! In deep learning, a tensor is simply an n-dimensional array. Different operations expect differing
 //! dimensionality of tensor, so we make sure the dimensionality of the tensor is included in the type.
 
-use crate::Error;
+use crate::InvalidSizeError;
 use ndarray::{Array, Ix2};
 
 /// Represents a 2 dimensional tensor with elements of type T.
@@ -12,7 +12,7 @@ use ndarray::{Array, Ix2};
 /// multiple rows and columns. This is the most common tensor type found in the
 /// operations within Eidetic.
 #[derive(Debug)]
-pub struct Tensor2<T>(Array<T, Ix2>);
+pub struct Tensor2<T>(pub(crate) Array<T, Ix2>);
 
 impl<T> Tensor2<T> {
     /// Takes input data along with a shape for a 2-dimensional Tensor, and tries to construct
@@ -30,20 +30,20 @@ impl<T> Tensor2<T> {
     /// ```
     ///
     /// ```
-    /// use eidetic::{Error, Tensor2};
+    /// use eidetic::{InvalidSizeError, Tensor2};
     /// let result = Tensor2::try_from_iter((3, 2), [1, 2, 3, 4, 5, 6, 7, 8, 9]);
     /// assert!(result.is_err());
-    /// assert_eq!(result.unwrap_err(), Error::TensorTryFromIterError {expected: 6, actual: 9});
+    /// assert_eq!(result.unwrap_err(), InvalidSizeError {expected: 6, actual: 9});
     /// ```
     pub fn try_from_iter(
         shape: (usize, usize),
         iter: impl IntoIterator<Item = T>,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self, InvalidSizeError> {
         let expected = shape.0 * shape.1;
         let flat_array = Array::from_iter(iter);
         let actual = flat_array.len();
         if expected != actual {
-            Err(Error::TensorTryFromIterError { expected, actual })
+            Err(InvalidSizeError { expected, actual })
         } else {
             let reshaped_array = flat_array.into_shape(shape).unwrap(); // safe to unwrap as we checked the shape previously
             Ok(Self(reshaped_array))
@@ -137,7 +137,7 @@ mod tests {
         // Assert
         assert_eq!(
             err,
-            Error::TensorTryFromIterError {
+            InvalidSizeError {
                 expected: 6,
                 actual: 9
             }
