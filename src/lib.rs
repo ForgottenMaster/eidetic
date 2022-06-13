@@ -10,7 +10,9 @@
 //! 4. **Correctness** - We make use of unit testing and documentation testing to verify that the API is correct and functions as expected. Any example code in documentation will be correct and compile
 //! 5. **Well Documented** - Every function, type, module should be documented and where possible include code example/documentation tests.
 
+mod errors;
 mod tensor;
 
 // re-exports
-pub use tensor::{InvalidTensorSizeError, Tensor2};
+pub use errors::TensorConstructionError;
+pub use tensor::Tensor2;

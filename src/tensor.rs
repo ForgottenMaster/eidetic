@@ -4,9 +4,8 @@
 //! In deep learning, a tensor is simply an n-dimensional array. Different operations expect differing
 //! dimensionality of tensor, so we make sure the dimensionality of the tensor is included in the type.
 
+use crate::TensorConstructionError;
 use ndarray::{Array, Ix2};
-#[cfg(feature = "thiserror")]
-use thiserror::Error;
 
 /// Represents a 2 dimensional tensor with elements of type T.
 /// A 2 dimensional tensor is commonly referred to as a matrix and contains
@@ -31,20 +30,20 @@ impl<T> Tensor2<T> {
     /// ```
     ///
     /// ```
-    /// use eidetic::{InvalidTensorSizeError, Tensor2};
+    /// use eidetic::{TensorConstructionError, Tensor2};
     /// let result = Tensor2::try_from_iter((3, 2), [1, 2, 3, 4, 5, 6, 7, 8, 9]);
     /// assert!(result.is_err());
-    /// assert_eq!(result.unwrap_err(), InvalidTensorSizeError {expected: 6, actual: 9});
+    /// assert_eq!(result.unwrap_err(), TensorConstructionError::InvalidShape {expected: 6, actual: 9});
     /// ```
     pub fn try_from_iter(
         shape: (usize, usize),
         iter: impl IntoIterator<Item = T>,
-    ) -> Result<Self, InvalidTensorSizeError> {
+    ) -> Result<Self, TensorConstructionError> {
         let expected = shape.0 * shape.1;
         let flat_array = Array::from_iter(iter);
         let actual = flat_array.len();
         if expected != actual {
-            Err(InvalidTensorSizeError { expected, actual })
+            Err(TensorConstructionError::InvalidShape { expected, actual })
         } else {
             let reshaped_array = flat_array.into_shape(shape).unwrap(); // safe to unwrap as we checked the shape previously
             Ok(Self(reshaped_array))
@@ -108,25 +107,6 @@ impl<T> Iterator for Tensor2Iterator<T> {
     }
 }
 
-/// This error type represents the type of error that occurs where some expected
-/// number of elements does not match the actual number provided.
-///
-/// If the Cargo feature "thiserror" is enabled, this will use it to derive the
-/// std::error::Error implementation.
-#[derive(Debug, PartialEq)]
-#[cfg_attr(feature = "thiserror", derive(Error))]
-#[cfg_attr(
-    feature = "thiserror",
-    error("Invalid tensor size. Expected {expected} elements, got {actual}.")
-)]
-pub struct InvalidTensorSizeError {
-    /// The number of elements that were actually expected.
-    pub expected: usize,
-
-    /// The number of elements that were provided.
-    pub actual: usize,
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -157,7 +137,7 @@ mod tests {
         // Assert
         assert_eq!(
             err,
-            InvalidTensorSizeError {
+            TensorConstructionError::InvalidShape {
                 expected: 6,
                 actual: 9
             }
