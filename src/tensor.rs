@@ -11,12 +11,21 @@ use ndarray::{Array, Ix2};
 /// A 2 dimensional tensor is commonly referred to as a matrix and contains
 /// multiple rows and columns. This is the most common tensor type found in the
 /// operations within Eidetic.
+///
+/// Since the number of neurons is a core architectural decision, it's baked in at the type level.
+/// This means to construct a new Tensor2 we only need specify the number of rows and the number of neurons
+/// will be provided at the type level.
+///
+/// This will also be a useful property when chaining network operations together since they should have matching
+/// expected neuron counts to allow the tensors to flow through the network properly.
 #[derive(Debug)]
-pub struct Tensor2<T>(pub(crate) Array<T, Ix2>);
+pub struct Tensor2<T, const NEURONS: usize>(pub(crate) Array<T, Ix2>);
 
-impl<T> Tensor2<T> {
-    /// Takes input data along with a shape for a 2-dimensional Tensor, and tries to construct
+impl<T, const NEURONS: usize> Tensor2<T, NEURONS> {
+    /// Takes input data along with the number of rows for a 2-dimensional Tensor, and tries to construct
     /// the tensor.
+    /// The number of neurons in the tensor is equivalent to the number of columns. As such, the specified
+    /// shape only gives the row count.
     /// This will produce an error if the specified shape does not match the number of input elements.
     ///
     /// # Panics
@@ -25,27 +34,27 @@ impl<T> Tensor2<T> {
     /// # Examples
     /// ```
     /// use eidetic::Tensor2;
-    /// let result = Tensor2::try_from_iter((3, 3), [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    /// let result = Tensor2::<_, 3>::try_from_iter(3, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
     /// assert!(result.is_ok());
     /// ```
     ///
     /// ```
     /// use eidetic::{TensorConstructionError, Tensor2};
-    /// let result = Tensor2::try_from_iter((3, 2), [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    /// let result = Tensor2::<_, 2>::try_from_iter(3, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
     /// assert!(result.is_err());
     /// assert_eq!(result.unwrap_err(), TensorConstructionError::InvalidShape {expected: 6, actual: 9});
     /// ```
     pub fn try_from_iter(
-        shape: (usize, usize),
+        rows: usize,
         iter: impl IntoIterator<Item = T>,
     ) -> Result<Self, TensorConstructionError> {
-        let expected = shape.0 * shape.1;
+        let expected = rows * NEURONS;
         let flat_array = Array::from_iter(iter);
         let actual = flat_array.len();
         if expected != actual {
             Err(TensorConstructionError::InvalidShape { expected, actual })
         } else {
-            let reshaped_array = flat_array.into_shape(shape).unwrap(); // safe to unwrap as we checked the shape previously
+            let reshaped_array = flat_array.into_shape((rows, NEURONS)).unwrap(); // safe to unwrap as we checked the shape previously
             Ok(Self(reshaped_array))
         }
     }
@@ -56,7 +65,7 @@ impl<T> Tensor2<T> {
     /// # Examples
     /// ```
     /// use eidetic::Tensor2;
-    /// let tensor = Tensor2::try_from_iter((2, 3), [1, 2, 3, 4, 5, 6]).unwrap();
+    /// let tensor = Tensor2::<_, 3>::try_from_iter(2, [1, 2, 3, 4, 5, 6]).unwrap();
     /// let mut iter = tensor.iter();
     /// assert_eq!(iter.next().unwrap(), &1);
     /// assert_eq!(iter.next().unwrap(), &2);
@@ -75,7 +84,7 @@ impl<T> Tensor2<T> {
     /// # Examples
     /// ```
     /// use eidetic::Tensor2;
-    /// let mut tensor = Tensor2::try_from_iter((2, 3), [1, 2, 3, 4, 5, 6]).unwrap();
+    /// let mut tensor = Tensor2::<_, 3>::try_from_iter(2, [1, 2, 3, 4, 5, 6]).unwrap();
     /// let mut iter = tensor.iter_mut();
     /// assert_eq!(iter.next().unwrap(), &mut 1);
     /// assert_eq!(iter.next().unwrap(), &mut 2);
@@ -91,7 +100,7 @@ impl<T> Tensor2<T> {
 
 pub struct Tensor2Iterator<T>(<Array<T, Ix2> as IntoIterator>::IntoIter);
 
-impl<T> IntoIterator for Tensor2<T> {
+impl<T, const NEURONS: usize> IntoIterator for Tensor2<T, NEURONS> {
     type Item = T;
     type IntoIter = Tensor2Iterator<T>;
 
@@ -120,7 +129,7 @@ mod tests {
             .unwrap();
 
         // Act
-        let tensor = Tensor2::try_from_iter((3, 3), input).unwrap();
+        let tensor = Tensor2::<_, 3>::try_from_iter(3, input).unwrap();
 
         // Assert
         assert_eq!(tensor.0, expected);
@@ -132,7 +141,7 @@ mod tests {
         let input = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
         // Act
-        let err = Tensor2::try_from_iter((3, 2), input).unwrap_err();
+        let err = Tensor2::<_, 2>::try_from_iter(3, input).unwrap_err();
 
         // Assert
         assert_eq!(
@@ -147,7 +156,7 @@ mod tests {
     #[test]
     fn test_tensor_2_iter() {
         // Arrange
-        let tensor = Tensor2::try_from_iter((3, 3), [1, 2, 3, 4, 5, 6, 7, 8, 9]).unwrap();
+        let tensor = Tensor2::<_, 3>::try_from_iter(3, [1, 2, 3, 4, 5, 6, 7, 8, 9]).unwrap();
 
         // Act
         let mut iter = tensor.iter();
@@ -163,7 +172,7 @@ mod tests {
     #[test]
     fn test_tensor_2_iter_mut() {
         // Arrange
-        let mut tensor = Tensor2::try_from_iter((3, 3), [1, 2, 3, 4, 5, 6, 7, 8, 9]).unwrap();
+        let mut tensor = Tensor2::<_, 3>::try_from_iter(3, [1, 2, 3, 4, 5, 6, 7, 8, 9]).unwrap();
 
         // Act
         let mut iter = tensor.iter_mut();
@@ -179,7 +188,7 @@ mod tests {
     #[test]
     fn test_tensor_2_into_iter() {
         // Arrange
-        let tensor = Tensor2::try_from_iter((3, 3), [1, 2, 3, 4, 5, 6, 7, 8, 9]).unwrap();
+        let tensor = Tensor2::<_, 3>::try_from_iter(3, [1, 2, 3, 4, 5, 6, 7, 8, 9]).unwrap();
 
         // Act
         let mut iter = tensor.into_iter();
