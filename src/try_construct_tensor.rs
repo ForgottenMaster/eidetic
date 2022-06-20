@@ -140,3 +140,134 @@ impl TryConstructTensor for (usize, usize, usize, usize, usize) {
             .map(|array| Tensor(array))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_construct_rank_0_tensor_with_success() {
+        // Arrange
+        let shape = ();
+        let input = [1];
+
+        // Act
+        shape.try_construct_tensor(input).unwrap();
+    }
+
+    #[test]
+    fn test_construct_rank_1_tensor_with_success() {
+        // Arrange
+        let shape = (4,);
+        let input = 1..=4;
+
+        // Act
+        shape.try_construct_tensor(input).unwrap();
+    }
+
+    #[test]
+    fn test_construct_rank_2_tensor_with_success() {
+        // Arrange
+        let shape = (4, 3);
+        let input = 1..=12;
+
+        // Act
+        shape.try_construct_tensor(input).unwrap();
+    }
+
+    #[test]
+    fn test_construct_rank_3_tensor_with_success() {
+        // Arrange
+        let shape = (4, 3, 2);
+        let input = 1..=24;
+
+        // Act
+        shape.try_construct_tensor(input).unwrap();
+    }
+
+    #[test]
+    fn test_construct_rank_4_tensor_with_success() {
+        // Arrange
+        let shape = (4, 3, 2, 2);
+        let input = 1..=48;
+
+        // Act
+        shape.try_construct_tensor(input).unwrap();
+    }
+
+    #[test]
+    fn test_construct_rank_5_tensor_with_success() {
+        // Arrange
+        let shape = (4, 3, 2, 2, 3);
+        let input = 1..=144;
+
+        // Act
+        shape.try_construct_tensor(input).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_construct_rank_0_tensor_with_failure() {
+        // Arrange
+        let shape = ();
+        let input = [1, 2];
+
+        // Act
+        shape.try_construct_tensor(input).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_construct_rank_1_tensor_with_failure() {
+        // Arrange
+        let shape = (4,);
+        let input = 1..=5;
+
+        // Act
+        shape.try_construct_tensor(input).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_construct_rank_2_tensor_with_failure() {
+        // Arrange
+        let shape = (4, 3);
+        let input = 1..=14;
+
+        // Act
+        shape.try_construct_tensor(input).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_construct_rank_3_tensor_with_failure() {
+        // Arrange
+        let shape = (4, 3, 2);
+        let input = 1..=26;
+
+        // Act
+        shape.try_construct_tensor(input).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_construct_rank_4_tensor_with_failure() {
+        // Arrange
+        let shape = (4, 3, 2, 2);
+        let input = 1..=42;
+
+        // Act
+        shape.try_construct_tensor(input).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_construct_rank_5_tensor_with_failure() {
+        // Arrange
+        let shape = (4, 3, 2, 2, 3);
+        let input = 1..=154;
+
+        // Act
+        shape.try_construct_tensor(input).unwrap();
+    }
+}
