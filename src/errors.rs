@@ -7,14 +7,11 @@ use thiserror::Error;
 #[derive(Debug, PartialEq)]
 #[cfg_attr(feature = "thiserror", derive(Error))]
 pub enum TensorConstructionError {
-    /// This variant is used in the case that the specified tensor shape (e.g. rows * columns) doesn't match the number
+    /// This variant is used in the case that the product of the specified tensor shape components (e.g. rows * columns for a rank 2 tensor) doesn't match the number
     /// of elements provided in the iterator.
-    #[cfg_attr(feature="thiserror", error("Constructing tensor with an expected {expected} elements, but only provided {actual} elements."))]
+    #[cfg_attr(feature="thiserror", error("The provided iterator does not have the correct number of elements. Expected {expected} elements."))]
     InvalidShape {
-        /// The expected total number of elements for the tensor.
+        /// The number of elements that we expected to get.
         expected: usize,
-
-        /// The actual provided number of elements in the given iterator.
-        actual: usize,
     },
 }
