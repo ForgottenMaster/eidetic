@@ -52,7 +52,7 @@ impl TryConstructTensor for () {
         input: impl IntoIterator<Item = T>,
     ) -> Result<Tensor<T, Self::Rank>, TensorConstructionError> {
         Array::from_iter(input)
-            .into_shape((*self).clone())
+            .into_shape(())
             .map_err(|_| TensorConstructionError::InvalidShape { expected: 1 })
             .map(|array| Tensor(array))
     }
@@ -67,7 +67,7 @@ impl TryConstructTensor for (usize,) {
         input: impl IntoIterator<Item = T>,
     ) -> Result<Tensor<T, Self::Rank>, TensorConstructionError> {
         Array::from_iter(input)
-            .into_shape((*self).clone())
+            .into_shape(*self)
             .map_err(|_| TensorConstructionError::InvalidShape { expected: self.0 })
             .map(|array| Tensor(array))
     }
@@ -82,7 +82,7 @@ impl TryConstructTensor for (usize, usize) {
         input: impl IntoIterator<Item = T>,
     ) -> Result<Tensor<T, Self::Rank>, TensorConstructionError> {
         Array::from_iter(input)
-            .into_shape((*self).clone())
+            .into_shape(*self)
             .map_err(|_| TensorConstructionError::InvalidShape {
                 expected: self.0 * self.1,
             })
@@ -99,7 +99,7 @@ impl TryConstructTensor for (usize, usize, usize) {
         input: impl IntoIterator<Item = T>,
     ) -> Result<Tensor<T, Self::Rank>, TensorConstructionError> {
         Array::from_iter(input)
-            .into_shape((*self).clone())
+            .into_shape(*self)
             .map_err(|_| TensorConstructionError::InvalidShape {
                 expected: self.0 * self.1 * self.2,
             })
@@ -116,7 +116,7 @@ impl TryConstructTensor for (usize, usize, usize, usize) {
         input: impl IntoIterator<Item = T>,
     ) -> Result<Tensor<T, Self::Rank>, TensorConstructionError> {
         Array::from_iter(input)
-            .into_shape((*self).clone())
+            .into_shape(*self)
             .map_err(|_| TensorConstructionError::InvalidShape {
                 expected: self.0 * self.1 * self.2 * self.3,
             })
@@ -133,7 +133,7 @@ impl TryConstructTensor for (usize, usize, usize, usize, usize) {
         input: impl IntoIterator<Item = T>,
     ) -> Result<Tensor<T, Self::Rank>, TensorConstructionError> {
         Array::from_iter(input)
-            .into_shape((*self).clone())
+            .into_shape(*self)
             .map_err(|_| TensorConstructionError::InvalidShape {
                 expected: self.0 * self.1 * self.2 * self.3 * self.4,
             })
