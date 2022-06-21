@@ -50,3 +50,59 @@ impl<T, R: Rank> Iterator for TensorIterator<T, R> {
         self.0.next()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::*;
+
+    #[test]
+    fn test_tensor_iter() {
+        // Arrange
+        let tensor = (2, 3).try_construct_tensor(1..=6).unwrap();
+
+        // Act
+        let mut iter = tensor.iter();
+
+        // Assert
+        assert_eq!(iter.next().unwrap(), &1);
+        assert_eq!(iter.next().unwrap(), &2);
+        assert_eq!(iter.next().unwrap(), &3);
+        assert_eq!(iter.next().unwrap(), &4);
+        assert_eq!(iter.next().unwrap(), &5);
+        assert_eq!(iter.next().unwrap(), &6);
+    }
+
+    #[test]
+    fn test_tensor_iter_mut() {
+        // Arrange
+        let mut tensor = (2, 3).try_construct_tensor(1..=6).unwrap();
+
+        // Act
+        let mut iter = tensor.iter_mut();
+
+        // Assert
+        assert_eq!(iter.next().unwrap(), &mut 1);
+        assert_eq!(iter.next().unwrap(), &mut 2);
+        assert_eq!(iter.next().unwrap(), &mut 3);
+        assert_eq!(iter.next().unwrap(), &mut 4);
+        assert_eq!(iter.next().unwrap(), &mut 5);
+        assert_eq!(iter.next().unwrap(), &mut 6);
+    }
+
+    #[test]
+    fn test_tensor_into_iter() {
+        // Arrange
+        let tensor = (2, 3).try_construct_tensor(1..=6).unwrap();
+
+        // Act
+        let mut iter = tensor.into_iter();
+
+        // Assert
+        assert_eq!(iter.next().unwrap(), 1);
+        assert_eq!(iter.next().unwrap(), 2);
+        assert_eq!(iter.next().unwrap(), 3);
+        assert_eq!(iter.next().unwrap(), 4);
+        assert_eq!(iter.next().unwrap(), 5);
+        assert_eq!(iter.next().unwrap(), 6);
+    }
+}
