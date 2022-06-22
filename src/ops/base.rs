@@ -12,17 +12,17 @@ pub trait Operation: OperationPrivate {
     /// of the operation from the given iterator of elements, and puts the
     /// operation in an initialised state. Used for when we are reconstructing
     /// a neural network from previously stored weights.
-    fn from_iter(
+    fn with_iter(
         self,
         iter: &mut impl Iterator<Item = Self::Element>,
     ) -> Result<OperationInitialised<Self>, Self::InitialisationError> {
-        self.from_iter_internal(iter, 0)
+        self.with_iter_internal(iter, 0)
     }
 
     /// This function should be called in order to initialise the parameters
     /// of the operation randomly from a seed.
-    fn from_seed(self, seed: u64) -> Result<OperationInitialised<Self>, Self::InitialisationError> {
-        self.from_seed_internal(seed, 0)
+    fn with_seed(self, seed: u64) -> Result<OperationInitialised<Self>, Self::InitialisationError> {
+        self.with_seed_internal(seed, 0)
     }
 }
 
@@ -32,13 +32,14 @@ pub trait OperationPrivate: Sized {
     type Parameter;
     type ParameterIter: Iterator;
 
+    fn neurons(&self) -> usize;
     fn parameter_iter(&self) -> Self::ParameterIter;
-    fn from_iter_internal(
+    fn with_iter_internal(
         self,
         iter: &mut impl Iterator<Item = Self::Element>,
         input_neurons: usize,
     ) -> Result<OperationInitialised<Self>, Self::InitialisationError>;
-    fn from_seed_internal(
+    fn with_seed_internal(
         self,
         seed: u64,
         input_neurons: usize,
