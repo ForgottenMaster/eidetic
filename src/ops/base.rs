@@ -1,5 +1,17 @@
-use crate::sealed::Sealed;
+/// This trait is used to define a specific operation within
+/// the neural network.
+///
+/// Where possible the Operation trait will hide function calls
+/// within the OperationPrivate trait in order to restrict their
+/// access to this API.
+///
+/// This allows us to enforce correct usage of the API in client code
+/// by having to go through the correct flow of control.
+pub trait Operation: OperationPrivate {}
 
+pub trait OperationPrivate {}
+
+/*
 /// A trait which identifies the required information to act as an operation within
 /// a neural network that is currently in the unininitialised state.
 ///
@@ -137,3 +149,4 @@ pub trait OperationBackward: Sealed {
     /// in during the prepare step.
     fn optimise(self);
 }
+*/
