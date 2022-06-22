@@ -1,3 +1,4 @@
+use crate::sealed::Sealed;
 use crate::{Rank, Rank0, Rank1, Rank2, Rank3, Rank4, Rank5, Tensor, TensorConstructionError};
 use ndarray::Array;
 
@@ -6,44 +7,20 @@ use ndarray::Array;
 ///
 /// The rank will be baked into the implementation but it will be able to create an
 /// appropriately shaped tensor from any iterator type.
-pub trait TryConstructTensor: TryConstructTensorPrivate {
+pub trait TryConstructTensor: Sealed {
     /// The rank of the tensor that is constructed.
     type Rank: Rank;
 
     /// A function which takes an iterator of elements of a type T
     /// and produces either a correctly shaped Tensor instance, or a
     /// TensorConstructionError with details on why it couldn't be constructed.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use eidetic::*;
-    /// assert!(().try_construct_tensor([1]).is_ok());
-    /// assert!((5,).try_construct_tensor(1..=5).is_ok());
-    /// assert!((2, 4).try_construct_tensor(1..=8).is_ok());
-    /// assert!((1, 2, 3).try_construct_tensor(1..=6).is_ok());
-    /// assert!((2, 3, 4, 5).try_construct_tensor(1..=120).is_ok());
-    /// assert!((2, 3, 4, 5, 6).try_construct_tensor(1..=720).is_ok());
-    /// ```
-    ///
-    /// ```
-    /// use eidetic::*;
-    /// assert_eq!(().try_construct_tensor([1, 2]).unwrap_err(), TensorConstructionError::InvalidShape { expected: 1 });
-    /// assert_eq!((5,).try_construct_tensor([1..=6]).unwrap_err(), TensorConstructionError::InvalidShape { expected: 5 });
-    /// assert_eq!((2, 4).try_construct_tensor(1..=9).unwrap_err(), TensorConstructionError::InvalidShape { expected: 8 });
-    /// assert_eq!((1, 2, 3).try_construct_tensor(1..=5).unwrap_err(), TensorConstructionError::InvalidShape { expected: 6 });
-    /// assert_eq!((2, 3, 4, 5).try_construct_tensor(1..=10).unwrap_err(), TensorConstructionError::InvalidShape { expected: 120 });
-    /// assert_eq!((2, 3, 4, 5, 6).try_construct_tensor(1..=42).unwrap_err(), TensorConstructionError::InvalidShape { expected: 720 });
-    /// ```
     fn try_construct_tensor<T>(
         &self,
         input: impl IntoIterator<Item = T>,
     ) -> Result<Tensor<T, Self::Rank>, TensorConstructionError>;
 }
 
-pub trait TryConstructTensorPrivate {}
-
-impl TryConstructTensorPrivate for () {}
+impl Sealed for () {}
 impl TryConstructTensor for () {
     type Rank = Rank0;
 
@@ -58,7 +35,7 @@ impl TryConstructTensor for () {
     }
 }
 
-impl TryConstructTensorPrivate for (usize,) {}
+impl Sealed for (usize,) {}
 impl TryConstructTensor for (usize,) {
     type Rank = Rank1;
 
@@ -73,7 +50,7 @@ impl TryConstructTensor for (usize,) {
     }
 }
 
-impl TryConstructTensorPrivate for (usize, usize) {}
+impl Sealed for (usize, usize) {}
 impl TryConstructTensor for (usize, usize) {
     type Rank = Rank2;
 
@@ -90,7 +67,7 @@ impl TryConstructTensor for (usize, usize) {
     }
 }
 
-impl TryConstructTensorPrivate for (usize, usize, usize) {}
+impl Sealed for (usize, usize, usize) {}
 impl TryConstructTensor for (usize, usize, usize) {
     type Rank = Rank3;
 
@@ -107,7 +84,7 @@ impl TryConstructTensor for (usize, usize, usize) {
     }
 }
 
-impl TryConstructTensorPrivate for (usize, usize, usize, usize) {}
+impl Sealed for (usize, usize, usize, usize) {}
 impl TryConstructTensor for (usize, usize, usize, usize) {
     type Rank = Rank4;
 
@@ -124,7 +101,7 @@ impl TryConstructTensor for (usize, usize, usize, usize) {
     }
 }
 
-impl TryConstructTensorPrivate for (usize, usize, usize, usize, usize) {}
+impl Sealed for (usize, usize, usize, usize, usize) {}
 impl TryConstructTensor for (usize, usize, usize, usize, usize) {
     type Rank = Rank5;
 

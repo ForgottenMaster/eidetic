@@ -11,12 +11,17 @@
 //! 5. **Well Documented** - Every public function, type, module should be documented and where possible include code example/documentation tests.
 
 mod errors;
+mod ops;
+mod optim;
 mod rank;
+mod sealed;
 mod tensor;
 mod try_construct_tensor;
 
 // re-exports
 pub use errors::TensorConstructionError;
+pub use ops::{OperationBackward, OperationForward, OperationInitialised, OperationUninitialised};
+pub use optim::Optimiser;
 pub use rank::{Rank, Rank0, Rank1, Rank2, Rank3, Rank4, Rank5};
 pub use tensor::Tensor;
 pub use try_construct_tensor::TryConstructTensor;
