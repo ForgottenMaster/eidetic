@@ -13,10 +13,18 @@ pub trait OperationPrivate: Sized {
     type Element;
     type InitialisationError;
     type Parameter;
-    type ParameterIter: Iterator;
+    type ParameterIter;
+    type Input;
+    type Output;
+    type PredictionError;
 
     fn neurons(&self) -> usize;
-    fn parameter_iter(&self) -> Self::ParameterIter;
+    fn parameter_iter(&self, parameter: Self::Parameter) -> Self::ParameterIter;
+    fn predict(
+        &self,
+        input: Self::Input,
+        parameter: Self::Parameter,
+    ) -> Result<Self::Output, Self::PredictionError>;
     fn with_iter_internal(
         self,
         iter: &mut impl Iterator<Item = Self::Element>,
@@ -60,11 +68,14 @@ impl<T: Operation> OperationExt for T {}
 /// of these instances is to call the initialise function on an Operation, thus
 /// guaranteeing that the parameter has been correctly initialised.
 pub struct OperationInitialised<T: OperationPrivate> {
-    _parameter: T::Parameter,
+    parameter: T::Parameter,
     operation: T,
 }
 
-impl<T: Operation> OperationInitialised<T> {
+impl<T: Operation> OperationInitialised<T>
+where
+    T::Parameter: Clone,
+{
     /// This function can be called to get a *copy* of the elements inside the
     /// operation as an iterator.
     ///
@@ -72,7 +83,13 @@ impl<T: Operation> OperationInitialised<T> {
     /// GATs (Generic Associated Types) in order to allow the associated type
     /// ParameterIter to be generic over the lifetime of the borrow to self.
     pub fn parameters(&self) -> T::ParameterIter {
-        self.operation.parameter_iter()
+        self.operation.parameter_iter(self.parameter.clone())
+    }
+
+    /// This function is called in order to predict the output of the operation
+    /// given the input, through inference by just using the trained weights.
+    pub fn predict(&self, input: T::Input) -> Result<T::Output, T::PredictionError> {
+        self.operation.predict(input, self.parameter.clone())
     }
 }
 
