@@ -7,26 +7,42 @@
 ///
 /// This allows us to enforce correct usage of the API in client code
 /// by having to go through the correct flow of control.
-pub trait Operation: OperationPrivate + Sized {
-    /// The type of the elements that are being used by the
-    /// neural network.
-    type Element;
-
-    /// The type that will be returned if the operation fails to
-    /// be initialised from the initialisation stream/iterator.
-    type Error;
-
+pub trait Operation: OperationPrivate {
     /// This function should be called in order to initialise the parameters
     /// of the operation from the given iterator of elements, and puts the
-    /// operation in an initialised state.
-    fn initialise(
+    /// operation in an initialised state. Used for when we are reconstructing
+    /// a neural network from previously stored weights.
+    fn from_iter(
         self,
         iter: &mut impl Iterator<Item = Self::Element>,
-    ) -> Result<OperationInitialised<Self>, Self::Error>;
+    ) -> Result<OperationInitialised<Self>, Self::InitialisationError> {
+        self.from_iter_internal(iter, 0)
+    }
+
+    /// This function should be called in order to initialise the parameters
+    /// of the operation randomly from a seed.
+    fn from_seed(self, seed: u64) -> Result<OperationInitialised<Self>, Self::InitialisationError> {
+        self.from_seed_internal(seed, 0)
+    }
 }
 
-pub trait OperationPrivate {
+pub trait OperationPrivate: Sized {
+    type Element;
+    type InitialisationError;
     type Parameter;
+    type ParameterIter: Iterator;
+
+    fn parameter_iter(&self) -> Self::ParameterIter;
+    fn from_iter_internal(
+        self,
+        iter: &mut impl Iterator<Item = Self::Element>,
+        input_neurons: usize,
+    ) -> Result<OperationInitialised<Self>, Self::InitialisationError>;
+    fn from_seed_internal(
+        self,
+        seed: u64,
+        input_neurons: usize,
+    ) -> Result<OperationInitialised<Self>, Self::InitialisationError>;
 }
 
 /// This structure is used to represent an operation that has been correctly
@@ -35,9 +51,21 @@ pub trait OperationPrivate {
 /// Since the internals are not publicly visible, the only way to construct one
 /// of these instances is to call the initialise function on an Operation, thus
 /// guaranteeing that the parameter has been correctly initialised.
-pub struct OperationInitialised<T: Operation> {
+pub struct OperationInitialised<T: OperationPrivate> {
     _parameter: T::Parameter,
-    _operation: T,
+    operation: T,
+}
+
+impl<T: Operation> OperationInitialised<T> {
+    /// This function can be called to get a *copy* of the elements inside the
+    /// operation as an iterator.
+    ///
+    /// We are required to return and iterator of copies because we would need
+    /// GATs (Generic Associated Types) in order to allow the associated type
+    /// ParameterIter to be generic over the lifetime of the borrow to self.
+    pub fn parameters(&self) -> T::ParameterIter {
+        self.operation.parameter_iter()
+    }
 }
 
 /*
