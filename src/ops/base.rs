@@ -7,24 +7,7 @@
 ///
 /// This allows us to enforce correct usage of the API in client code
 /// by having to go through the correct flow of control.
-pub trait Operation: OperationPrivate {
-    /// This function should be called in order to initialise the parameters
-    /// of the operation from the given iterator of elements, and puts the
-    /// operation in an initialised state. Used for when we are reconstructing
-    /// a neural network from previously stored weights.
-    fn with_iter(
-        self,
-        iter: &mut impl Iterator<Item = Self::Element>,
-    ) -> Result<OperationInitialised<Self>, Self::InitialisationError> {
-        self.with_iter_internal(iter, 0)
-    }
-
-    /// This function should be called in order to initialise the parameters
-    /// of the operation randomly from a seed.
-    fn with_seed(self, seed: u64) -> Result<OperationInitialised<Self>, Self::InitialisationError> {
-        self.with_seed_internal(seed, 0)
-    }
-}
+pub trait Operation: OperationPrivate {}
 
 pub trait OperationPrivate: Sized {
     type Element;
@@ -45,6 +28,30 @@ pub trait OperationPrivate: Sized {
         input_neurons: usize,
     ) -> Result<OperationInitialised<Self>, Self::InitialisationError>;
 }
+
+/// An extension trait for implementations of Operation that adds
+/// additional functionality on top of the implementation provided by
+/// the Operation trait itself.
+pub trait OperationExt: Operation {
+    /// This function should be called in order to initialise the parameters
+    /// of the operation from the given iterator of elements, and puts the
+    /// operation in an initialised state. Used for when we are reconstructing
+    /// a neural network from previously stored weights.
+    fn with_iter(
+        self,
+        iter: &mut impl Iterator<Item = Self::Element>,
+    ) -> Result<OperationInitialised<Self>, Self::InitialisationError> {
+        self.with_iter_internal(iter, 0)
+    }
+
+    /// This function should be called in order to initialise the parameters
+    /// of the operation randomly from a seed.
+    fn with_seed(self, seed: u64) -> Result<OperationInitialised<Self>, Self::InitialisationError> {
+        self.with_seed_internal(seed, 0)
+    }
+}
+
+impl<T: Operation> OperationExt for T {}
 
 /// This structure is used to represent an operation that has been correctly
 /// initialised.
