@@ -1,3 +1,3 @@
 mod base;
 
-pub use base::Operation;
+pub use base::{Operation, OperationInitialised};

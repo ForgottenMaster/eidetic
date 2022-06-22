@@ -20,7 +20,7 @@ mod try_construct_tensor;
 
 // re-exports
 pub use errors::TensorConstructionError;
-pub use ops::Operation;
+pub use ops::{Operation, OperationInitialised};
 pub use optim::Optimiser;
 pub use rank::{Rank, Rank0, Rank1, Rank2, Rank3, Rank4, Rank5};
 pub use tensor::Tensor;

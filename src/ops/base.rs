@@ -7,50 +7,40 @@
 ///
 /// This allows us to enforce correct usage of the API in client code
 /// by having to go through the correct flow of control.
-pub trait Operation: OperationPrivate {}
+pub trait Operation: OperationPrivate + Sized {
+    /// The type of the elements that are being used by the
+    /// neural network.
+    type Element;
 
-pub trait OperationPrivate {}
-
-/*
-/// A trait which identifies the required information to act as an operation within
-/// a neural network that is currently in the unininitialised state.
-///
-/// This is the state that operations will be in when the network is first constructed
-/// and in order to be mapped to an initialised state will need to be provided with a
-/// stream of elements from which to build the initial parameters.
-///
-/// Unfortunately due to the way we're using typestate for making use of the network
-/// I couldn't find a good way of branching the typestate mapping from OperationInitialised
-/// to OperationTrainable based on the type of optimiser we're using.... therefore we have
-/// to encode the optimiser we're using in at the type level here and pass it through up to
-/// the OperationTrainable state.
-///
-/// Note that since this is a subtrait of the Sealed trait which is not visible
-/// in the public API, this trait can only be implemented by types within the crate.
-///
-/// # Parameters
-/// T - The type of the optimiser factory we want to use when we put the operation into a trainable state
-pub trait OperationUninitialised<T>: Sealed {
-    /// The type of elements that the operation uses that will be the type of the
-    /// items in the iterator provided for initialisation.
-    type ElementType;
-
-    /// The type of an object that encodes this operation in an initialised and ready to
-    /// use state.
-    type Initialised;
-
-    /// The type of the error variant for when initialisation fails for some reason.
+    /// The type that will be returned if the operation fails to
+    /// be initialised from the initialisation stream/iterator.
     type Error;
 
-    /// This function can be called with an iterator of elements to construct the
-    /// parameters from and will either return a valid object representing the initialised state of this operation,
-    /// or an error.
+    /// This function should be called in order to initialise the parameters
+    /// of the operation from the given iterator of elements, and puts the
+    /// operation in an initialised state.
     fn initialise(
         self,
-        iter: &mut impl Iterator<Item = Self::ElementType>,
-    ) -> Result<Self::Initialised, Self::Error>;
+        iter: &mut impl Iterator<Item = Self::Element>,
+    ) -> Result<OperationInitialised<Self>, Self::Error>;
 }
 
+pub trait OperationPrivate {
+    type Parameter;
+}
+
+/// This structure is used to represent an operation that has been correctly
+/// initialised.
+///
+/// Since the internals are not publicly visible, the only way to construct one
+/// of these instances is to call the initialise function on an Operation, thus
+/// guaranteeing that the parameter has been correctly initialised.
+pub struct OperationInitialised<T: Operation> {
+    _parameter: T::Parameter,
+    _operation: T,
+}
+
+/*
 /// This trait defines the valid functionality for an operation that has been
 /// correctly initialised and can be used for inference or prepared for training.
 ///
