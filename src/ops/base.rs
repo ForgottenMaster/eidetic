@@ -1,3 +1,5 @@
+use crate::Optimiser;
+
 /// This trait is used to define a specific operation within
 /// the neural network.
 ///
@@ -13,6 +15,7 @@ pub trait OperationPrivate: Sized {
     type Element;
     type InitialisationError;
     type Parameter;
+    type ParameterGradient;
     type ParameterIter;
     type Input;
     type Output;
@@ -90,6 +93,30 @@ where
     /// given the input, through inference by just using the trained weights.
     pub fn predict(&self, input: T::Input) -> Result<T::Output, T::PredictionError> {
         self.operation.predict(input, self.parameter.clone())
+    }
+
+    /// This function takes a given optimiser that operates on parameters and
+    /// parameter gradients of the same kind as this operation and progresses the
+    /// typestate to the trainable state.
+    pub fn with_optimiser<U: Optimiser<T::Parameter, T::ParameterGradient>>(
+        self,
+        optimiser: U,
+    ) -> OperationTrainable<T, U> {
+        OperationTrainable {
+            initialised: self,
+            _optimiser: optimiser,
+        }
+    }
+}
+
+pub struct OperationTrainable<T: Operation, U: Optimiser<T::Parameter, T::ParameterGradient>> {
+    initialised: OperationInitialised<T>,
+    _optimiser: U,
+}
+
+impl<T: Operation, U: Optimiser<T::Parameter, T::ParameterGradient>> OperationTrainable<T, U> {
+    pub fn into_initialised(self) -> OperationInitialised<T> {
+        self.initialised
     }
 }
 
