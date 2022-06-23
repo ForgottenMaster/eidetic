@@ -10,7 +10,7 @@ use crate::private::Sealed;
 /// call to bind an optimiser to the network.
 pub trait OperationTrainable: Sealed {
     /// This is the type of the initialised version of the operation.
-    type Initialised: OperationInitialised<Trainable = Self>;
+    type Initialised: OperationInitialised;
 
     /// Calling this function will "go back" from a trainable
     /// state into an initialised one. This allows the trained network
@@ -24,11 +24,11 @@ pub trait OperationTrainable: Sealed {
 /// This gives us a wrapping type that can orchestrate the optimisation process.
 pub struct Trainable<T, U>(T, U);
 
-impl<T: OperationTrainable, U> Trainable<T, U> {
-    /// This function can be called to strip away the optimiser
-    /// and training stuff and go back to an initialised operation
-    /// again.
-    pub fn into_initialised(self) -> T::Initialised {
+impl<T, U> Sealed for Trainable<T, U> {}
+impl<T: OperationTrainable, U> OperationTrainable for Trainable<T, U> {
+    type Initialised = T::Initialised;
+
+    fn into_initialised(self) -> Self::Initialised {
         self.0.into_initialised()
     }
 }
