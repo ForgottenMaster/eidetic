@@ -3,7 +3,12 @@
 //! In deep learning, a tensor is simply an n-dimensional array. Different operations expect differing
 //! dimensionality of tensor, so we make sure the dimensionality of the tensor is included in the type.
 
-use crate::Rank;
+mod rank;
+mod try_construct_tensor;
+
+pub use rank::*;
+pub use try_construct_tensor::*;
+
 use ndarray::Array;
 
 /// Represents a tensor with a specific element type T, and specific dimensionality
@@ -32,7 +37,8 @@ impl<T, R: Rank> Tensor<T, R> {
     }
 }
 
-// IntoIterator implementation for iterating over an owned tensor.
+/// This struct is the type that is returned from calling .into_iter()
+/// on a Tensor. This type is an Iterator that iterates the underlying elements.
 pub struct TensorIterator<T, R: Rank>(<Array<T, R::Internal> as IntoIterator>::IntoIter);
 
 impl<T, R: Rank> IntoIterator for Tensor<T, R> {
@@ -53,7 +59,7 @@ impl<T, R: Rank> Iterator for TensorIterator<T, R> {
 
 #[cfg(test)]
 mod tests {
-    use crate::*;
+    use super::*;
 
     #[test]
     fn test_tensor_iter() {
