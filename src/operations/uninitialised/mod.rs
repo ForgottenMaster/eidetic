@@ -11,7 +11,13 @@ use crate::private::Sealed;
 pub trait OperationUninitialised: Sealed + Sized {
     /// The type of the underlying element that's used to represent
     /// the data.
-    type ElementType;
+    type Element;
+
+    /// The input type that the operation is expecting to receive.
+    type Input;
+
+    /// The output type that the operation will produce.
+    type Output;
 
     /// This is a type representing the next state in the typestate sequence
     /// which is an initialised operation with generated parameter, etc.
@@ -20,11 +26,11 @@ pub trait OperationUninitialised: Sealed + Sized {
     /// This returns the output neuron count for the operation.
     /// We represent this using the element type because it could be
     /// used with xavier initialisation
-    fn output_neuron_count(&self) -> Self::ElementType;
+    fn output_neuron_count(&self) -> Self::Element;
 
     /// This function can be called to initialise the parameters of the operation
     /// from an iterator that yields elements of the expected type for the operation.
-    fn with_iter(self, mut iter: impl Iterator<Item = Self::ElementType>) -> Self::Initialised {
+    fn with_iter(self, mut iter: impl Iterator<Item = Self::Element>) -> Self::Initialised {
         let input_neuron_count = self.output_neuron_count();
         self.with_iter_private(&mut iter, input_neuron_count)
     }
@@ -39,14 +45,10 @@ pub trait OperationUninitialised: Sealed + Sized {
     #[doc(hidden)]
     fn with_iter_private(
         self,
-        iter: &mut impl Iterator<Item = Self::ElementType>,
-        input_neuron_count: Self::ElementType,
+        iter: &mut impl Iterator<Item = Self::Element>,
+        input_neuron_count: Self::Element,
     ) -> Self::Initialised;
 
     #[doc(hidden)]
-    fn with_seed_private(
-        self,
-        seed: u64,
-        input_neuron_count: Self::ElementType,
-    ) -> Self::Initialised;
+    fn with_seed_private(self, seed: u64, input_neuron_count: Self::Element) -> Self::Initialised;
 }
