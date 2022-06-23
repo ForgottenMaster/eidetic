@@ -4,4 +4,5 @@
 //! lowest level.
 
 pub mod initialised;
+pub mod trainable;
 pub mod uninitialised;

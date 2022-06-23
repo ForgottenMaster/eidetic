@@ -19,6 +19,10 @@ pub trait OperationUninitialised: Sealed + Sized {
     /// The output type that the operation will produce.
     type Output;
 
+    /// This is the type that's used in order to report an error
+    /// with initialisation (e.g. not enough elements in the iterator, etc.).
+    type Error;
+
     /// This is a type representing the next state in the typestate sequence
     /// which is an initialised operation with generated parameter, etc.
     type Initialised: OperationInitialised;
@@ -28,14 +32,17 @@ pub trait OperationUninitialised: Sealed + Sized {
 
     /// This function can be called to initialise the parameters of the operation
     /// from an iterator that yields elements of the expected type for the operation.
-    fn with_iter(self, mut iter: impl Iterator<Item = Self::Element>) -> Self::Initialised {
+    fn with_iter(
+        self,
+        mut iter: impl Iterator<Item = Self::Element>,
+    ) -> Result<Self::Initialised, Self::Error> {
         let input_neuron_count = self.output_neuron_count();
         self.with_iter_private(&mut iter, input_neuron_count)
     }
 
     /// This function can be called to initialise the parameters of the operation
     /// randomly using the given RNG seed.
-    fn with_seed(self, seed: u64) -> Self::Initialised {
+    fn with_seed(self, seed: u64) -> Result<Self::Initialised, Self::Error> {
         let input_neuron_count = self.output_neuron_count();
         self.with_seed_private(seed, input_neuron_count)
     }
@@ -45,15 +52,21 @@ pub trait OperationUninitialised: Sealed + Sized {
         self,
         iter: &mut impl Iterator<Item = Self::Element>,
         input_neuron_count: usize,
-    ) -> Self::Initialised;
+    ) -> Result<Self::Initialised, Self::Error>;
 
     #[doc(hidden)]
-    fn with_seed_private(self, seed: u64, input_neuron_count: usize) -> Self::Initialised;
+    fn with_seed_private(
+        self,
+        seed: u64,
+        input_neuron_count: usize,
+    ) -> Result<Self::Initialised, Self::Error>;
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::operations::trainable::{OperationTrainable, Trainable};
+    use crate::optimisers::OptimiserFactory;
 
     struct StubOperationUninitialised(usize);
     impl Sealed for StubOperationUninitialised {}
@@ -61,6 +74,7 @@ mod tests {
         type Element = ();
         type Input = ();
         type Output = ();
+        type Error = ();
         type Initialised = StubOperationInitialised;
         fn output_neuron_count(&self) -> usize {
             self.0
@@ -69,22 +83,54 @@ mod tests {
             self,
             iter: &mut impl Iterator<Item = Self::Element>,
             input_neuron_count: usize,
-        ) -> Self::Initialised {
-            StubOperationInitialised(input_neuron_count, self.output_neuron_count(), iter.count())
+        ) -> Result<Self::Initialised, Self::Error> {
+            Ok(StubOperationInitialised(
+                input_neuron_count,
+                self.output_neuron_count(),
+                iter.count(),
+            ))
         }
-        fn with_seed_private(self, seed: u64, input_neuron_count: usize) -> Self::Initialised {
-            StubOperationInitialised(
+        fn with_seed_private(
+            self,
+            seed: u64,
+            input_neuron_count: usize,
+        ) -> Result<Self::Initialised, Self::Error> {
+            Ok(StubOperationInitialised(
                 input_neuron_count,
                 self.output_neuron_count(),
                 seed as usize,
-            )
+            ))
         }
     }
 
     #[derive(Debug, PartialEq)]
     struct StubOperationInitialised(usize, usize, usize);
     impl Sealed for StubOperationInitialised {}
-    impl OperationInitialised for StubOperationInitialised {}
+    impl OperationInitialised for StubOperationInitialised {
+        type Element = ();
+        type Input = ();
+        type Output = ();
+        type Parameter = ();
+        type ParameterIter = core::iter::Empty<()>;
+        type Error = ();
+        type Trainable = StubOperationTrainable;
+        fn iter(&self) -> Self::ParameterIter {
+            unimplemented!()
+        }
+        fn predict(&self, _input: Self::Input) -> Result<Self::Output, Self::Error> {
+            unimplemented!()
+        }
+        fn with_optimiser<T: OptimiserFactory<Self>>(
+            self,
+            _factory: T,
+        ) -> Trainable<Self::Trainable, T::Optimiser> {
+            unimplemented!()
+        }
+    }
+
+    struct StubOperationTrainable;
+    impl Sealed for StubOperationTrainable {}
+    impl OperationTrainable for StubOperationTrainable {}
 
     #[test]
     fn test_operation_initialisation_with_iter() {
@@ -93,7 +139,7 @@ mod tests {
         let array = [(); 7];
 
         // Act
-        let init = uninit.with_iter(array.into_iter());
+        let init = uninit.with_iter(array.into_iter()).unwrap();
 
         // Assert
         assert_eq!(init, StubOperationInitialised(42, 42, 7));
@@ -106,7 +152,7 @@ mod tests {
         let seed = 42;
 
         // Act
-        let init = uninit.with_seed(seed);
+        let init = uninit.with_seed(seed).unwrap();
 
         // Assert
         assert_eq!(init, StubOperationInitialised(112, 112, 42));
