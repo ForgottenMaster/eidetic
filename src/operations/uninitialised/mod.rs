@@ -177,4 +177,10 @@ mod tests {
     fn test_stub_operation_initialised_predict() {
         StubOperationInitialised(0, 0, 0).predict(()).unwrap();
     }
+
+    #[test]
+    #[should_panic]
+    fn test_stub_operation_training_into_initialised() {
+        StubOperationTrainable.into_initialised();
+    }
 }
