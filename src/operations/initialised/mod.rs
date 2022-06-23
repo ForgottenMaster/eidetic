@@ -33,7 +33,7 @@ pub trait OperationInitialised: Sealed + Sized {
 
     /// This is the type that is used once the operation is placed in a trainable
     /// state, and provides the forward pass functionality.
-    type Trainable: OperationTrainable;
+    type Trainable: OperationTrainable<Initialised = Self>;
 
     /// This function can be called to get an iterator over the copies of the elements
     /// stored within this operation's parameter. The parameter is flattened to a single

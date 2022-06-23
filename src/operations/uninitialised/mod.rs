@@ -130,7 +130,12 @@ mod tests {
 
     struct StubOperationTrainable;
     impl Sealed for StubOperationTrainable {}
-    impl OperationTrainable for StubOperationTrainable {}
+    impl OperationTrainable for StubOperationTrainable {
+        type Initialised = StubOperationInitialised;
+        fn into_initialised(self) -> Self::Initialised {
+            unimplemented!()
+        }
+    }
 
     #[test]
     fn test_operation_initialisation_with_iter() {
