@@ -32,7 +32,7 @@ impl TryConstructTensor for () {
         input: impl IntoIterator<Item = T>,
     ) -> Result<Tensor<T, Self::Rank>, TensorConstructionError> {
         Array::from_iter(input)
-            .into_shape(())
+            .into_shape([])
             .map_err(|_| TensorConstructionError::InvalidShape { expected: 1 })
             .map(|array| Tensor(array))
     }
