@@ -24,9 +24,7 @@ pub trait OperationUninitialised: Sealed + Sized {
     type Initialised: OperationInitialised;
 
     /// This returns the output neuron count for the operation.
-    /// We represent this using the element type because it could be
-    /// used with xavier initialisation
-    fn output_neuron_count(&self) -> Self::Element;
+    fn output_neuron_count(&self) -> usize;
 
     /// This function can be called to initialise the parameters of the operation
     /// from an iterator that yields elements of the expected type for the operation.
@@ -46,9 +44,71 @@ pub trait OperationUninitialised: Sealed + Sized {
     fn with_iter_private(
         self,
         iter: &mut impl Iterator<Item = Self::Element>,
-        input_neuron_count: Self::Element,
+        input_neuron_count: usize,
     ) -> Self::Initialised;
 
     #[doc(hidden)]
-    fn with_seed_private(self, seed: u64, input_neuron_count: Self::Element) -> Self::Initialised;
+    fn with_seed_private(self, seed: u64, input_neuron_count: usize) -> Self::Initialised;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    struct StubOperationUninitialised(usize);
+    impl Sealed for StubOperationUninitialised {}
+    impl OperationUninitialised for StubOperationUninitialised {
+        type Element = ();
+        type Input = ();
+        type Output = ();
+        type Initialised = StubOperationInitialised;
+        fn output_neuron_count(&self) -> usize {
+            self.0
+        }
+        fn with_iter_private(
+            self,
+            iter: &mut impl Iterator<Item = Self::Element>,
+            input_neuron_count: usize,
+        ) -> Self::Initialised {
+            StubOperationInitialised(input_neuron_count, self.output_neuron_count(), iter.count())
+        }
+        fn with_seed_private(self, seed: u64, input_neuron_count: usize) -> Self::Initialised {
+            StubOperationInitialised(
+                input_neuron_count,
+                self.output_neuron_count(),
+                seed as usize,
+            )
+        }
+    }
+
+    #[derive(Debug, PartialEq)]
+    struct StubOperationInitialised(usize, usize, usize);
+    impl Sealed for StubOperationInitialised {}
+    impl OperationInitialised for StubOperationInitialised {}
+
+    #[test]
+    fn test_operation_initialisation_with_iter() {
+        // Arrange
+        let uninit = StubOperationUninitialised(42);
+        let array = [(); 7];
+
+        // Act
+        let init = uninit.with_iter(array.into_iter());
+
+        // Assert
+        assert_eq!(init, StubOperationInitialised(42, 42, 7));
+    }
+
+    #[test]
+    fn test_operation_initialisation_with_seed() {
+        // Arrange
+        let uninit = StubOperationUninitialised(112);
+        let seed = 42;
+
+        // Act
+        let init = uninit.with_seed(seed);
+
+        // Assert
+        assert_eq!(init, StubOperationInitialised(112, 112, 42));
+    }
 }
