@@ -1,6 +1,6 @@
 use crate::private::Sealed;
 use crate::tensors::{Rank, Rank0, Rank1, Rank2, Rank3, Rank4, Rank5, Tensor};
-use ndarray::Array;
+use ndarray::{arr0, Array};
 
 #[cfg(feature = "thiserror")]
 use thiserror::Error;
@@ -31,10 +31,16 @@ impl TryConstructTensor for () {
         &self,
         input: impl IntoIterator<Item = T>,
     ) -> Result<Tensor<T, Self::Rank>, TensorConstructionError> {
-        Array::from_iter(input)
-            .into_shape([])
-            .map_err(|_| TensorConstructionError::InvalidShape { expected: 1 })
-            .map(|array| Tensor(array))
+        let mut input = input.into_iter();
+        if let Some(elem) = input.next() {
+            if input.next().is_none() {
+                Ok(Tensor(arr0(elem)))
+            } else {
+                Err(TensorConstructionError::InvalidShape { expected: 1 })
+            }
+        } else {
+            Err(TensorConstructionError::InvalidShape { expected: 1 })
+        }
     }
 }
 
@@ -202,10 +208,21 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn test_construct_rank_0_tensor_with_failure() {
+    fn test_construct_rank_0_tensor_with_failure_too_many() {
         // Arrange
         let shape = ();
         let input = [1, 2];
+
+        // Act
+        shape.try_construct_tensor(input).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_construct_rank_0_tensor_with_failure_too_few() {
+        // Arrange
+        let shape = ();
+        let input: [u32; 0] = [];
 
         // Act
         shape.try_construct_tensor(input).unwrap();
