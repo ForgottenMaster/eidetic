@@ -1,6 +1,7 @@
 //! Module containing the traits and types relating
 //! to operations and chains of operations in the trainable typestate.
 
+use crate::operations::forward;
 use crate::operations::initialised;
 use crate::optimisers::OptimiserFactory;
 use crate::private::Sealed;
@@ -24,4 +25,15 @@ pub trait Operation: Sealed {
     /// to be used for inference, or allows a different optimiser to be
     /// used (though the optimiser obviously starts from scratch).
     fn into_initialised(self) -> Self::Initialised;
+
+    /// Function which uses the lifetime of the mutable borrow of self
+    /// to produce a type that is specific to this Operation and which
+    /// should hold onto that wrapped reference until the pass is applied
+    /// or dropped.
+    fn forward<'a>(
+        &'a mut self,
+        input: <Self::Initialised as initialised::Operation<Self::Factory>>::Input,
+    ) -> <Self as forward::Construct<'a>>::Output
+    where
+        Self: forward::Construct<'a>;
 }

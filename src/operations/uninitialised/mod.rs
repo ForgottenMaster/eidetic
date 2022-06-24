@@ -66,6 +66,7 @@ pub trait Operation: Sealed + Sized {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::operations::forward;
     use crate::operations::{trainable, uninitialised};
     use crate::optimisers;
     use crate::optimisers::OptimiserFactory;
@@ -135,6 +136,12 @@ mod tests {
         type Factory = null::OptimiserFactory;
         type Initialised = StubOperationInitialised;
         fn into_initialised(self) -> Self::Initialised {
+            unimplemented!()
+        }
+        fn forward<'a>(&'a mut self, _input: ()) -> <Self as forward::Construct<'a>>::Output
+        where
+            Self: forward::Construct<'a>,
+        {
             unimplemented!()
         }
     }
