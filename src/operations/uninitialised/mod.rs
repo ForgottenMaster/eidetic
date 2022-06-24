@@ -14,12 +14,6 @@ pub trait Operation: Sealed + Sized {
     /// the data.
     type Element;
 
-    /// The input type that the operation is expecting to receive.
-    type Input;
-
-    /// The output type that the operation will produce.
-    type Output;
-
     /// This is the type that's used in order to report an error
     /// with initialisation (e.g. not enough elements in the iterator, etc.).
     type Error;
@@ -80,8 +74,6 @@ mod tests {
     impl Sealed for StubOperationUninitialised {}
     impl uninitialised::Operation for StubOperationUninitialised {
         type Element = ();
-        type Input = ();
-        type Output = ();
         type Error = ();
         type Initialised = StubOperationInitialised;
         fn output_neuron_count(&self) -> usize {
