@@ -1,20 +1,20 @@
 //! Module containing the traits and types relating
 //! to operations and chains of operations in the trainable typestate.
 
-use crate::operations::initialised::OperationInitialised;
+use crate::operations::initialised;
 use crate::optimisers::OptimiserFactory;
 use crate::private::Sealed;
 
 /// This trait is implemented on those types that represent
 /// an operation that is in a state ready to be trained.
-/// This means it has been through the "with_optimiser" function
+/// This means it has been through the `with_optimiser` function
 /// call to bind an optimiser to the network.
-pub trait OperationTrainable<
-    T: OptimiserFactory<<Self::Initialised as OperationInitialised<T>>::Parameter>,
+pub trait Operation<
+    T: OptimiserFactory<<Self::Initialised as initialised::Operation<T>>::Parameter>,
 >: Sealed
 {
     /// This is the type of the initialised version of the operation.
-    type Initialised: OperationInitialised<T>;
+    type Initialised: initialised::Operation<T>;
 
     /// Calling this function will "go back" from a trainable
     /// state into an initialised one. This allows the trained network

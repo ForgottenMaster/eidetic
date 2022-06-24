@@ -1,5 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-#![deny(warnings, missing_docs)]
+#![deny(warnings, missing_docs, clippy::pedantic, clippy::nursery)]
 
 //! Eidetic is a simple pure rust library for neural networks and deep learning.
 //! Implemented alongside working through the "Deep learning from scratch in Python" book in order to get hands on with it.

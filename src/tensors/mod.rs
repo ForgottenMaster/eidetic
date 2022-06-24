@@ -25,19 +25,19 @@ pub struct Tensor<T, R: Rank>(pub(crate) Array<T, R::Internal>);
 
 impl<T, R: Rank> Tensor<T, R> {
     /// Obtains an iterator over references to the elements of the Tensor2 in the same ordering as they were
-    /// provided in try_from_iter for construction (row-major).
+    /// provided in `try_from_iter` for construction (row-major).
     pub fn iter(&self) -> impl Iterator<Item = &T> {
         self.0.iter()
     }
 
     /// Obtains an iterator over **mutable** references to the elements of the Tensor in the same ordering as they were
-    /// provided in try_from_iter for construction (row-major).
+    /// provided in `try_from_iter` for construction (row-major).
     pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut T> {
         self.0.iter_mut()
     }
 }
 
-/// This struct is the type that is returned from calling .into_iter()
+/// This struct is the type that is returned from calling `into_iter()`
 /// on a Tensor. This type is an Iterator that iterates the underlying elements.
 pub struct TensorIterator<T, R: Rank>(<Array<T, R::Internal> as IntoIterator>::IntoIter);
 

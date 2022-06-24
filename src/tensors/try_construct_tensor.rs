@@ -1,5 +1,5 @@
 use crate::private::Sealed;
-use crate::tensors::{Rank, Rank0, Rank1, Rank2, Rank3, Rank4, Rank5, Tensor};
+use crate::tensors::{Five, Four, One, Rank, Tensor, Three, Two, Zero};
 use ndarray::{arr0, Array};
 
 #[cfg(feature = "thiserror")]
@@ -15,8 +15,10 @@ pub trait TryConstructTensor: Sealed {
     type Rank: Rank;
 
     /// A function which takes an iterator of elements of a type T
-    /// and produces either a correctly shaped Tensor instance, or a
-    /// TensorConstructionError with details on why it couldn't be constructed.
+    /// and tries to construct a Tensor of the appropriate rank.
+    ///
+    /// # Errors
+    /// `TensorConstructionError` if there was some issue with the construction from the given iterator.
     fn try_construct_tensor<T>(
         &self,
         input: impl IntoIterator<Item = T>,
@@ -25,28 +27,29 @@ pub trait TryConstructTensor: Sealed {
 
 impl Sealed for () {}
 impl TryConstructTensor for () {
-    type Rank = Rank0;
+    type Rank = Zero;
 
     fn try_construct_tensor<T>(
         &self,
         input: impl IntoIterator<Item = T>,
     ) -> Result<Tensor<T, Self::Rank>, TensorConstructionError> {
         let mut input = input.into_iter();
-        if let Some(elem) = input.next() {
-            if input.next().is_none() {
-                Ok(Tensor(arr0(elem)))
-            } else {
-                Err(TensorConstructionError::InvalidShape { expected: 1 })
-            }
-        } else {
-            Err(TensorConstructionError::InvalidShape { expected: 1 })
-        }
+        input.next().map_or(
+            Err(TensorConstructionError::InvalidShape { expected: 1 }),
+            |elem| {
+                if input.next().is_none() {
+                    Ok(Tensor(arr0(elem)))
+                } else {
+                    Err(TensorConstructionError::InvalidShape { expected: 1 })
+                }
+            },
+        )
     }
 }
 
 impl Sealed for (usize,) {}
 impl TryConstructTensor for (usize,) {
-    type Rank = Rank1;
+    type Rank = One;
 
     fn try_construct_tensor<T>(
         &self,
@@ -61,7 +64,7 @@ impl TryConstructTensor for (usize,) {
 
 impl Sealed for (usize, usize) {}
 impl TryConstructTensor for (usize, usize) {
-    type Rank = Rank2;
+    type Rank = Two;
 
     fn try_construct_tensor<T>(
         &self,
@@ -78,7 +81,7 @@ impl TryConstructTensor for (usize, usize) {
 
 impl Sealed for (usize, usize, usize) {}
 impl TryConstructTensor for (usize, usize, usize) {
-    type Rank = Rank3;
+    type Rank = Three;
 
     fn try_construct_tensor<T>(
         &self,
@@ -95,7 +98,7 @@ impl TryConstructTensor for (usize, usize, usize) {
 
 impl Sealed for (usize, usize, usize, usize) {}
 impl TryConstructTensor for (usize, usize, usize, usize) {
-    type Rank = Rank4;
+    type Rank = Four;
 
     fn try_construct_tensor<T>(
         &self,
@@ -112,7 +115,7 @@ impl TryConstructTensor for (usize, usize, usize, usize) {
 
 impl Sealed for (usize, usize, usize, usize, usize) {}
 impl TryConstructTensor for (usize, usize, usize, usize, usize) {
-    type Rank = Rank5;
+    type Rank = Five;
 
     fn try_construct_tensor<T>(
         &self,

@@ -16,48 +16,48 @@ pub trait Rank: Sealed {
 
 /// This is a unit struct that can be used to identify a rank 0 tensor.
 #[derive(Debug)]
-pub struct Rank0;
-impl Rank for Rank0 {
+pub struct Zero;
+impl Rank for Zero {
     type Internal = Ix0;
 }
-impl Sealed for Rank0 {}
+impl Sealed for Zero {}
 
 /// This is a unit struct that can be used to identify a rank 1 tensor.
 #[derive(Debug)]
-pub struct Rank1;
-impl Rank for Rank1 {
+pub struct One;
+impl Rank for One {
     type Internal = Ix1;
 }
-impl Sealed for Rank1 {}
+impl Sealed for One {}
 
 /// This is a unit struct that can be used to identify a rank 2 tensor.
 #[derive(Debug)]
-pub struct Rank2;
-impl Rank for Rank2 {
+pub struct Two;
+impl Rank for Two {
     type Internal = Ix2;
 }
-impl Sealed for Rank2 {}
+impl Sealed for Two {}
 
 /// This is a unit struct that can be used to identify a rank 3 tensor.
 #[derive(Debug)]
-pub struct Rank3;
-impl Rank for Rank3 {
+pub struct Three;
+impl Rank for Three {
     type Internal = Ix3;
 }
-impl Sealed for Rank3 {}
+impl Sealed for Three {}
 
 /// This is a unit struct that can be used to identify a rank 4 tensor.
 #[derive(Debug)]
-pub struct Rank4;
-impl Rank for Rank4 {
+pub struct Four;
+impl Rank for Four {
     type Internal = Ix4;
 }
-impl Sealed for Rank4 {}
+impl Sealed for Four {}
 
 /// This is a unit struct that can be used to identify a rank 5 tensor.
 #[derive(Debug)]
-pub struct Rank5;
-impl Rank for Rank5 {
+pub struct Five;
+impl Rank for Five {
     type Internal = Ix5;
 }
-impl Sealed for Rank5 {}
+impl Sealed for Five {}
