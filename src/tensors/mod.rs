@@ -3,10 +3,10 @@
 //! In deep learning, a tensor is simply an n-dimensional array. Different operations expect differing
 //! dimensionality of tensor, so we make sure the dimensionality of the tensor is included in the type.
 
-mod rank;
+pub mod rank;
 mod try_construct_tensor;
 
-pub use rank::*;
+use rank::Rank;
 pub use try_construct_tensor::*;
 
 use ndarray::Array;

@@ -1,5 +1,6 @@
 use crate::private::Sealed;
-use crate::tensors::{Five, Four, One, Rank, Tensor, Three, Two, Zero};
+use crate::tensors::rank;
+use crate::tensors::{Rank, Tensor};
 use ndarray::{arr0, Array};
 
 #[cfg(feature = "thiserror")]
@@ -27,7 +28,7 @@ pub trait TryConstructTensor: Sealed {
 
 impl Sealed for () {}
 impl TryConstructTensor for () {
-    type Rank = Zero;
+    type Rank = rank::Zero;
 
     fn try_construct_tensor<T>(
         &self,
@@ -49,7 +50,7 @@ impl TryConstructTensor for () {
 
 impl Sealed for (usize,) {}
 impl TryConstructTensor for (usize,) {
-    type Rank = One;
+    type Rank = rank::One;
 
     fn try_construct_tensor<T>(
         &self,
@@ -64,7 +65,7 @@ impl TryConstructTensor for (usize,) {
 
 impl Sealed for (usize, usize) {}
 impl TryConstructTensor for (usize, usize) {
-    type Rank = Two;
+    type Rank = rank::Two;
 
     fn try_construct_tensor<T>(
         &self,
@@ -81,7 +82,7 @@ impl TryConstructTensor for (usize, usize) {
 
 impl Sealed for (usize, usize, usize) {}
 impl TryConstructTensor for (usize, usize, usize) {
-    type Rank = Three;
+    type Rank = rank::Three;
 
     fn try_construct_tensor<T>(
         &self,
@@ -98,7 +99,7 @@ impl TryConstructTensor for (usize, usize, usize) {
 
 impl Sealed for (usize, usize, usize, usize) {}
 impl TryConstructTensor for (usize, usize, usize, usize) {
-    type Rank = Four;
+    type Rank = rank::Four;
 
     fn try_construct_tensor<T>(
         &self,
@@ -115,7 +116,7 @@ impl TryConstructTensor for (usize, usize, usize, usize) {
 
 impl Sealed for (usize, usize, usize, usize, usize) {}
 impl TryConstructTensor for (usize, usize, usize, usize, usize) {
-    type Rank = Five;
+    type Rank = rank::Five;
 
     fn try_construct_tensor<T>(
         &self,

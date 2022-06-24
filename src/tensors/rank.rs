@@ -1,3 +1,6 @@
+//! This sub module contains the various supported ranks
+//! that can be used by tensors.
+
 use crate::private::Sealed;
 use ndarray::{Dimension, Ix0, Ix1, Ix2, Ix3, Ix4, Ix5};
 
