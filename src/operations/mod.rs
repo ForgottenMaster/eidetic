@@ -3,6 +3,7 @@
 //! well as providing methods to chain them together at this
 //! lowest level.
 
+pub mod forward;
 pub mod initialised;
 pub mod trainable;
 pub mod uninitialised;
