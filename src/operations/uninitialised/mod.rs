@@ -3,6 +3,7 @@
 //! or random seed and will generate the correct size parameter for the operation.
 
 use crate::operations::initialised::OperationInitialised;
+use crate::optimisers::NullOptimiser;
 use crate::private::Sealed;
 
 /// This trait is used to represent an operation in an uninitialised state
@@ -25,7 +26,7 @@ pub trait OperationUninitialised: Sealed + Sized {
 
     /// This is a type representing the next state in the typestate sequence
     /// which is an initialised operation with generated parameter, etc.
-    type Initialised: OperationInitialised;
+    type Initialised: OperationInitialised<NullOptimiser>;
 
     /// This returns the output neuron count for the operation.
     fn output_neuron_count(&self) -> usize;
@@ -65,7 +66,7 @@ pub trait OperationUninitialised: Sealed + Sized {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::operations::trainable::{OperationTrainable, Trainable};
+    use crate::operations::trainable::OperationTrainable;
     use crate::optimisers::OptimiserFactory;
 
     struct StubOperationUninitialised(usize);
@@ -106,7 +107,7 @@ mod tests {
     #[derive(Debug, PartialEq)]
     struct StubOperationInitialised(usize, usize, usize);
     impl Sealed for StubOperationInitialised {}
-    impl OperationInitialised for StubOperationInitialised {
+    impl<T: OptimiserFactory<()>> OperationInitialised<T> for StubOperationInitialised {
         type Element = ();
         type Input = ();
         type Output = ();
@@ -120,17 +121,14 @@ mod tests {
         fn predict(&self, _input: Self::Input) -> Result<Self::Output, Self::Error> {
             unimplemented!()
         }
-        fn with_optimiser<T: OptimiserFactory<Self>>(
-            self,
-            _factory: T,
-        ) -> Trainable<Self::Trainable, T::Optimiser> {
+        fn with_optimiser(self, _factory: T) -> Self::Trainable {
             unimplemented!()
         }
     }
 
     struct StubOperationTrainable;
     impl Sealed for StubOperationTrainable {}
-    impl OperationTrainable for StubOperationTrainable {
+    impl<T: OptimiserFactory<()>> OperationTrainable<T> for StubOperationTrainable {
         type Initialised = StubOperationInitialised;
         fn into_initialised(self) -> Self::Initialised {
             unimplemented!()
@@ -169,18 +167,21 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_stub_operation_initialised_iter() {
-        StubOperationInitialised(0, 0, 0).iter().next().unwrap();
+        OperationInitialised::<NullOptimiser>::iter(&StubOperationInitialised(0, 0, 0))
+            .next()
+            .unwrap();
     }
 
     #[test]
     #[should_panic]
     fn test_stub_operation_initialised_predict() {
-        StubOperationInitialised(0, 0, 0).predict(()).unwrap();
+        OperationInitialised::<NullOptimiser>::predict(&StubOperationInitialised(0, 0, 0), ())
+            .unwrap();
     }
 
     #[test]
     #[should_panic]
     fn test_stub_operation_training_into_initialised() {
-        StubOperationTrainable.into_initialised();
+        OperationTrainable::<NullOptimiser>::into_initialised(StubOperationTrainable);
     }
 }

@@ -1,14 +1,14 @@
 //! This submodule contains the traits and structures for operations in the
 //! initialised state.
 
-use crate::operations::trainable::{OperationTrainable, Trainable};
+use crate::operations::trainable::OperationTrainable;
 use crate::optimisers::OptimiserFactory;
 use crate::private::Sealed;
 
 /// This trait is used to represent an operation in an initialised state that has a valid
 /// parameter stored internally, and which can be used to run inference or prepared for
 /// training by providing an optimiser.
-pub trait OperationInitialised: Sealed + Sized {
+pub trait OperationInitialised<T: OptimiserFactory<Self::Parameter>>: Sealed + Sized {
     /// The type of the elements within the operation.
     /// Used to ensure that the ParameterIter item type matches.
     type Element;
@@ -33,7 +33,7 @@ pub trait OperationInitialised: Sealed + Sized {
 
     /// This is the type that is used once the operation is placed in a trainable
     /// state, and provides the forward pass functionality.
-    type Trainable: OperationTrainable<Initialised = Self>;
+    type Trainable: OperationTrainable<T, Initialised = Self>;
 
     /// This function can be called to get an iterator over the copies of the elements
     /// stored within this operation's parameter. The parameter is flattened to a single
@@ -49,8 +49,5 @@ pub trait OperationInitialised: Sealed + Sized {
     /// specifying a specific optimiser. Since this operation might be a chain, and since we want
     /// each element of the chain to get its own optimiser, we need to accept the optimiser as a factory
     /// which can produce a specific optimiser for ourselves.
-    fn with_optimiser<T: OptimiserFactory<Self>>(
-        self,
-        factory: T,
-    ) -> Trainable<Self::Trainable, T::Optimiser>;
+    fn with_optimiser(self, factory: T) -> Self::Trainable;
 }
