@@ -49,5 +49,8 @@ pub trait OperationInitialised<T: OptimiserFactory<Self::Parameter>>: Sealed + S
     /// specifying a specific optimiser. Since this operation might be a chain, and since we want
     /// each element of the chain to get its own optimiser, we need to accept the optimiser as a factory
     /// which can produce a specific optimiser for ourselves.
-    fn with_optimiser(self, factory: T) -> Self::Trainable;
+    fn with_optimiser<U>(self, factory: U) -> <Self as OperationInitialised<U>>::Trainable
+    where
+        Self: OperationInitialised<U>,
+        U: OptimiserFactory<<Self as OperationInitialised<U>>::Parameter>;
 }

@@ -6,7 +6,15 @@ use core::marker::PhantomData;
 /// It does however enable a sensible default for the generic
 /// parameter of OperationInitialised when first initialised from
 /// an OperationUninitialised.
+#[derive(Default)]
 pub struct NullOptimiser(());
+
+impl NullOptimiser {
+    /// This function will create a new NullOptimiser instance.
+    pub fn new() -> Self {
+        Self(())
+    }
+}
 
 impl Sealed for NullOptimiser {}
 impl<T> OptimiserFactory<T> for NullOptimiser {

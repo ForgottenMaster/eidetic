@@ -121,8 +121,12 @@ mod tests {
         fn predict(&self, _input: Self::Input) -> Result<Self::Output, Self::Error> {
             unimplemented!()
         }
-        fn with_optimiser(self, _factory: T) -> Self::Trainable {
-            unimplemented!()
+        fn with_optimiser<U>(self, _factory: U) -> <Self as OperationInitialised<U>>::Trainable
+        where
+            Self: OperationInitialised<U>,
+            U: OptimiserFactory<<Self as OperationInitialised<U>>::Parameter>,
+        {
+            unimplemented!();
         }
     }
 
@@ -170,6 +174,15 @@ mod tests {
         OperationInitialised::<NullOptimiser>::iter(&StubOperationInitialised(0, 0, 0))
             .next()
             .unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_stub_operation_initialised_with_optimiser() {
+        OperationInitialised::<NullOptimiser>::with_optimiser(
+            StubOperationInitialised(0, 0, 0),
+            NullOptimiser::new(),
+        );
     }
 
     #[test]
