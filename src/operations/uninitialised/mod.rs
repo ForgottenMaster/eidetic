@@ -131,7 +131,8 @@ mod tests {
 
     struct StubOperationTrainable;
     impl Sealed for StubOperationTrainable {}
-    impl<T: OptimiserFactory<()>> trainable::Operation<T> for StubOperationTrainable {
+    impl trainable::Operation for StubOperationTrainable {
+        type Factory = null::OptimiserFactory;
         type Initialised = StubOperationInitialised;
         fn into_initialised(self) -> Self::Initialised {
             unimplemented!()
@@ -197,6 +198,6 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_stub_operation_training_into_initialised() {
-        trainable::Operation::<null::OptimiserFactory>::into_initialised(StubOperationTrainable);
+        trainable::Operation::into_initialised(StubOperationTrainable);
     }
 }
