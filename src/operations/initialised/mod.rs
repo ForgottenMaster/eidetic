@@ -4,6 +4,7 @@
 use crate::operations::initialised;
 use crate::optimisers::base::OptimiserFactory;
 use crate::private::Sealed;
+use crate::Result;
 
 /// This trait is used to represent an operation in an initialised state that has a valid
 /// parameter stored internally, and which can be used to run inference or prepared for
@@ -23,10 +24,6 @@ pub trait Operation<T>: Sealed + Sized {
     /// this operation (for example, for serialization/saving after training).
     type ParameterIter: Iterator;
 
-    /// The error type that will be emitted if prediction fails such as if the
-    /// input type has an incorrect shape for example.
-    type Error;
-
     /// This is the type that is used once the operation is placed in a trainable
     /// state, and provides the forward pass functionality.
     type Trainable;
@@ -41,8 +38,8 @@ pub trait Operation<T>: Sealed + Sized {
     /// the output for it. Can produce an error if (for example) the input is an incorrect shape.
     ///
     /// # Errors
-    /// `Self::Error` if the prediction fails such as if the input is incorrectly shaped.
-    fn predict(&self, input: Self::Input) -> Result<Self::Output, Self::Error>;
+    /// `Error` if the prediction fails such as if the input is incorrectly shaped.
+    fn predict(&self, input: Self::Input) -> Result<Self::Output>;
 
     /// This function can be used to prepare the initialised network/operation for training by
     /// specifying a specific optimiser. Since this operation might be a chain, and since we want

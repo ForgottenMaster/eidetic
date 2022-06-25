@@ -4,6 +4,7 @@
 //! ready for running the backward pass.
 
 use crate::private::Sealed;
+use crate::Result;
 
 /// This trait is used to allow us to produce a specific concrete type for a given
 /// lifetime for an implementation specific to a trainable operation.
@@ -44,5 +45,8 @@ pub trait Operation: Sealed {
 
     /// This function maps the forward pass to a backward one, calculating the
     /// gradients ready for optimisation.
-    fn backward(self, output_gradient: Self::Output) -> (Self::Backward, Self::Input);
+    ///
+    /// # Errors
+    /// `Error` if the backward pass fails such as due to an invalid shape output gradient.
+    fn backward(self, output_gradient: Self::Output) -> Result<(Self::Backward, Self::Input)>;
 }

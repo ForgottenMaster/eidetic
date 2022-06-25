@@ -5,6 +5,7 @@
 pub mod linear;
 
 use crate::private::Sealed;
+use crate::Result;
 
 /// This trait is used to represent an operation in an uninitialised state
 /// that must be initialised before it's used. These operations can be
@@ -14,10 +15,6 @@ pub trait Operation: Sealed + Sized {
     /// the data.
     type Element;
 
-    /// This is the type that's used in order to report an error
-    /// with initialisation (e.g. not enough elements in the iterator, etc.).
-    type Error;
-
     /// This is a type representing the next state in the typestate sequence
     /// which is an initialised operation with generated parameter, etc.
     type Initialised;
@@ -26,11 +23,8 @@ pub trait Operation: Sealed + Sized {
     /// from an iterator that yields elements of the expected type for the operation.
     ///
     /// # Errors
-    /// `Self::Error` if the initialisation couldn't be performed for some reason.
-    fn with_iter(
-        self,
-        mut iter: impl Iterator<Item = Self::Element>,
-    ) -> Result<Self::Initialised, Self::Error> {
+    /// `Error` if the initialisation fails (likely due to invalid count of elements provided).
+    fn with_iter(self, mut iter: impl Iterator<Item = Self::Element>) -> Result<Self::Initialised> {
         let input_neuron_count = self.output_neuron_count();
         self.with_iter_private(&mut iter, input_neuron_count)
     }
@@ -39,8 +33,8 @@ pub trait Operation: Sealed + Sized {
     /// randomly using the given RNG seed.
     ///
     /// # Errors
-    /// `Self::Error` if the initialisation couldn't be performed for some reason.
-    fn with_seed(self, seed: u64) -> Result<Self::Initialised, Self::Error> {
+    /// `Error` if the initialisation fails (likely due to invalid count of elements provided).
+    fn with_seed(self, seed: u64) -> Result<Self::Initialised> {
         let input_neuron_count = self.output_neuron_count();
         self.with_seed_private(seed, input_neuron_count)
     }
@@ -53,14 +47,10 @@ pub trait Operation: Sealed + Sized {
         self,
         iter: &mut impl Iterator<Item = Self::Element>,
         input_neuron_count: usize,
-    ) -> Result<Self::Initialised, Self::Error>;
+    ) -> Result<Self::Initialised>;
 
     #[doc(hidden)]
-    fn with_seed_private(
-        self,
-        seed: u64,
-        input_neuron_count: usize,
-    ) -> Result<Self::Initialised, Self::Error>;
+    fn with_seed_private(self, seed: u64, input_neuron_count: usize) -> Result<Self::Initialised>;
 }
 
 #[cfg(test)]
@@ -72,7 +62,6 @@ mod tests {
     impl Sealed for StubOperationUninitialised {}
     impl uninitialised::Operation for StubOperationUninitialised {
         type Element = ();
-        type Error = ();
         type Initialised = StubOperationInitialised;
         fn output_neuron_count(&self) -> usize {
             self.0
@@ -81,7 +70,7 @@ mod tests {
             self,
             iter: &mut impl Iterator<Item = Self::Element>,
             input_neuron_count: usize,
-        ) -> Result<Self::Initialised, Self::Error> {
+        ) -> Result<Self::Initialised> {
             Ok(StubOperationInitialised(
                 input_neuron_count,
                 self.output_neuron_count(),
@@ -92,7 +81,7 @@ mod tests {
             self,
             seed: u64,
             input_neuron_count: usize,
-        ) -> Result<Self::Initialised, Self::Error> {
+        ) -> Result<Self::Initialised> {
             Ok(StubOperationInitialised(
                 input_neuron_count,
                 self.output_neuron_count(),

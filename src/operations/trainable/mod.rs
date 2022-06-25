@@ -3,6 +3,7 @@
 
 use crate::operations::forward;
 use crate::private::Sealed;
+use crate::Result;
 
 /// This trait is implemented on those types that represent
 /// an operation that is in a state ready to be trained.
@@ -26,10 +27,13 @@ pub trait Operation: Sealed {
     /// to produce a type that is specific to this Operation and which
     /// should hold onto that wrapped reference until the pass is applied
     /// or dropped.
+    ///
+    /// # Errors
+    /// `Error` if the forward pass can't be performed such as due to the input being incorrectly shaped.
     fn forward<'a>(
         &'a mut self,
         input: <Self as forward::Construct<'a>>::Input,
-    ) -> (Self::Forward, Self::Output)
+    ) -> Result<(Self::Forward, Self::Output)>
     where
         Self: forward::Construct<'a>;
 }
