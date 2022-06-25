@@ -20,10 +20,34 @@ pub trait Construct<'a>: Sealed {
 
     /// This associated type defines the concrete output type for this forward pass
     /// given the lifetime we were given.
-    type Output;
+    type Forward;
 
     /// Takes input of the appropriate type and a mutable borrow to self and will
     /// return a specific concrete instance of the appropriate generic type to
     /// represent that forward pass.
-    fn construct(&'a mut self, input: Self::Input) -> Self::Output;
+    fn construct(&'a mut self, input: Self::Input) -> Self::Forward;
+}
+
+/// This trait is used to encompass the functionality of an operation that has had
+/// the forward pass performed and is ready for a backward pass when given an output
+/// gradient.
+pub trait Operation: Sealed {
+    /// This is the type of the output, but also the type that we expect the
+    /// output gradient to be.
+    type Output;
+
+    /// This is the type that the input gradient is for this Operation.
+    type Input;
+
+    /// This is the type representing this Operation that has had the backward
+    /// pass run and is now ready to apply gradients using the optimiser that should
+    /// be built in.
+    type Backward;
+
+    /// This function gives access to the calculated output from the operation.
+    fn output(&self) -> &Self::Output;
+
+    /// This function maps the forward pass to a backward one, calculating the
+    /// gradients ready for optimisation.
+    fn backward(self, output_gradient: Self::Output) -> (Self::Backward, Self::Input);
 }

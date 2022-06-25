@@ -9,6 +9,10 @@ use crate::private::Sealed;
 /// This means it has been through the `with_optimiser` function
 /// call to bind an optimiser to the network.
 pub trait Operation: Sealed {
+    /// The type of the output produced by the flow of the tensors through
+    /// the operation.
+    type Output;
+
     /// This is the type of the initialised version of the operation.
     type Initialised;
 
@@ -25,7 +29,7 @@ pub trait Operation: Sealed {
     fn forward<'a>(
         &'a mut self,
         input: <Self as forward::Construct<'a>>::Input,
-    ) -> <Self as forward::Construct<'a>>::Output
+    ) -> (Self::Forward, Self::Output)
     where
         Self: forward::Construct<'a>;
 }
