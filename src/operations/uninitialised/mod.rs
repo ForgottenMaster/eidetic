@@ -106,7 +106,6 @@ mod tests {
     struct StubOperationInitialised(usize, usize, usize);
     impl Sealed for StubOperationInitialised {}
     impl<T: optimisers::OptimiserFactory<()>> initialised::Operation<T> for StubOperationInitialised {
-        type Element = ();
         type Input = ();
         type Output = ();
         type Parameter = ();

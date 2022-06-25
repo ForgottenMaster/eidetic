@@ -2,31 +2,26 @@
 //! initialised state.
 
 use crate::operations::initialised;
-use crate::operations::trainable;
 use crate::optimisers::OptimiserFactory;
 use crate::private::Sealed;
 
 /// This trait is used to represent an operation in an initialised state that has a valid
 /// parameter stored internally, and which can be used to run inference or prepared for
 /// training by providing an optimiser.
-pub trait Operation<T: OptimiserFactory<Self::Parameter>>: Sealed + Sized {
-    /// The type of the elements within the operation.
-    /// Used to ensure that the `ParameterIter` item type matches.
-    type Element;
-
+pub trait Operation<T>: Sealed + Sized {
     /// The type that is passed into the operation.
     type Input;
 
     /// The type that is output from the operation.
     type Output;
 
-    /// The type of the parameter stored within the operation.
+    /// The type of the parameter that the operation uses.
     type Parameter;
 
     /// The iterator type that will be returned when asked for that
     /// iterates over the elements of the (flattened) parameter(s) within
     /// this operation (for example, for serialization/saving after training).
-    type ParameterIter: Iterator<Item = Self::Element>;
+    type ParameterIter: Iterator;
 
     /// The error type that will be emitted if prediction fails such as if the
     /// input type has an incorrect shape for example.
@@ -34,7 +29,7 @@ pub trait Operation<T: OptimiserFactory<Self::Parameter>>: Sealed + Sized {
 
     /// This is the type that is used once the operation is placed in a trainable
     /// state, and provides the forward pass functionality.
-    type Trainable: trainable::Operation<Initialised = Self>;
+    type Trainable;
 
     /// This function can be called to get an iterator over the copies of the elements
     /// stored within this operation's parameter. The parameter is flattened to a single
