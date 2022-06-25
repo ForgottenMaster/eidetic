@@ -9,9 +9,6 @@ use thiserror::Error;
 #[cfg_attr(feature = "thiserror", derive(Error))]
 #[cfg_attr(
     feature = "thiserror",
-    error("The provided number of elements ({expected}) does not match the requested shape.")
+    error("The provided number of elements does not match the requested shape.")
 )]
-pub struct ElementCountError {
-    /// The expected number of elements.
-    pub expected: usize,
-}
+pub struct ElementCountError;

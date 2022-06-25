@@ -63,9 +63,7 @@ impl<T> Tensor<T, rank::Two> {
     ) -> Result<Self, ElementCountError> {
         Array::from_iter(iter)
             .into_shape(shape)
-            .map_err(|_| ElementCountError {
-                expected: shape.0 * shape.1,
-            })
+            .map_err(|_| ElementCountError)
             .map(|array| Self(array))
     }
 }
@@ -82,9 +80,7 @@ impl<T> Tensor<T, rank::Three> {
     ) -> Result<Self, ElementCountError> {
         Array::from_iter(iter)
             .into_shape(shape)
-            .map_err(|_| ElementCountError {
-                expected: shape.0 * shape.1 * shape.2,
-            })
+            .map_err(|_| ElementCountError)
             .map(|array| Self(array))
     }
 }
@@ -101,9 +97,7 @@ impl<T> Tensor<T, rank::Four> {
     ) -> Result<Self, ElementCountError> {
         Array::from_iter(iter)
             .into_shape(shape)
-            .map_err(|_| ElementCountError {
-                expected: shape.0 * shape.1 * shape.2 * shape.3,
-            })
+            .map_err(|_| ElementCountError)
             .map(|array| Self(array))
     }
 }
@@ -120,9 +114,7 @@ impl<T> Tensor<T, rank::Five> {
     ) -> Result<Self, ElementCountError> {
         Array::from_iter(iter)
             .into_shape(shape)
-            .map_err(|_| ElementCountError {
-                expected: shape.0 * shape.1 * shape.2 * shape.3 * shape.4,
-            })
+            .map_err(|_| ElementCountError)
             .map(|array| Self(array))
     }
 }
