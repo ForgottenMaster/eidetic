@@ -22,9 +22,7 @@ pub trait Construct<'a>: Sealed {
     /// given the lifetime we were given.
     type Forward;
 
-    /// Takes input of the appropriate type and a mutable borrow to self and will
-    /// return a specific concrete instance of the appropriate generic type to
-    /// represent that forward pass.
+    #[doc(hidden)]
     fn construct(&'a mut self, input: Self::Input) -> Self::Forward;
 }
 
