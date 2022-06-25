@@ -12,3 +12,19 @@ This API is implemented with the following pillars:
 3. **Foolproof** - We will make copious use of typestates and error handling to ensure that the API cannot be misused in any way. Where possible correct API usage will be verified by the compiler
 4. **Correctness** - We make use of unit testing and documentation testing to verify that the API is correct and functions as expected. Any example code in documentation will be correct and compile
 5. **Well Documented** - Every function, type, module should be documented and where possible include code example/documentation tests.
+
+# TODO
+- [ ] Linear activation
+- [ ] Sigmoid activation
+- [ ] Tanh activation
+- [ ] Weight multiply
+- [ ] Bias add
+- [ ] Dropout
+- [ ] Mean squared error loss
+- [ ] Softmax cross entropy loss
+- [ ] Operation chaining
+- [ ] Dense layer
+- [ ] SGD optimiser
+- [ ] SGD optimiser with momentum
+- [ ] Learning rate linear decay
+- [ ] Learning rate exponential decay
