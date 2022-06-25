@@ -2,8 +2,6 @@
 //! uninitialised state. These are operations that will accept and iterator
 //! or random seed and will generate the correct size parameter for the operation.
 
-use crate::operations::initialised;
-use crate::optimisers::null;
 use crate::private::Sealed;
 
 /// This trait is used to represent an operation in an uninitialised state
@@ -20,7 +18,7 @@ pub trait Operation: Sealed + Sized {
 
     /// This is a type representing the next state in the typestate sequence
     /// which is an initialised operation with generated parameter, etc.
-    type Initialised: initialised::Operation<null::OptimiserFactory>;
+    type Initialised;
 
     /// This returns the output neuron count for the operation.
     fn output_neuron_count(&self) -> usize;
@@ -66,9 +64,9 @@ pub trait Operation: Sealed + Sized {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::operations::forward;
-    use crate::operations::{trainable, uninitialised};
+    use crate::operations::{forward, initialised, trainable, uninitialised};
     use crate::optimisers;
+    use crate::optimisers::null;
     use crate::optimisers::OptimiserFactory;
 
     struct StubOperationUninitialised(usize);
