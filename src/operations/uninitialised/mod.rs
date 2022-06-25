@@ -64,10 +64,7 @@ pub trait Operation: Sealed + Sized {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::operations::{forward, initialised, trainable, uninitialised};
-    use crate::optimisers;
-    use crate::optimisers::null;
-    use crate::optimisers::OptimiserFactory;
+    use crate::operations::uninitialised;
 
     struct StubOperationUninitialised(usize);
     impl Sealed for StubOperationUninitialised {}
@@ -104,46 +101,6 @@ mod tests {
 
     #[derive(Debug, PartialEq)]
     struct StubOperationInitialised(usize, usize, usize);
-    impl Sealed for StubOperationInitialised {}
-    impl<T: optimisers::OptimiserFactory<()>> initialised::Operation<T> for StubOperationInitialised {
-        type Input = ();
-        type Output = ();
-        type Parameter = ();
-        type ParameterIter = core::iter::Empty<()>;
-        type Error = ();
-        type Trainable = StubOperationTrainable;
-        fn iter(&self) -> Self::ParameterIter {
-            unimplemented!()
-        }
-        fn predict(&self, _input: Self::Input) -> Result<Self::Output, Self::Error> {
-            unimplemented!()
-        }
-        fn with_optimiser<U>(self, _factory: U) -> <Self as initialised::Operation<U>>::Trainable
-        where
-            Self: initialised::Operation<U>,
-            U: OptimiserFactory<<Self as initialised::Operation<U>>::Parameter>,
-        {
-            unimplemented!();
-        }
-    }
-
-    struct StubOperationTrainable;
-    impl Sealed for StubOperationTrainable {}
-    impl trainable::Operation for StubOperationTrainable {
-        type Initialised = StubOperationInitialised;
-        fn into_initialised(self) -> Self::Initialised {
-            unimplemented!()
-        }
-        fn forward<'a>(
-            &'a mut self,
-            _input: <Self as forward::Construct<'a>>::Input,
-        ) -> <Self as forward::Construct<'a>>::Output
-        where
-            Self: forward::Construct<'a>,
-        {
-            unimplemented!()
-        }
-    }
 
     #[test]
     fn test_operation_initialisation_with_iter() {
@@ -169,41 +126,5 @@ mod tests {
 
         // Assert
         assert_eq!(init, StubOperationInitialised(112, 112, 42));
-    }
-
-    // These tests aren't actually testing anything because the system under
-    // test at this point is not the initialised stub. However due to code coverage
-    // we should execute these functions to remove the lines from uncovered ones.
-    #[test]
-    #[should_panic]
-    fn test_stub_operation_initialised_iter() {
-        initialised::Operation::<null::OptimiserFactory>::iter(&StubOperationInitialised(0, 0, 0))
-            .next()
-            .unwrap();
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_stub_operation_initialised_with_optimiser() {
-        initialised::Operation::<null::OptimiserFactory>::with_optimiser(
-            StubOperationInitialised(0, 0, 0),
-            null::OptimiserFactory::new(),
-        );
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_stub_operation_initialised_predict() {
-        initialised::Operation::<null::OptimiserFactory>::predict(
-            &StubOperationInitialised(0, 0, 0),
-            (),
-        )
-        .unwrap();
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_stub_operation_training_into_initialised() {
-        trainable::Operation::into_initialised(StubOperationTrainable);
     }
 }
