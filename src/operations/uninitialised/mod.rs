@@ -130,12 +130,14 @@ mod tests {
     struct StubOperationTrainable;
     impl Sealed for StubOperationTrainable {}
     impl trainable::Operation for StubOperationTrainable {
-        type Factory = null::OptimiserFactory;
         type Initialised = StubOperationInitialised;
         fn into_initialised(self) -> Self::Initialised {
             unimplemented!()
         }
-        fn forward<'a>(&'a mut self, _input: ()) -> <Self as forward::Construct<'a>>::Output
+        fn forward<'a>(
+            &'a mut self,
+            _input: <Self as forward::Construct<'a>>::Input,
+        ) -> <Self as forward::Construct<'a>>::Output
         where
             Self: forward::Construct<'a>,
         {
