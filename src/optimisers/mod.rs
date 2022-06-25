@@ -12,13 +12,10 @@ pub trait OptimiserFactory<T>: Sealed {
     /// The type of the optimiser produced by this specific trait implementation
     /// on the factory. Must implement the Optimiser trait and optimise for the same
     /// parameter type as the initialised operation itself.
-    type Optimiser: Optimiser<Parameter = T>;
+    type Optimiser;
 }
 
 /// This trait is implemented for a specific concrete optimiser for
 /// a specific parameter type that can be used to optimise an operation with
 /// the same parameter type.
-pub trait Optimiser: Sealed {
-    /// This is the type of the parameter/parameter gradient being optimised.
-    type Parameter;
-}
+pub trait Optimiser: Sealed {}

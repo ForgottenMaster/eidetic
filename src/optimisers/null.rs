@@ -32,6 +32,4 @@ impl<T> optimisers::OptimiserFactory<T> for OptimiserFactory {
 pub struct Optimiser<T>(PhantomData<T>);
 
 impl<T> Sealed for Optimiser<T> {}
-impl<T> optimisers::Optimiser for Optimiser<T> {
-    type Parameter = T;
-}
+impl<T> optimisers::Optimiser for Optimiser<T> {}
