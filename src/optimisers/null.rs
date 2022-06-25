@@ -23,9 +23,7 @@ impl OptimiserFactory {
 }
 
 impl Sealed for OptimiserFactory {}
-impl<T> optimisers::OptimiserFactory<T> for OptimiserFactory {
-    type Optimiser = Optimiser<T>;
-}
+impl<T> optimisers::OptimiserFactory<T> for OptimiserFactory {}
 
 /// This struct is the concrete optimiser that is produced by the
 /// null `OptimiserFactory`.
