@@ -11,7 +11,7 @@ use core::marker::PhantomData;
 /// It does however enable a sensible default for the generic
 /// parameter of `OperationInitialised` when first initialised from
 /// an `OperationUninitialised`.
-#[derive(Default)]
+#[derive(Debug, Default, PartialEq)]
 pub struct OptimiserFactory(());
 
 impl OptimiserFactory {
@@ -31,3 +31,17 @@ pub struct Optimiser<T>(PhantomData<T>);
 
 impl<T> Sealed for Optimiser<T> {}
 impl<T> optimisers::Optimiser for Optimiser<T> {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_optimiser_factory_new() {
+        // Arrange/Act
+        let factory = OptimiserFactory::new();
+
+        // Assert
+        assert_eq!(factory, OptimiserFactory(()));
+    }
+}
