@@ -2,7 +2,7 @@ use eidetic::tensors::*;
 
 #[test]
 fn test_tensor_rank_0_construction() {
-    let mut tensor = ().try_construct_tensor([42]).unwrap();
+    let mut tensor = Tensor::<_, rank::Zero>::new(42);
     assert_eq!(tensor.iter().next().unwrap(), &42);
     assert_eq!(tensor.iter_mut().next().unwrap(), &mut 42);
     assert_eq!(tensor.into_iter().next().unwrap(), 42);
@@ -10,7 +10,7 @@ fn test_tensor_rank_0_construction() {
 
 #[test]
 fn test_tensor_rank_1_construction() {
-    let mut tensor = (3,).try_construct_tensor(1..=3).unwrap();
+    let mut tensor = Tensor::<_, rank::One>::new(1..=3);
     {
         let mut iter = tensor.iter();
         assert_eq!(iter.next().unwrap(), &1);
@@ -33,7 +33,7 @@ fn test_tensor_rank_1_construction() {
 
 #[test]
 fn test_tensor_rank_2_construction() {
-    let mut tensor = (2, 2).try_construct_tensor(1..=4).unwrap();
+    let mut tensor = Tensor::<_, rank::Two>::new((2, 2), 1..=4).unwrap();
     {
         let mut iter = tensor.iter();
         assert_eq!(iter.next().unwrap(), &1);
@@ -59,7 +59,7 @@ fn test_tensor_rank_2_construction() {
 
 #[test]
 fn test_tensor_rank_3_construction() {
-    let tensor = (2, 3, 2).try_construct_tensor(1..=12).unwrap();
+    let tensor = Tensor::<_, rank::Three>::new((2, 3, 2), 1..=12).unwrap();
     let expected = (1..=12).collect::<Vec<_>>();
     let output = tensor.into_iter().collect::<Vec<_>>();
     assert_eq!(expected, output);
@@ -67,7 +67,7 @@ fn test_tensor_rank_3_construction() {
 
 #[test]
 fn test_tensor_rank_4_construction() {
-    let tensor = (2, 3, 2, 2).try_construct_tensor(1..=24).unwrap();
+    let tensor = Tensor::<_, rank::Four>::new((2, 3, 2, 2), 1..=24).unwrap();
     let expected = (1..=24).collect::<Vec<_>>();
     let output = tensor.into_iter().collect::<Vec<_>>();
     assert_eq!(expected, output);
@@ -75,7 +75,7 @@ fn test_tensor_rank_4_construction() {
 
 #[test]
 fn test_tensor_rank_5_construction() {
-    let tensor = (2, 3, 2, 2, 3).try_construct_tensor(1..=72).unwrap();
+    let tensor = Tensor::<_, rank::Five>::new((2, 3, 2, 2, 3), 1..=72).unwrap();
     let expected = (1..=72).collect::<Vec<_>>();
     let output = tensor.into_iter().collect::<Vec<_>>();
     assert_eq!(expected, output);
