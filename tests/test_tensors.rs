@@ -1,3 +1,4 @@
+use eidetic::errors::*;
 use eidetic::tensors::*;
 
 #[test]
@@ -84,27 +85,27 @@ fn test_tensor_rank_5_construction() {
 #[test]
 fn test_tensor_rank_2_construction_failure() {
     let error = Tensor::<_, rank::Two>::new((2, 2), 1..=5).unwrap_err();
-    let expected = TensorConstructionError::InvalidShape { expected: 4 };
+    let expected = ElementCountError { expected: 4 };
     assert_eq!(error, expected);
 }
 
 #[test]
 fn test_tensor_rank_3_construction_failure() {
     let error = Tensor::<_, rank::Three>::new((2, 3, 2), 1..=13).unwrap_err();
-    let expected = TensorConstructionError::InvalidShape { expected: 12 };
+    let expected = ElementCountError { expected: 12 };
     assert_eq!(error, expected);
 }
 
 #[test]
 fn test_tensor_rank_4_construction_failure() {
     let error = Tensor::<_, rank::Four>::new((2, 3, 2, 4), 1..=51).unwrap_err();
-    let expected = TensorConstructionError::InvalidShape { expected: 48 };
+    let expected = ElementCountError { expected: 48 };
     assert_eq!(error, expected);
 }
 
 #[test]
 fn test_tensor_rank_5_construction_failure() {
     let error = Tensor::<_, rank::Five>::new((2, 3, 2, 4, 2), 1..=97).unwrap_err();
-    let expected = TensorConstructionError::InvalidShape { expected: 96 };
+    let expected = ElementCountError { expected: 96 };
     assert_eq!(error, expected);
 }

@@ -2,6 +2,8 @@
 //! uninitialised state. These are operations that will accept and iterator
 //! or random seed and will generate the correct size parameter for the operation.
 
+pub mod linear;
+
 use crate::private::Sealed;
 
 /// This trait is used to represent an operation in an uninitialised state

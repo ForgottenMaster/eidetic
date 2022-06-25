@@ -5,10 +5,9 @@
 
 pub mod rank;
 
+use crate::errors::ElementCountError;
 use ndarray::{arr0, Array};
 use rank::Rank;
-#[cfg(feature = "thiserror")]
-use thiserror::Error;
 
 /// Represents a tensor with a specific element type T, and specific dimensionality
 /// given by the R generic type parameter.
@@ -57,14 +56,14 @@ impl<T> Tensor<T, rank::Two> {
     /// any iterable.
     ///
     /// # Errors
-    /// `TensorConstructionError` if the construction fails such as, insufficient elements provided for the shape.
+    /// `ElementCountError` if the provided number of elements does not match the requested shape.
     pub fn new(
         shape: (usize, usize),
         iter: impl IntoIterator<Item = T>,
-    ) -> Result<Self, TensorConstructionError> {
+    ) -> Result<Self, ElementCountError> {
         Array::from_iter(iter)
             .into_shape(shape)
-            .map_err(|_| TensorConstructionError::InvalidShape {
+            .map_err(|_| ElementCountError {
                 expected: shape.0 * shape.1,
             })
             .map(|array| Self(array))
@@ -76,14 +75,14 @@ impl<T> Tensor<T, rank::Three> {
     /// any iterable.
     ///
     /// # Errors
-    /// `TensorConstructionError` if the construction fails such as, insufficient elements provided for the shape.
+    /// `ElementCountError` if the provided number of elements does not match the requested shape.
     pub fn new(
         shape: (usize, usize, usize),
         iter: impl IntoIterator<Item = T>,
-    ) -> Result<Self, TensorConstructionError> {
+    ) -> Result<Self, ElementCountError> {
         Array::from_iter(iter)
             .into_shape(shape)
-            .map_err(|_| TensorConstructionError::InvalidShape {
+            .map_err(|_| ElementCountError {
                 expected: shape.0 * shape.1 * shape.2,
             })
             .map(|array| Self(array))
@@ -95,14 +94,14 @@ impl<T> Tensor<T, rank::Four> {
     /// any iterable.
     ///
     /// # Errors
-    /// `TensorConstructionError` if the construction fails such as, insufficient elements provided for the shape.
+    /// `ElementCountError` if the provided number of elements does not match the requested shape.
     pub fn new(
         shape: (usize, usize, usize, usize),
         iter: impl IntoIterator<Item = T>,
-    ) -> Result<Self, TensorConstructionError> {
+    ) -> Result<Self, ElementCountError> {
         Array::from_iter(iter)
             .into_shape(shape)
-            .map_err(|_| TensorConstructionError::InvalidShape {
+            .map_err(|_| ElementCountError {
                 expected: shape.0 * shape.1 * shape.2 * shape.3,
             })
             .map(|array| Self(array))
@@ -114,14 +113,14 @@ impl<T> Tensor<T, rank::Five> {
     /// any iterable.
     ///
     /// # Errors
-    /// `TensorConstructionError` if the construction fails such as, insufficient elements provided for the shape.
+    /// `ElementCountError` if the provided number of elements does not match the requested shape.
     pub fn new(
         shape: (usize, usize, usize, usize, usize),
         iter: impl IntoIterator<Item = T>,
-    ) -> Result<Self, TensorConstructionError> {
+    ) -> Result<Self, ElementCountError> {
         Array::from_iter(iter)
             .into_shape(shape)
-            .map_err(|_| TensorConstructionError::InvalidShape {
+            .map_err(|_| ElementCountError {
                 expected: shape.0 * shape.1 * shape.2 * shape.3 * shape.4,
             })
             .map(|array| Self(array))
@@ -146,19 +145,4 @@ impl<T, R: Rank> Iterator for TensorIterator<T, R> {
     fn next(&mut self) -> Option<Self::Item> {
         self.0.next()
     }
-}
-
-/// This is the error type which is used to report a failure to construct a new
-/// tensor from a provided iterator of elements.
-#[non_exhaustive]
-#[derive(Debug, Eq, PartialEq)]
-#[cfg_attr(feature = "thiserror", derive(Error))]
-pub enum TensorConstructionError {
-    /// This variant is used in the case that the product of the specified tensor shape components (e.g. rows * columns for a rank 2 tensor) doesn't match the number
-    /// of elements provided in the iterator.
-    #[cfg_attr(feature="thiserror", error("The provided iterator does not have the correct number of elements. Expected {expected} elements."))]
-    InvalidShape {
-        /// The number of elements that we expected to get.
-        expected: usize,
-    },
 }
