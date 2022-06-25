@@ -8,3 +8,10 @@ mod forward;
 mod initialised;
 mod trainable;
 mod uninitialised;
+
+pub use backward::Operation as BackwardOperation;
+pub use forward::Construct;
+pub use forward::Operation as ForwardOperation;
+pub use initialised::Operation as InitialisedOperation;
+pub use trainable::Operation as TrainableOperation;
+pub use uninitialised::Operation as UninitialisedOperation;

@@ -44,9 +44,6 @@ pub trait Operation: Sealed {
     /// be built in.
     type Backward;
 
-    /// This function gives access to the calculated output from the operation.
-    fn output(&self) -> &Self::Output;
-
     /// This function maps the forward pass to a backward one, calculating the
     /// gradients ready for optimisation.
     fn backward(self, output_gradient: Self::Output) -> (Self::Backward, Self::Input);

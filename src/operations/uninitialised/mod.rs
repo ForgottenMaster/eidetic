@@ -20,9 +20,6 @@ pub trait Operation: Sealed + Sized {
     /// which is an initialised operation with generated parameter, etc.
     type Initialised;
 
-    /// This returns the output neuron count for the operation.
-    fn output_neuron_count(&self) -> usize;
-
     /// This function can be called to initialise the parameters of the operation
     /// from an iterator that yields elements of the expected type for the operation.
     ///
@@ -45,6 +42,9 @@ pub trait Operation: Sealed + Sized {
         let input_neuron_count = self.output_neuron_count();
         self.with_seed_private(seed, input_neuron_count)
     }
+
+    #[doc(hidden)]
+    fn output_neuron_count(&self) -> usize;
 
     #[doc(hidden)]
     fn with_iter_private(
