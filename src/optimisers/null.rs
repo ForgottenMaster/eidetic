@@ -10,15 +10,6 @@ use core::marker::PhantomData;
 #[derive(Debug, Default, PartialEq)]
 pub struct OptimiserFactory(());
 
-impl OptimiserFactory {
-    /// This function will create a new `NullOptimiser` instance.
-    #[must_use]
-    #[cfg(test)]
-    pub const fn new() -> Self {
-        Self(())
-    }
-}
-
 impl Sealed for OptimiserFactory {}
 impl<T> optimisers::base::OptimiserFactory<T> for OptimiserFactory {}
 
@@ -28,17 +19,3 @@ pub struct Optimiser<T>(PhantomData<T>);
 
 impl<T> Sealed for Optimiser<T> {}
 impl<T> optimisers::base::Optimiser for Optimiser<T> {}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_optimiser_factory_new() {
-        // Arrange/Act
-        let factory = OptimiserFactory::new();
-
-        // Assert
-        assert_eq!(factory, OptimiserFactory(()));
-    }
-}
