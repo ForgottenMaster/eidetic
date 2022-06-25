@@ -3,8 +3,8 @@
 //! well as providing methods to chain them together at this
 //! lowest level.
 
-pub mod backward;
-pub mod forward;
-pub mod initialised;
-pub mod trainable;
-pub mod uninitialised;
+mod backward;
+mod forward;
+mod initialised;
+mod trainable;
+mod uninitialised;
