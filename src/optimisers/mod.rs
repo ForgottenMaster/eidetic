@@ -2,4 +2,4 @@
 //! of optimisation that can be used when updating an operation's parameter.
 
 pub(crate) mod base;
-mod null;
+pub(crate) mod null;

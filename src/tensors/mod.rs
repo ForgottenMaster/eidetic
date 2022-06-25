@@ -5,12 +5,10 @@
 
 pub mod rank;
 
-use ndarray::arr0;
+use ndarray::{arr0, Array};
 use rank::Rank;
 #[cfg(feature = "thiserror")]
 use thiserror::Error;
-
-use ndarray::Array;
 
 /// Represents a tensor with a specific element type T, and specific dimensionality
 /// given by the R generic type parameter.

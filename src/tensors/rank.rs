@@ -12,7 +12,7 @@ use ndarray::{Dimension, Ix0, Ix1, Ix2, Ix3, Ix4, Ix5};
 /// Note that this trait is sealed as the supertrait is not in the
 /// public API meaning that all implementations for Rank exist solely
 /// inside the Eidetic library.
-pub trait Rank: Sealed + PartialEq {
+pub trait Rank: Sealed {
     #[doc(hidden)]
     type Internal: Dimension;
 }
