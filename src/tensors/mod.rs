@@ -5,7 +5,7 @@
 
 pub mod rank;
 
-use crate::errors::ElementCountError;
+use crate::{Error, Result};
 use ndarray::{arr0, Array};
 use rank::Rank;
 
@@ -56,14 +56,11 @@ impl<T> Tensor<T, rank::Two> {
     /// any iterable.
     ///
     /// # Errors
-    /// `ElementCountError` if the provided number of elements does not match the requested shape.
-    pub fn new(
-        shape: (usize, usize),
-        iter: impl IntoIterator<Item = T>,
-    ) -> Result<Self, ElementCountError> {
+    /// `Error` if the provided number of elements does not match the requested shape.
+    pub fn new(shape: (usize, usize), iter: impl IntoIterator<Item = T>) -> Result<Self> {
         Array::from_iter(iter)
             .into_shape(shape)
-            .map_err(|_| ElementCountError)
+            .map_err(|_| Error(()))
             .map(|array| Self(array))
     }
 }
@@ -73,14 +70,11 @@ impl<T> Tensor<T, rank::Three> {
     /// any iterable.
     ///
     /// # Errors
-    /// `ElementCountError` if the provided number of elements does not match the requested shape.
-    pub fn new(
-        shape: (usize, usize, usize),
-        iter: impl IntoIterator<Item = T>,
-    ) -> Result<Self, ElementCountError> {
+    /// `Error` if the provided number of elements does not match the requested shape.
+    pub fn new(shape: (usize, usize, usize), iter: impl IntoIterator<Item = T>) -> Result<Self> {
         Array::from_iter(iter)
             .into_shape(shape)
-            .map_err(|_| ElementCountError)
+            .map_err(|_| Error(()))
             .map(|array| Self(array))
     }
 }
@@ -90,14 +84,14 @@ impl<T> Tensor<T, rank::Four> {
     /// any iterable.
     ///
     /// # Errors
-    /// `ElementCountError` if the provided number of elements does not match the requested shape.
+    /// `Error` if the provided number of elements does not match the requested shape.
     pub fn new(
         shape: (usize, usize, usize, usize),
         iter: impl IntoIterator<Item = T>,
-    ) -> Result<Self, ElementCountError> {
+    ) -> Result<Self> {
         Array::from_iter(iter)
             .into_shape(shape)
-            .map_err(|_| ElementCountError)
+            .map_err(|_| Error(()))
             .map(|array| Self(array))
     }
 }
@@ -107,14 +101,14 @@ impl<T> Tensor<T, rank::Five> {
     /// any iterable.
     ///
     /// # Errors
-    /// `ElementCountError` if the provided number of elements does not match the requested shape.
+    /// `Error` if the provided number of elements does not match the requested shape.
     pub fn new(
         shape: (usize, usize, usize, usize, usize),
         iter: impl IntoIterator<Item = T>,
-    ) -> Result<Self, ElementCountError> {
+    ) -> Result<Self> {
         Array::from_iter(iter)
             .into_shape(shape)
-            .map_err(|_| ElementCountError)
+            .map_err(|_| Error(()))
             .map(|array| Self(array))
     }
 }
