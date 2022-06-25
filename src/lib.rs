@@ -21,6 +21,7 @@ use thiserror::Error;
 /// goes wrong. Having a custom error type means we can typedef Result too.
 #[derive(Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "thiserror", derive(Error))]
+#[cfg_attr(feature = "thiserror", error("An error that can occur during runtime operation of Eidetic. Since the API uses typestates and catches issues at compile time, this will usually be an invalid shape (e.g. incorrect column count in the data)."))]
 pub struct Error(pub(crate) ());
 
 type Result<T> = core::result::Result<T, Error>;
