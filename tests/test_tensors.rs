@@ -1,4 +1,4 @@
-use eidetic::prelude::*;
+use eidetic::tensors::*;
 
 #[test]
 fn test_tensor_rank_0_construction() {

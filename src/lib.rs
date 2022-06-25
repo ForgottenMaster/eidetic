@@ -12,6 +12,5 @@
 
 pub mod operations;
 pub mod optimisers;
-pub mod prelude;
 mod private;
 pub mod tensors;

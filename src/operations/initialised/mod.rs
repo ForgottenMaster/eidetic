@@ -2,14 +2,14 @@
 //! initialised state.
 
 use crate::operations::initialised;
-use crate::optimisers::OptimiserFactory;
+use crate::optimisers::base::OptimiserFactory;
 use crate::private::Sealed;
 
 /// This trait is used to represent an operation in an initialised state that has a valid
 /// parameter stored internally, and which can be used to run inference or prepared for
 /// training by providing an optimiser.
 #[allow(clippy::redundant_pub_crate)]
-pub(crate) trait Operation<T>: Sealed + Sized {
+pub trait Operation<T>: Sealed + Sized {
     /// The type that is passed into the operation.
     type Input;
 
