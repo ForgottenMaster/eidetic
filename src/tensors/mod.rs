@@ -6,7 +6,7 @@
 pub mod rank;
 
 use crate::{Error, Result};
-use ndarray::{arr0, Array};
+use ndarray::{arr0, Array, Ix1, Ix2};
 use rank::Rank;
 
 /// Represents a tensor with a specific element type T, and specific dimensionality
@@ -58,10 +58,9 @@ impl<T> Tensor<T, rank::Two> {
     /// # Errors
     /// `Error` if the provided number of elements does not match the requested shape.
     pub fn new(shape: (usize, usize), iter: impl IntoIterator<Item = T>) -> Result<Self> {
-        Array::from_iter(iter)
-            .into_shape(shape)
-            .map_err(|_| Error(()))
-            .map(|array| Self(array))
+        let array: Array<T, Ix1> = Array::from_iter(iter);
+        let array: Array<T, Ix2> = array.into_shape(shape).map_err(|_| Error(()))?;
+        Ok(Self(array))
     }
 }
 
