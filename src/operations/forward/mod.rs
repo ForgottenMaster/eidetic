@@ -15,16 +15,13 @@ use crate::Result;
 /// we can name the correct concrete type in the Output associated type which binds the borrow and
 /// the input together.
 pub trait Construct<'a>: Sealed {
-    /// The type of the input provided to construct the forward
-    /// pass stage.
-    type Input;
-
     /// This associated type defines the concrete output type for this forward pass
     /// given the lifetime we were given.
     type Forward;
 
-    #[doc(hidden)]
-    fn construct(&'a mut self, input: Self::Input) -> Self::Forward;
+    /// Constructs a new instance of the Forward type given a mutable
+    /// reference to the Operation type.
+    fn construct(&'a mut self) -> Self::Forward;
 }
 
 /// This trait is used to encompass the functionality of an operation that has had

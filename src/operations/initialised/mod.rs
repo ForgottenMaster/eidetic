@@ -1,15 +1,18 @@
 //! This submodule contains the traits and structures for operations in the
 //! initialised state.
 
-use crate::operations::initialised;
+pub mod input;
+
+use crate::operations::{initialised, trainable};
 use crate::optimisers::base::OptimiserFactory;
 use crate::private::Sealed;
+use crate::ElementType;
 use crate::Result;
 
 /// This trait is used to represent an operation in an initialised state that has a valid
 /// parameter stored internally, and which can be used to run inference or prepared for
 /// training by providing an optimiser.
-pub trait Operation<T>: Sealed + Sized {
+pub trait Operation<T: OptimiserFactory<Self::Parameter>>: Sealed + Sized {
     /// The type that is passed into the operation.
     type Input;
 
@@ -22,11 +25,11 @@ pub trait Operation<T>: Sealed + Sized {
     /// The iterator type that will be returned when asked for that
     /// iterates over the elements of the (flattened) parameter(s) within
     /// this operation (for example, for serialization/saving after training).
-    type ParameterIter: Iterator;
+    type ParameterIter: Iterator<Item = ElementType>;
 
     /// This is the type that is used once the operation is placed in a trainable
     /// state, and provides the forward pass functionality.
-    type Trainable;
+    type Trainable: trainable::Operation<Initialised = Self>;
 
     /// This function can be called to get an iterator over the copies of the elements
     /// stored within this operation's parameter. The parameter is flattened to a single

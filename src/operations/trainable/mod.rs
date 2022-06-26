@@ -1,6 +1,8 @@
 //! Module containing the traits and types relating
 //! to operations and chains of operations in the trainable typestate.
 
+pub mod input;
+
 use crate::operations::forward;
 use crate::private::Sealed;
 use crate::Result;
@@ -9,13 +11,19 @@ use crate::Result;
 /// an operation that is in a state ready to be trained.
 /// This means it has been through the `with_optimiser` function
 /// call to bind an optimiser to the network.
-pub trait Operation: Sealed {
+pub trait Operation: Sealed + Sized {
+    /// The type of the input expected into this operation.
+    type Input;
+
     /// The type of the output produced by the flow of the tensors through
     /// the operation.
     type Output;
 
     /// This is the type of the initialised version of the operation.
     type Initialised;
+
+    /// Constructs a new Self from the initialised form.
+    fn new(init: Self::Initialised) -> Self;
 
     /// Calling this function will "go back" from a trainable
     /// state into an initialised one. This allows the trained network
@@ -30,10 +38,7 @@ pub trait Operation: Sealed {
     ///
     /// # Errors
     /// `Error` if the forward pass can't be performed such as due to the input being incorrectly shaped.
-    fn forward<'a>(
-        &'a mut self,
-        input: <Self as forward::Construct<'a>>::Input,
-    ) -> Result<(Self::Forward, Self::Output)>
+    fn forward<'a>(&'a mut self, input: Self::Input) -> Result<(Self::Forward, Self::Output)>
     where
         Self: forward::Construct<'a>;
 }

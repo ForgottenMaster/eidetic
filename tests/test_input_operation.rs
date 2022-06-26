@@ -9,5 +9,5 @@ fn test_input_operation_with_iter() {
 #[test]
 fn test_input_operation_with_seed() {
     let input = Input::new(2);
-    assert_eq!(input.with_seed(42), ());
+    input.with_seed(42);
 }

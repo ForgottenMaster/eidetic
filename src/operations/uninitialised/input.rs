@@ -1,3 +1,4 @@
+use crate::operations::initialised;
 use crate::operations::UninitialisedOperation;
 use crate::private::Sealed;
 use crate::ElementType;
@@ -25,14 +26,19 @@ impl Input {
 
 impl Sealed for Input {}
 impl UninitialisedOperation for Input {
-    type Initialised = (); // TODO: Replace this with something sensible.
+    type Initialised = initialised::input::Operation;
 
     fn with_iter_private(
         self,
         _iter: &mut impl Iterator<Item = ElementType>,
         _input_neuron_count: usize,
     ) -> Result<(Self::Initialised, usize)> {
-        Ok(((), self.neuron_count))
+        Ok((
+            initialised::input::Operation {
+                neurons: self.neuron_count,
+            },
+            self.neuron_count,
+        ))
     }
 
     fn with_seed_private(
@@ -40,6 +46,11 @@ impl UninitialisedOperation for Input {
         _seed: u64,
         _input_neuron_count: usize,
     ) -> (Self::Initialised, usize) {
-        ((), self.neuron_count)
+        (
+            initialised::input::Operation {
+                neurons: self.neuron_count,
+            },
+            self.neuron_count,
+        )
     }
 }
