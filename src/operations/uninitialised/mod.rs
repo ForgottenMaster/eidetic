@@ -21,36 +21,41 @@ pub trait Operation: Sealed + Sized {
 
     /// This function can be called to initialise the parameters of the operation
     /// from an iterator that yields elements of the expected type for the operation.
+    /// Returns an initialised version of the operation if successful. Also returns the number
+    /// of output neurons from the operation.
     ///
     /// # Errors
     /// `Error` if the initialisation fails (likely due to invalid count of elements provided).
-    fn with_iter(self, mut iter: impl Iterator<Item = Self::Element>) -> Result<Self::Initialised> {
-        let input_neuron_count = self.output_neuron_count();
-        self.with_iter_private(&mut iter, input_neuron_count)
+    fn with_iter(
+        self,
+        mut iter: impl Iterator<Item = Self::Element>,
+    ) -> Result<(Self::Initialised, usize)> {
+        self.with_iter_private(&mut iter, 0)
     }
 
     /// This function can be called to initialise the parameters of the operation
-    /// randomly using the given RNG seed.
+    /// randomly using the given RNG seed. Returns the initialised version of the operation
+    /// if successful. Also returns the number of output neurons from the operation.
     ///
     /// # Errors
     /// `Error` if the initialisation fails (likely due to invalid count of elements provided).
-    fn with_seed(self, seed: u64) -> Result<Self::Initialised> {
-        let input_neuron_count = self.output_neuron_count();
-        self.with_seed_private(seed, input_neuron_count)
+    fn with_seed(self, seed: u64) -> Result<(Self::Initialised, usize)> {
+        self.with_seed_private(seed, 0)
     }
-
-    #[doc(hidden)]
-    fn output_neuron_count(&self) -> usize;
 
     #[doc(hidden)]
     fn with_iter_private(
         self,
         iter: &mut impl Iterator<Item = Self::Element>,
         input_neuron_count: usize,
-    ) -> Result<Self::Initialised>;
+    ) -> Result<(Self::Initialised, usize)>;
 
     #[doc(hidden)]
-    fn with_seed_private(self, seed: u64, input_neuron_count: usize) -> Result<Self::Initialised>;
+    fn with_seed_private(
+        self,
+        seed: u64,
+        input_neuron_count: usize,
+    ) -> Result<(Self::Initialised, usize)>;
 }
 
 #[cfg(test)]
@@ -63,35 +68,24 @@ mod tests {
     impl uninitialised::Operation for StubOperationUninitialised {
         type Element = ();
         type Initialised = StubOperationInitialised;
-        fn output_neuron_count(&self) -> usize {
-            self.0
-        }
         fn with_iter_private(
             self,
             iter: &mut impl Iterator<Item = Self::Element>,
-            input_neuron_count: usize,
-        ) -> Result<Self::Initialised> {
-            Ok(StubOperationInitialised(
-                input_neuron_count,
-                self.output_neuron_count(),
-                iter.count(),
-            ))
+            _input_neuron_count: usize,
+        ) -> Result<(Self::Initialised, usize)> {
+            Ok((StubOperationInitialised(iter.count()), self.0))
         }
         fn with_seed_private(
             self,
             seed: u64,
-            input_neuron_count: usize,
-        ) -> Result<Self::Initialised> {
-            Ok(StubOperationInitialised(
-                input_neuron_count,
-                self.output_neuron_count(),
-                seed as usize,
-            ))
+            _input_neuron_count: usize,
+        ) -> Result<(Self::Initialised, usize)> {
+            Ok((StubOperationInitialised(seed as usize), self.0))
         }
     }
 
     #[derive(Debug, PartialEq)]
-    struct StubOperationInitialised(usize, usize, usize);
+    struct StubOperationInitialised(usize);
 
     #[test]
     fn test_operation_initialisation_with_iter() {
@@ -100,10 +94,11 @@ mod tests {
         let array = [(); 7];
 
         // Act
-        let init = uninit.with_iter(array.into_iter()).unwrap();
+        let (init, neurons) = uninit.with_iter(array.into_iter()).unwrap();
 
         // Assert
-        assert_eq!(init, StubOperationInitialised(42, 42, 7));
+        assert_eq!(init, StubOperationInitialised(7));
+        assert_eq!(neurons, 42);
     }
 
     #[test]
@@ -113,9 +108,10 @@ mod tests {
         let seed = 42;
 
         // Act
-        let init = uninit.with_seed(seed).unwrap();
+        let (init, neurons) = uninit.with_seed(seed).unwrap();
 
         // Assert
-        assert_eq!(init, StubOperationInitialised(112, 112, 42));
+        assert_eq!(init, StubOperationInitialised(42));
+        assert_eq!(neurons, 112);
     }
 }

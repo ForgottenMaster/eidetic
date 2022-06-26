@@ -22,23 +22,19 @@ impl<T> uninitialised::Operation for Linear<T> {
     type Element = T;
     type Initialised = (); // TODO: replace this with something sensible
 
-    fn output_neuron_count(&self) -> usize {
-        self.1
-    }
-
     fn with_iter_private(
         self,
         _iter: &mut impl Iterator<Item = Self::Element>,
         _input_neuron_count: usize,
-    ) -> Result<Self::Initialised> {
-        Ok(()) // TODO: replace this with something sensible
+    ) -> Result<(Self::Initialised, usize)> {
+        Ok(((), self.1)) // TODO: replace this with something sensible
     }
 
     fn with_seed_private(
         self,
         _seed: u64,
         _input_neuron_count: usize,
-    ) -> Result<Self::Initialised> {
-        Ok(()) // TODO: replace this with something sensible
+    ) -> Result<(Self::Initialised, usize)> {
+        Ok(((), self.1)) // TODO: replace this with something sensible
     }
 }
