@@ -32,8 +32,7 @@ pub trait Operation: Sealed + Sized {
     /// from a random seed. This is used when the network isn't already trained
     /// and is being constructed for the first time.
     fn with_seed(self, seed: u64) -> Self::Initialised {
-        let (initialised, _) = self.with_seed_private(seed, 0);
-        initialised
+        self.with_seed_private(seed, 0).0
     }
 
     #[doc(hidden)]
