@@ -27,10 +27,8 @@ fn test_input_operation_with_seed() {
         input.predict(valid_tensor_1.clone()).unwrap(),
         valid_tensor_1.clone()
     );
-    assert_eq!(
-        input.predict(valid_tensor_2.clone()).unwrap(),
-        valid_tensor_2.clone()
-    );
+    let prediction = input.predict(valid_tensor_2.clone()).unwrap();
+    assert_eq!(prediction, valid_tensor_2.clone());
     assert!(input.predict(invalid_tensor.clone()).is_err());
 
     // map to trainable
@@ -48,5 +46,6 @@ fn test_input_operation_with_seed() {
     assert!(input.forward(invalid_tensor.clone()).is_err());
 
     // test into_initialised again
-    input.into_initialised();
+    let input = input.into_initialised();
+    println!("{:?}", input);
 }
