@@ -34,4 +34,12 @@ impl UninitialisedOperation for Input {
     ) -> Result<(Self::Initialised, usize)> {
         Ok(((), self.neuron_count))
     }
+
+    fn with_seed_private(
+        self,
+        _seed: u64,
+        _input_neuron_count: usize,
+    ) -> (Self::Initialised, usize) {
+        ((), self.neuron_count)
+    }
 }

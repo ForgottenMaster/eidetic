@@ -22,12 +22,18 @@ pub trait Operation: Sealed + Sized {
     /// of output neurons from the operation.
     ///
     /// # Errors
-    /// `Error` if the initialisation fails (likely due to invalid count of elements provided).
-    fn with_iter(
-        self,
-        mut iter: impl Iterator<Item = ElementType>,
-    ) -> Result<(Self::Initialised, usize)> {
-        self.with_iter_private(&mut iter, 0)
+    /// `Error` if the initialisation fails due to the incorrect number of elements being provided.
+    fn with_iter(self, mut iter: impl Iterator<Item = ElementType>) -> Result<Self::Initialised> {
+        let (initialised, _) = self.with_iter_private(&mut iter, 0)?;
+        Ok(initialised)
+    }
+
+    /// This function is called to initialise the parameters of the operation
+    /// from a random seed. This is used when the network isn't already trained
+    /// and is being constructed for the first time.
+    fn with_seed(self, seed: u64) -> Self::Initialised {
+        let (initialised, _) = self.with_seed_private(seed, 0);
+        initialised
     }
 
     #[doc(hidden)]
@@ -36,4 +42,7 @@ pub trait Operation: Sealed + Sized {
         iter: &mut impl Iterator<Item = ElementType>,
         input_neuron_count: usize,
     ) -> Result<(Self::Initialised, usize)>;
+
+    #[doc(hidden)]
+    fn with_seed_private(self, seed: u64, input_neuron_count: usize) -> (Self::Initialised, usize);
 }
