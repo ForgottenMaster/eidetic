@@ -16,4 +16,4 @@ pub use initialised::Operation as InitialisedOperation;
 pub use trainable::Operation as TrainableOperation;
 pub use uninitialised::Operation as UninitialisedOperation;
 
-pub use uninitialised::linear::Linear;
+pub use uninitialised::input::Input;
