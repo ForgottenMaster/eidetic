@@ -18,7 +18,7 @@ use rank::Rank;
 /// All operations in Eidetic will use the rank of the tensor to check at compile time
 /// if operations and layers are connected correctly and won't allow mismatching ranks to
 /// be connected depending on what the layer input/output supports.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Tensor<R: Rank>(pub(crate) Array<ElementType, R::Internal>);
 
 impl Tensor<rank::Zero> {

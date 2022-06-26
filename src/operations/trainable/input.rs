@@ -4,13 +4,14 @@ use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
 use crate::{Error, Result};
 
-pub struct Operation(initialised::input::Operation);
+#[derive(Debug, PartialEq)]
+pub struct Operation<T>(initialised::input::Operation<T>);
 
-impl Sealed for Operation {}
-impl trainable::Operation for Operation {
+impl<T> Sealed for Operation<T> {}
+impl<T> trainable::Operation for Operation<T> {
     type Input = Tensor<rank::Two>;
     type Output = Tensor<rank::Two>;
-    type Initialised = initialised::input::Operation;
+    type Initialised = initialised::input::Operation<T>;
 
     fn new(init: Self::Initialised) -> Self {
         Self(init)
@@ -35,11 +36,12 @@ impl trainable::Operation for Operation {
     }
 }
 
-impl<'a> forward::Construct<'a> for Operation {
-    type Forward = Forward<'a>;
+impl<'a, T: 'a> forward::Construct<'a> for Operation<T> {
+    type Forward = Forward<'a, T>;
     fn construct(&'a mut self) -> Self::Forward {
         Forward::<'a>(self)
     }
 }
 
-pub struct Forward<'a>(&'a mut Operation);
+#[derive(Debug, PartialEq)]
+pub struct Forward<'a, T>(&'a mut Operation<T>);

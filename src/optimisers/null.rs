@@ -7,8 +7,20 @@ use crate::optimisers;
 use crate::private::Sealed;
 use core::marker::PhantomData;
 
+/// This is an optimiser that does nothing during the optimisation
+/// step of training. Analagous to the Linear activation function where
+/// one needs to provide an optimiser to the API but might not want to
+/// necessarily do anything.
 #[derive(Debug, Default, PartialEq)]
 pub struct OptimiserFactory(());
+
+impl OptimiserFactory {
+    /// Constructs a new instance of the null optimiser.
+    #[must_use]
+    pub const fn new() -> Self {
+        Self(())
+    }
+}
 
 impl Sealed for OptimiserFactory {}
 impl<T> optimisers::base::OptimiserFactory<T> for OptimiserFactory {}

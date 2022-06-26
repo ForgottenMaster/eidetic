@@ -3,3 +3,5 @@
 
 pub(crate) mod base;
 pub(crate) mod null;
+
+pub use null::OptimiserFactory as NullOptimiser;

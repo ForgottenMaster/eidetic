@@ -6,19 +6,21 @@ use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
 use crate::{ElementType, Error, Result};
 use core::iter::{empty, Empty};
+use core::marker::PhantomData;
 
 #[derive(Debug, PartialEq)]
-pub struct Operation {
+pub struct Operation<T> {
     pub(crate) neurons: usize,
+    pub(crate) phantom_data: PhantomData<T>,
 }
 
-impl Sealed for Operation {}
-impl<T: OptimiserFactory<Tensor<rank::Two>>> InitialisedOperation<T> for Operation {
+impl<T> Sealed for Operation<T> {}
+impl<T: OptimiserFactory<Tensor<rank::Two>>> InitialisedOperation<T> for Operation<T> {
     type Input = Tensor<rank::Two>;
     type Output = Tensor<rank::Two>;
     type Parameter = Tensor<rank::Two>;
     type ParameterIter = Empty<ElementType>;
-    type Trainable = trainable::input::Operation;
+    type Trainable = trainable::input::Operation<T>;
 
     fn iter(&self) -> Self::ParameterIter {
         empty()
