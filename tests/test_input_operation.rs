@@ -47,10 +47,6 @@ fn test_input_operation_with_seed() {
 
     // test into_initialised again
     let input = input.into_initialised();
-    let valid_tensor_3 =
-        Tensor::<rank::Two>::new((3, 2), [17.0, 18.0, 19.0, 20.0, 21.0, 22.0]).unwrap();
-    assert_eq!(
-        input.predict(valid_tensor_3.clone()).unwrap(),
-        valid_tensor_3.clone()
-    );
+    let mut input_iter = input.iter();
+    assert!(input_iter.next().is_none());
 }
