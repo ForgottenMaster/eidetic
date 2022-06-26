@@ -5,16 +5,13 @@
 pub mod input;
 
 use crate::private::Sealed;
+use crate::ElementType;
 use crate::Result;
 
 /// This trait is used to represent an operation in an uninitialised state
 /// that must be initialised before it's used. These operations can be
 /// initialised with either an iterator of elements or a random seed.
 pub trait Operation: Sealed + Sized {
-    /// The type of the underlying element that's used to represent
-    /// the data.
-    type Element;
-
     /// This is a type representing the next state in the typestate sequence
     /// which is an initialised operation with generated parameter, etc.
     type Initialised;
@@ -28,7 +25,7 @@ pub trait Operation: Sealed + Sized {
     /// `Error` if the initialisation fails (likely due to invalid count of elements provided).
     fn with_iter(
         self,
-        mut iter: impl Iterator<Item = Self::Element>,
+        mut iter: impl Iterator<Item = ElementType>,
     ) -> Result<(Self::Initialised, usize)> {
         self.with_iter_private(&mut iter, 0)
     }
@@ -36,44 +33,7 @@ pub trait Operation: Sealed + Sized {
     #[doc(hidden)]
     fn with_iter_private(
         self,
-        iter: &mut impl Iterator<Item = Self::Element>,
+        iter: &mut impl Iterator<Item = ElementType>,
         input_neuron_count: usize,
     ) -> Result<(Self::Initialised, usize)>;
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::operations::uninitialised;
-
-    struct StubOperationUninitialised(usize);
-    impl Sealed for StubOperationUninitialised {}
-    impl uninitialised::Operation for StubOperationUninitialised {
-        type Element = ();
-        type Initialised = StubOperationInitialised;
-        fn with_iter_private(
-            self,
-            iter: &mut impl Iterator<Item = Self::Element>,
-            _input_neuron_count: usize,
-        ) -> Result<(Self::Initialised, usize)> {
-            Ok((StubOperationInitialised(iter.count()), self.0))
-        }
-    }
-
-    #[derive(Debug, PartialEq)]
-    struct StubOperationInitialised(usize);
-
-    #[test]
-    fn test_operation_initialisation() {
-        // Arrange
-        let uninit = StubOperationUninitialised(42);
-        let array = [(); 7];
-
-        // Act
-        let (init, neurons) = uninit.with_iter(array.into_iter()).unwrap();
-
-        // Assert
-        assert_eq!(init, StubOperationInitialised(7));
-        assert_eq!(neurons, 42);
-    }
 }

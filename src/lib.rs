@@ -24,4 +24,16 @@ use thiserror::Error;
 #[cfg_attr(feature = "thiserror", error("An error that can occur during runtime operation of Eidetic. Since the API uses typestates and catches issues at compile time, this will usually be an invalid shape (e.g. incorrect column count in the data)."))]
 pub struct Error(pub(crate) ());
 
-type Result<T> = core::result::Result<T, Error>;
+/// This is the Result type alias defined by Eidetic to
+/// hard code the error type to be `eidetic::Error`.
+pub type Result<T> = core::result::Result<T, Error>;
+
+/// This is defined to be the element type to be used by the library.
+/// This is the default type to be used.
+#[cfg(not(feature = "f32"))]
+pub type ElementType = f64;
+
+/// This is defined to be the element type to be used by the library.
+/// This is used as the type only when the "f32" feature is enabled to save memory.
+#[cfg(feature = "f32")]
+pub type ElementType = f32;
