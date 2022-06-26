@@ -47,5 +47,8 @@ fn test_input_operation_with_seed() {
 
     // test into_initialised again
     let input = input.into_initialised();
-    println!("{:?}", input);
+    assert_eq!(
+        input.predict(valid_tensor_1.clone()).unwrap(),
+        valid_tensor_1.clone()
+    );
 }
