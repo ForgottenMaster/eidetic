@@ -5,6 +5,7 @@ use crate::tensors::{rank, Tensor};
 use crate::{Error, Result};
 
 #[derive(Debug, Eq, PartialEq)]
+#[repr(C)] // code coverage hack, I dislike <100%
 pub struct Operation<T>(initialised::input::Operation<T>);
 
 impl<T> Sealed for Operation<T> {}
