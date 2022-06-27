@@ -8,7 +8,7 @@ use crate::{ElementType, Error, Result};
 use core::iter::{empty, Empty};
 use core::marker::PhantomData;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct Operation<T> {
     pub(crate) neurons: usize,
     pub(crate) phantom_data: PhantomData<T>,

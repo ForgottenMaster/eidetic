@@ -4,7 +4,7 @@ use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
 use crate::{Error, Result};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct Operation<T>(initialised::input::Operation<T>);
 
 impl<T> Sealed for Operation<T> {}
@@ -43,5 +43,5 @@ impl<'a, T: 'a> forward::Construct<'a> for Operation<T> {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct Forward<'a, T>(&'a mut Operation<T>);

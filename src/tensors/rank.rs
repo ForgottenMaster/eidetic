@@ -18,7 +18,7 @@ pub trait Rank: Clone + Sealed {
 }
 
 /// This is a unit struct that can be used to identify a rank 0 tensor.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Zero;
 impl Rank for Zero {
     type Internal = Ix0;
@@ -26,7 +26,7 @@ impl Rank for Zero {
 impl Sealed for Zero {}
 
 /// This is a unit struct that can be used to identify a rank 1 tensor.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct One;
 impl Rank for One {
     type Internal = Ix1;
@@ -34,7 +34,7 @@ impl Rank for One {
 impl Sealed for One {}
 
 /// This is a unit struct that can be used to identify a rank 2 tensor.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Two;
 impl Rank for Two {
     type Internal = Ix2;
@@ -42,7 +42,7 @@ impl Rank for Two {
 impl Sealed for Two {}
 
 /// This is a unit struct that can be used to identify a rank 3 tensor.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Three;
 impl Rank for Three {
     type Internal = Ix3;
@@ -50,7 +50,7 @@ impl Rank for Three {
 impl Sealed for Three {}
 
 /// This is a unit struct that can be used to identify a rank 4 tensor.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Four;
 impl Rank for Four {
     type Internal = Ix4;
@@ -58,7 +58,7 @@ impl Rank for Four {
 impl Sealed for Four {}
 
 /// This is a unit struct that can be used to identify a rank 5 tensor.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Five;
 impl Rank for Five {
     type Internal = Ix5;
