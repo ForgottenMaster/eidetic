@@ -45,3 +45,31 @@ impl<'a, T: 'a> forward::Construct<'a> for Operation<T> {
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Forward<'a, T>(&'a mut Operation<T>);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::operations::TrainableOperation;
+    use crate::optimisers::NullOptimiser;
+    use core::marker::PhantomData;
+
+    #[test]
+    fn test_into_initialised() {
+        // Arrange
+        let initialised_operation = initialised::input::Operation::<NullOptimiser> {
+            neurons: 42,
+            phantom_data: PhantomData,
+        };
+        let trainable_operation = Operation(initialised_operation);
+        let expected = initialised::input::Operation::<NullOptimiser> {
+            neurons: 42,
+            phantom_data: PhantomData,
+        };
+
+        // Act
+        let output = trainable_operation.into_initialised();
+
+        // Assert
+        assert_eq!(output, expected);
+    }
+}
