@@ -1,5 +1,6 @@
 use eidetic::operations::{
-    InitialisedOperation, Input, TrainableOperation, UninitialisedOperation, WithOptimiser,
+    BackwardOperation, ForwardOperation, InitialisedOperation, Input, TrainableOperation,
+    UninitialisedOperation, WithOptimiser,
 };
 use eidetic::optimisers::NullOptimiser;
 use eidetic::tensors::{rank, Tensor};
@@ -49,4 +50,43 @@ fn test_input_operation_with_seed() {
     let input = input.into_initialised();
     let mut input_iter = input.iter();
     assert!(input_iter.next().is_none());
+
+    // back to trainable to test the gradient is passed through correctly.
+    let mut input = input.with_optimiser(NullOptimiser::new());
+    assert_eq!(
+        input
+            .forward(valid_tensor_1.clone())
+            .unwrap()
+            .0
+            .backward(valid_tensor_1.clone())
+            .unwrap()
+            .1,
+        valid_tensor_1
+    );
+    assert_eq!(
+        input
+            .forward(valid_tensor_2.clone())
+            .unwrap()
+            .0
+            .backward(valid_tensor_2.clone())
+            .unwrap()
+            .1,
+        valid_tensor_2
+    );
+    assert!(input
+        .forward(valid_tensor_1.clone())
+        .unwrap()
+        .0
+        .backward(invalid_tensor)
+        .is_err());
+
+    // finally testing the optimise call after the backward pass (which does nothing).
+    input
+        .forward(valid_tensor_1.clone())
+        .unwrap()
+        .0
+        .backward(valid_tensor_1)
+        .unwrap()
+        .0
+        .optimise();
 }

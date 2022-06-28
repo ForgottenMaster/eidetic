@@ -2,6 +2,8 @@
 //! final stage of an operation in a training epoch. That of the operation
 //! having had the backward pass ran and ready for optimisation.
 
+pub mod input;
+
 use crate::private::Sealed;
 
 /// This trait represents the state of the operation after having the backward
