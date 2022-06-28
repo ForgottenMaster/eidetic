@@ -1,5 +1,6 @@
+use eidetic::layers::Input;
 use eidetic::operations::{
-    BackwardOperation, ForwardOperation, InitialisedOperation, Input, TrainableOperation,
+    BackwardOperation, ForwardOperation, InitialisedOperation, TrainableOperation,
     UninitialisedOperation, WithOptimiser,
 };
 use eidetic::optimisers::NullOptimiser;
