@@ -10,9 +10,10 @@ mod trainable;
 mod uninitialised;
 
 pub use backward::Operation as BackwardOperation;
-pub use forward::Construct;
+pub use forward::Construct as ConstructForward;
 pub use forward::Operation as ForwardOperation;
 pub use initialised::Operation as InitialisedOperation;
+pub use initialised::WithOptimiser;
 pub use trainable::Operation as TrainableOperation;
 pub use uninitialised::Operation as UninitialisedOperation;
 

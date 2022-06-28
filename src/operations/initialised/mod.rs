@@ -3,33 +3,23 @@
 
 pub mod input;
 
-use crate::operations::{initialised, trainable};
-use crate::optimisers::base::OptimiserFactory;
 use crate::private::Sealed;
-use crate::ElementType;
-use crate::Result;
+use crate::{ElementType, Result};
 
 /// This trait is used to represent an operation in an initialised state that has a valid
 /// parameter stored internally, and which can be used to run inference or prepared for
 /// training by providing an optimiser.
-pub trait Operation<T: OptimiserFactory<Self::Parameter>>: Sealed + Sized {
+pub trait Operation: Sealed + Sized {
     /// The type that is passed into the operation.
     type Input;
 
     /// The type that is output from the operation.
     type Output;
 
-    /// The type of the parameter that the operation uses.
-    type Parameter;
-
     /// The iterator type that will be returned when asked for that
     /// iterates over the elements of the (flattened) parameter(s) within
     /// this operation (for example, for serialization/saving after training).
     type ParameterIter: Iterator<Item = ElementType>;
-
-    /// This is the type that is used once the operation is placed in a trainable
-    /// state, and provides the forward pass functionality.
-    type Trainable: trainable::Operation<Initialised = Self>;
 
     /// This function can be called to get an iterator over the copies of the elements
     /// stored within this operation's parameter. The parameter is flattened to a single
@@ -43,13 +33,16 @@ pub trait Operation<T: OptimiserFactory<Self::Parameter>>: Sealed + Sized {
     /// # Errors
     /// `Error` if the prediction fails such as if the input is incorrectly shaped.
     fn predict(&self, input: Self::Input) -> Result<Self::Output>;
+}
 
-    /// This function can be used to prepare the initialised network/operation for training by
-    /// specifying a specific optimiser. Since this operation might be a chain, and since we want
-    /// each element of the chain to get its own optimiser, we need to accept the optimiser as a factory
-    /// which can produce a specific optimiser for ourselves.
-    fn with_optimiser<U>(self, factory: U) -> <Self as initialised::Operation<U>>::Trainable
-    where
-        Self: initialised::Operation<U>,
-        U: OptimiserFactory<<Self as initialised::Operation<U>>::Parameter>;
+/// This trait is used on an Operation type in order to be able to take it
+/// to a trainable form. This is generic over the optimiser type.
+pub trait WithOptimiser<T>: Sealed + Operation {
+    /// The output type of object that represents the operation in a
+    /// trainable state.
+    type Trainable;
+
+    /// The function that will take the optimiser and will produce the
+    /// trainable typestate.
+    fn with_optimiser(self, optimiser: T) -> Self::Trainable;
 }

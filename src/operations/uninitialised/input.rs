@@ -1,10 +1,8 @@
 use crate::operations::initialised;
 use crate::operations::UninitialisedOperation;
-use crate::optimisers::null;
 use crate::private::Sealed;
 use crate::ElementType;
 use crate::Result;
-use core::marker::PhantomData;
 
 /// This structure represents an input operation which will be used as the very first
 /// operation in a sequence. This is to ensure that the neuron count is allowed to be defined
@@ -28,7 +26,7 @@ impl Input {
 
 impl Sealed for Input {}
 impl UninitialisedOperation for Input {
-    type Initialised = initialised::input::Operation<null::OptimiserFactory>;
+    type Initialised = initialised::input::Operation;
 
     fn with_iter_private(
         self,
@@ -38,7 +36,6 @@ impl UninitialisedOperation for Input {
         Ok((
             initialised::input::Operation {
                 neurons: self.neuron_count,
-                phantom_data: PhantomData,
             },
             self.neuron_count,
         ))
@@ -52,7 +49,6 @@ impl UninitialisedOperation for Input {
         (
             initialised::input::Operation {
                 neurons: self.neuron_count,
-                phantom_data: PhantomData,
             },
             self.neuron_count,
         )

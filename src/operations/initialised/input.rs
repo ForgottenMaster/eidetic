@@ -1,26 +1,21 @@
-use crate::operations::InitialisedOperation;
-use crate::operations::TrainableOperation;
-use crate::operations::{initialised, trainable};
+use crate::operations::trainable;
+use crate::operations::{InitialisedOperation, WithOptimiser};
 use crate::optimisers::base::OptimiserFactory;
 use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
 use crate::{ElementType, Error, Result};
 use core::iter::{empty, Empty};
-use core::marker::PhantomData;
 
 #[derive(Debug, Eq, PartialEq)]
-pub struct Operation<T> {
+pub struct Operation {
     pub(crate) neurons: usize,
-    pub(crate) phantom_data: PhantomData<T>,
 }
 
-impl<T> Sealed for Operation<T> {}
-impl<T: OptimiserFactory<Tensor<rank::Two>>> InitialisedOperation<T> for Operation<T> {
+impl Sealed for Operation {}
+impl InitialisedOperation for Operation {
     type Input = Tensor<rank::Two>;
     type Output = Tensor<rank::Two>;
-    type Parameter = Tensor<rank::Two>;
     type ParameterIter = Empty<ElementType>;
-    type Trainable = trainable::input::Operation<T>;
 
     fn iter(&self) -> Self::ParameterIter {
         empty()
@@ -33,12 +28,12 @@ impl<T: OptimiserFactory<Tensor<rank::Two>>> InitialisedOperation<T> for Operati
             Err(Error(()))
         }
     }
+}
 
-    fn with_optimiser<U>(self, _factory: U) -> <Self as initialised::Operation<U>>::Trainable
-    where
-        Self: initialised::Operation<U>,
-        U: OptimiserFactory<<Self as initialised::Operation<U>>::Parameter>,
-    {
-        <Self as initialised::Operation<U>>::Trainable::new(self)
+impl<T: OptimiserFactory> WithOptimiser<T> for Operation {
+    type Trainable = trainable::input::Operation;
+
+    fn with_optimiser(self, _optimiser: T) -> Self::Trainable {
+        trainable::input::Operation(self)
     }
 }

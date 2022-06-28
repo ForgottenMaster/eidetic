@@ -5,18 +5,14 @@ use crate::tensors::{rank, Tensor};
 use crate::{Error, Result};
 
 #[derive(Debug, Eq, PartialEq)]
-#[repr(C)] // code coverage hack, I dislike <100%
-pub struct Operation<T>(initialised::input::Operation<T>);
+#[cfg_attr(tests, repr(C))] // code coverage hack, I dislike <100% in the report :(
+pub struct Operation(pub(crate) initialised::input::Operation);
 
-impl<T> Sealed for Operation<T> {}
-impl<T> trainable::Operation for Operation<T> {
+impl Sealed for Operation {}
+impl trainable::Operation for Operation {
     type Input = Tensor<rank::Two>;
     type Output = Tensor<rank::Two>;
-    type Initialised = initialised::input::Operation<T>;
-
-    fn new(init: Self::Initialised) -> Self {
-        Self(init)
-    }
+    type Initialised = initialised::input::Operation;
 
     fn into_initialised(self) -> Self::Initialised {
         self.0
@@ -37,35 +33,27 @@ impl<T> trainable::Operation for Operation<T> {
     }
 }
 
-impl<'a, T: 'a> forward::Construct<'a> for Operation<T> {
-    type Forward = Forward<'a, T>;
+impl<'a> forward::Construct<'a> for Operation {
+    type Forward = Forward<'a>;
     fn construct(&'a mut self) -> Self::Forward {
         Forward::<'a>(self)
     }
 }
 
 #[derive(Debug, Eq, PartialEq)]
-pub struct Forward<'a, T>(&'a mut Operation<T>);
+pub struct Forward<'a>(&'a mut Operation);
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::operations::TrainableOperation;
-    use crate::optimisers::NullOptimiser;
-    use core::marker::PhantomData;
 
     #[test]
     fn test_into_initialised() {
         // Arrange
-        let initialised_operation = initialised::input::Operation::<NullOptimiser> {
-            neurons: 42,
-            phantom_data: PhantomData,
-        };
+        let initialised_operation = initialised::input::Operation { neurons: 42 };
         let trainable_operation = Operation(initialised_operation);
-        let expected = initialised::input::Operation::<NullOptimiser> {
-            neurons: 42,
-            phantom_data: PhantomData,
-        };
+        let expected = initialised::input::Operation { neurons: 42 };
 
         // Act
         let output = trainable_operation.into_initialised();

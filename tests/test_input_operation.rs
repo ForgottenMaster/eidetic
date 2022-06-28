@@ -1,5 +1,5 @@
 use eidetic::operations::{
-    InitialisedOperation, Input, TrainableOperation, UninitialisedOperation,
+    InitialisedOperation, Input, TrainableOperation, UninitialisedOperation, WithOptimiser,
 };
 use eidetic::optimisers::NullOptimiser;
 use eidetic::tensors::{rank, Tensor};

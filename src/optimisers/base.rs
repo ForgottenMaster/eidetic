@@ -1,2 +1,2 @@
-pub trait OptimiserFactory<T> {}
+pub trait OptimiserFactory {}
 pub trait Optimiser {}

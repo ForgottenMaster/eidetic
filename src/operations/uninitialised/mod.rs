@@ -5,7 +5,6 @@
 pub mod input;
 
 use crate::operations::initialised;
-use crate::optimisers::null;
 use crate::private::Sealed;
 use crate::ElementType;
 use crate::Result;
@@ -16,7 +15,7 @@ use crate::Result;
 pub trait Operation: Sealed + Sized {
     /// This is a type representing the next state in the typestate sequence
     /// which is an initialised operation with generated parameter, etc.
-    type Initialised: initialised::Operation<null::OptimiserFactory>;
+    type Initialised: initialised::Operation;
 
     /// This function can be called to initialise the parameters of the operation
     /// from an iterator that yields elements of the expected type for the operation.

@@ -22,9 +22,6 @@ pub trait Operation: Sealed + Sized {
     /// This is the type of the initialised version of the operation.
     type Initialised;
 
-    /// Constructs a new Self from the initialised form.
-    fn new(init: Self::Initialised) -> Self;
-
     /// Calling this function will "go back" from a trainable
     /// state into an initialised one. This allows the trained network
     /// to be used for inference, or allows a different optimiser to be

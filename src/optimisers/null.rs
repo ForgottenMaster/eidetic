@@ -23,7 +23,7 @@ impl OptimiserFactory {
 }
 
 impl Sealed for OptimiserFactory {}
-impl<T> optimisers::base::OptimiserFactory<T> for OptimiserFactory {}
+impl optimisers::base::OptimiserFactory for OptimiserFactory {}
 
 /// This struct is the concrete optimiser that is produced by the
 /// null `OptimiserFactory`.
