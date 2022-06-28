@@ -11,7 +11,7 @@ use crate::Result;
 /// an operation that is in a state ready to be trained.
 /// This means it has been through the `with_optimiser` function
 /// call to bind an optimiser to the network.
-pub trait Operation: Sealed + Sized {
+pub trait Operation: Sealed {
     /// The type of the input expected into this operation.
     type Input;
 

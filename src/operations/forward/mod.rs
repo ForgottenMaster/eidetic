@@ -3,6 +3,8 @@
 //! run on it for training and so will produce a structure
 //! ready for running the backward pass.
 
+mod input;
+
 use crate::private::Sealed;
 use crate::Result;
 

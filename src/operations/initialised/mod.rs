@@ -9,7 +9,7 @@ use crate::{ElementType, Result};
 /// This trait is used to represent an operation in an initialised state that has a valid
 /// parameter stored internally, and which can be used to run inference or prepared for
 /// training by providing an optimiser.
-pub trait Operation: Sealed + Sized {
+pub trait Operation: Sealed {
     /// The type that is passed into the operation.
     type Input;
 
@@ -37,7 +37,7 @@ pub trait Operation: Sealed + Sized {
 
 /// This trait is used on an Operation type in order to be able to take it
 /// to a trainable form. This is generic over the optimiser type.
-pub trait WithOptimiser<T>: Sealed + Operation {
+pub trait WithOptimiser<T>: Sealed {
     /// The output type of object that represents the operation in a
     /// trainable state.
     type Trainable;

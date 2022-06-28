@@ -32,33 +32,3 @@ impl trainable::Operation for Operation {
         }
     }
 }
-
-impl<'a> forward::Construct<'a> for Operation {
-    type Forward = Forward<'a>;
-    fn construct(&'a mut self) -> Self::Forward {
-        Forward::<'a>(self)
-    }
-}
-
-#[derive(Debug, Eq, PartialEq)]
-pub struct Forward<'a>(&'a mut Operation);
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::operations::TrainableOperation;
-
-    #[test]
-    fn test_into_initialised() {
-        // Arrange
-        let initialised_operation = initialised::input::Operation { neurons: 42 };
-        let trainable_operation = Operation(initialised_operation);
-        let expected = initialised::input::Operation { neurons: 42 };
-
-        // Act
-        let output = trainable_operation.into_initialised();
-
-        // Assert
-        assert_eq!(output, expected);
-    }
-}
