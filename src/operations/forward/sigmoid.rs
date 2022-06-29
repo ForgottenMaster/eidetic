@@ -31,3 +31,56 @@ impl<'a> forward::Operation for Forward<'a> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::operations::{initialised, ForwardOperation};
+
+    #[test]
+    fn test_backward_success() {
+        // Arrange
+        #[cfg(feature = "f32")]
+        let last_output = Tensor::<rank::Two>::new((1, 3), [0.002472623, 0.5, 0.9975274]).unwrap();
+        #[cfg(not(feature = "f32"))]
+        let last_output =
+            Tensor::<rank::Two>::new((1, 3), [0.0024726231566347743, 0.5, 0.9975273768433653])
+                .unwrap();
+        let mut operation = trainable::sigmoid::Operation {
+            initialised: initialised::sigmoid::Operation { neurons: 3 },
+            last_output,
+        };
+        let forward = Forward(&mut operation);
+        let output_gradient = Tensor::<rank::Two>::new((1, 3), [1.0, 1.0, 1.0]).unwrap();
+        #[cfg(feature = "f32")]
+        let expected =
+            Tensor::<rank::Two>::new((1, 3), [0.0024665091, 0.25, 0.0024664658]).unwrap();
+        #[cfg(not(feature = "f32"))]
+        let expected =
+            Tensor::<rank::Two>::new((1, 3), [0.002466509291360048, 0.25, 0.002466509291359931])
+                .unwrap();
+
+        // Act
+        let input_gradient = forward.backward(output_gradient).unwrap().1;
+
+        // Assert
+        assert_eq!(input_gradient, expected);
+    }
+
+    #[test]
+    fn test_backward_failure() {
+        // Arrange
+        let mut operation = trainable::sigmoid::Operation {
+            initialised: initialised::sigmoid::Operation { neurons: 3 },
+            last_output: Tensor::default(),
+        };
+        let forward = Forward(&mut operation);
+        let output_gradient = Tensor::<rank::Two>::new((1, 4), [1.0, 2.0, 3.0, 4.0]).unwrap();
+
+        // Act
+        let result = forward.backward(output_gradient);
+
+        // Assert
+        assert!(result.is_err());
+    }
+}
