@@ -2,6 +2,7 @@
 //! activation functions in the layers of the neural network.
 
 pub use crate::operations::uninitialised::linear::Operation as Linear;
+pub use crate::operations::uninitialised::relu::Operation as ReLU;
 pub use crate::operations::uninitialised::sigmoid::Operation as Sigmoid;
 pub use crate::operations::uninitialised::tanh::Operation as Tanh;
 

@@ -5,6 +5,7 @@
 
 mod input;
 mod linear;
+mod relu;
 mod sigmoid;
 mod tanh;
 
