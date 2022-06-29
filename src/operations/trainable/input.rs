@@ -5,7 +5,7 @@ use crate::tensors::{rank, Tensor};
 use crate::{Error, Result};
 
 #[derive(Debug, Eq, PartialEq)]
-#[cfg_attr(test, repr(C))] // code coverage hack, I dislike <100% in the report :(
+#[repr(C)] // code coverage hack, I dislike <100% in the report :(
 pub struct Operation(pub(crate) initialised::input::Operation);
 
 impl Sealed for Operation {}
