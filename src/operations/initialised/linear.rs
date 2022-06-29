@@ -37,3 +37,61 @@ impl<T: OptimiserFactory> WithOptimiser<T> for Operation {
         trainable::linear::Operation(self)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::optimisers::NullOptimiser;
+    use crate::tensors::*;
+
+    #[test]
+    fn test_iter() {
+        // Arrange
+        let operation = Operation { neurons: 42 };
+
+        // Act
+        let iter_count = operation.iter().count();
+
+        // Assert
+        assert_eq!(iter_count, 0);
+    }
+
+    #[test]
+    fn test_predict_success() {
+        // Arrange
+        let operation = Operation { neurons: 2 };
+        let input = Tensor::<rank::Two>::new((2, 2), [1.0, 2.0, 3.0, 4.0]).unwrap();
+
+        // Act
+        let output = operation.predict(input.clone()).unwrap();
+
+        // Assert
+        assert_eq!(input, output);
+    }
+
+    #[test]
+    fn test_predict_failure() {
+        // Arrange
+        let operation = Operation { neurons: 2 };
+        let input = Tensor::<rank::Two>::new((2, 3), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]).unwrap();
+
+        // Act
+        let output = operation.predict(input);
+
+        // Assert
+        assert!(output.is_err());
+    }
+
+    #[test]
+    fn test_with_optimiser() {
+        // Arrange
+        let operation = Operation { neurons: 3 };
+        let expected = trainable::linear::Operation(Operation { neurons: 3 });
+
+        // Act
+        let output = operation.with_optimiser(NullOptimiser::new());
+
+        // Assert
+        assert_eq!(output, expected);
+    }
+}
