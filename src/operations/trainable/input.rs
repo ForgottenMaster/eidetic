@@ -32,3 +32,49 @@ impl trainable::Operation for Operation {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::operations::TrainableOperation;
+
+    #[test]
+    fn test_into_initialised() {
+        // Arrange
+        let operation = Operation(initialised::input::Operation { neurons: 42 });
+        let expected = initialised::input::Operation { neurons: 42 };
+
+        // Act
+        let output = operation.into_initialised();
+
+        // Assert
+        assert_eq!(output, expected);
+    }
+
+    #[test]
+    fn test_forward_success() {
+        // Arrange
+        let mut operation = Operation(initialised::input::Operation { neurons: 2 });
+        let input = Tensor::<rank::Two>::new((2, 2), [1.0, 2.0, 3.0, 4.0]).unwrap();
+        let expected = input.clone();
+
+        // Act
+        let (_, output) = operation.forward(input).unwrap();
+
+        // Assert
+        assert_eq!(output, expected);
+    }
+
+    #[test]
+    fn test_forward_failure() {
+        // Arrange
+        let mut operation = Operation(initialised::input::Operation { neurons: 2 });
+        let input = Tensor::<rank::Two>::new((2, 3), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]).unwrap();
+
+        // Act
+        let result = operation.forward(input);
+
+        // Assert
+        assert!(result.is_err());
+    }
+}
