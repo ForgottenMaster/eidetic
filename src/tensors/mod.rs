@@ -121,3 +121,144 @@ impl<R: Rank> Iterator for TensorIterator<R> {
         self.0.next()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_tensor_rank_0_construction() {
+        // Arrange
+        let tensor = Tensor::<rank::Zero>::new(42.0);
+
+        // Act
+        let first = tensor.into_iter().next().unwrap();
+
+        // Assert
+        assert_eq!(first, 42.0);
+    }
+
+    #[test]
+    fn test_tensor_rank_1_construction() {
+        // Arrange
+        let tensor = Tensor::<rank::One>::new((1..=3u16).map(|elem| ElementType::from(elem)));
+
+        // Act
+        let mut iter = tensor.into_iter();
+
+        // Assert
+        assert_eq!(iter.next().unwrap(), 1.0);
+        assert_eq!(iter.next().unwrap(), 2.0);
+        assert_eq!(iter.next().unwrap(), 3.0);
+    }
+
+    #[test]
+    fn test_tensor_rank_2_construction() {
+        // Arrange
+        let tensor =
+            Tensor::<rank::Two>::new((2, 2), (1..=4u16).map(|elem| ElementType::from(elem)))
+                .unwrap();
+
+        // Act
+        let mut iter = tensor.into_iter();
+
+        // Assert
+        assert_eq!(iter.next().unwrap(), 1.0);
+        assert_eq!(iter.next().unwrap(), 2.0);
+        assert_eq!(iter.next().unwrap(), 3.0);
+        assert_eq!(iter.next().unwrap(), 4.0);
+    }
+
+    #[test]
+    fn test_tensor_rank_3_construction() {
+        // Arrange
+        let tensor =
+            Tensor::<rank::Three>::new((2, 3, 2), (1..=12u16).map(|elem| ElementType::from(elem)))
+                .unwrap();
+        let expected = (1..=12u16).map(|elem| ElementType::from(elem));
+
+        // Act
+        let output = tensor.into_iter();
+
+        // Assert
+        assert!(expected.eq(output));
+    }
+
+    #[test]
+    fn test_tensor_rank_4_construction() {
+        // Arrange
+        let tensor = Tensor::<rank::Four>::new(
+            (2, 3, 2, 2),
+            (1..=24u16).map(|elem| ElementType::from(elem)),
+        )
+        .unwrap();
+        let expected = (1..=24u16).map(|elem| ElementType::from(elem));
+
+        // Act
+        let output = tensor.into_iter();
+
+        // Assert
+        assert!(expected.eq(output));
+    }
+
+    #[test]
+    fn test_tensor_rank_5_construction() {
+        // Arrange
+        let tensor = Tensor::<rank::Five>::new(
+            (2, 3, 2, 2, 3),
+            (1..=72u16).map(|elem| ElementType::from(elem)),
+        )
+        .unwrap();
+        let expected = (1..=72u16).map(|elem| ElementType::from(elem));
+
+        // Act
+        let output = tensor.into_iter();
+
+        // Assert
+        assert!(expected.eq(output));
+    }
+
+    #[test]
+    fn test_tensor_rank_2_construction_failure() {
+        // Arrange
+        let tensor =
+            Tensor::<rank::Two>::new((2, 2), (1..=5u16).map(|elem| ElementType::from(elem)));
+
+        // Assert
+        assert!(tensor.is_err());
+    }
+
+    #[test]
+    fn test_tensor_rank_3_construction_failure() {
+        // Arrange
+        let tensor =
+            Tensor::<rank::Three>::new((2, 3, 2), (1..=13u16).map(|elem| ElementType::from(elem)));
+
+        // Assert
+        assert!(tensor.is_err());
+    }
+
+    #[test]
+    fn test_tensor_rank_4_construction_failure() {
+        // Arrange
+        let tensor = Tensor::<rank::Four>::new(
+            (2, 3, 2, 4),
+            (1..=51u16).map(|elem| ElementType::from(elem)),
+        );
+
+        // Assert
+        assert!(tensor.is_err());
+    }
+
+    #[test]
+    fn test_tensor_rank_5_construction_failure() {
+        // Arrange
+        let tensor = Tensor::<rank::Five>::new(
+            (2, 3, 2, 4, 2),
+            (1..=97u16).map(|elem| ElementType::from(elem)),
+        );
+
+        // Assert
+        assert!(tensor.is_err());
+    }
+}
