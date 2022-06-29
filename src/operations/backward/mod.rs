@@ -5,6 +5,7 @@
 pub mod input;
 pub mod linear;
 pub mod sigmoid;
+pub mod tanh;
 
 use crate::private::Sealed;
 

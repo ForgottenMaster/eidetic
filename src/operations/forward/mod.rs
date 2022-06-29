@@ -6,6 +6,7 @@
 mod input;
 mod linear;
 mod sigmoid;
+mod tanh;
 
 use crate::private::Sealed;
 use crate::Result;
