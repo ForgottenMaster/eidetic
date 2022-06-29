@@ -1,3 +1,4 @@
+use crate::layers::Layer;
 use crate::operations::initialised;
 use crate::operations::UninitialisedOperation;
 use crate::private::Sealed;
@@ -26,6 +27,7 @@ impl Operation {
 }
 
 impl Sealed for Operation {}
+impl Layer for Operation {}
 impl UninitialisedOperation for Operation {
     type Initialised = initialised::input::Operation;
 

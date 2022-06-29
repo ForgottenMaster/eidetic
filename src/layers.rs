@@ -4,3 +4,7 @@
 //! networks.
 
 pub use crate::operations::uninitialised::input::Operation as Input;
+
+/// This marker trait is used to identify those operations that are
+/// considered layers which will then be chainable.
+pub trait Layer: crate::operations::UninitialisedOperation {}
