@@ -5,6 +5,7 @@
 
 mod input;
 mod linear;
+mod sigmoid;
 
 use crate::private::Sealed;
 use crate::Result;

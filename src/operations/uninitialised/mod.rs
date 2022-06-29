@@ -4,6 +4,7 @@
 
 pub mod input;
 pub mod linear;
+pub mod sigmoid;
 
 use crate::operations::initialised;
 use crate::private::Sealed;
