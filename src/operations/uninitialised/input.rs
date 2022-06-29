@@ -10,6 +10,7 @@ use crate::Result;
 /// count is allowed to not be specified for the input. This is different from the Linear activation
 /// function for example where the output neuron count is the same as the input - hence they need to be
 /// two different functions.
+#[derive(Debug, Eq, PartialEq)]
 pub struct Operation {
     neuron_count: usize,
 }
@@ -52,5 +53,48 @@ impl UninitialisedOperation for Operation {
             },
             self.neuron_count,
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_new() {
+        // Arrange
+        let expected = Operation { neuron_count: 42 };
+
+        // Act
+        let output = Operation::new(42);
+
+        // Assert
+        assert_eq!(output, expected);
+    }
+
+    #[test]
+    fn test_with_iter() {
+        // Arrange
+        let operation = Operation::new(122);
+        let expected_initialised = initialised::input::Operation { neurons: 122 };
+
+        // Act
+        let initialised = operation.with_iter([].into_iter()).unwrap();
+
+        // Assert
+        assert_eq!(initialised, expected_initialised);
+    }
+
+    #[test]
+    fn test_with_seed() {
+        // Arrange
+        let operation = Operation::new(135);
+        let expected_initialised = initialised::input::Operation { neurons: 135 };
+
+        // Act
+        let initialised = operation.with_seed(42);
+
+        // Assert
+        assert_eq!(initialised, expected_initialised);
     }
 }
