@@ -8,7 +8,7 @@ use crate::Result;
 /// This is a linear activation function intended to be used at the end of a dense
 /// layer in a neural network. It is linear in that it allows the data to pass through
 /// unchanged.
-#[derive(Default)]
+#[derive(Debug, Default, Eq, PartialEq)]
 pub struct Operation(());
 
 impl Operation {
@@ -49,5 +49,51 @@ impl UninitialisedOperation for Operation {
             },
             input_neuron_count,
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_new() {
+        // Arrange
+        let expected = Operation(());
+
+        // Act
+        let output = Operation::new();
+
+        // Assert
+        assert_eq!(output, expected);
+    }
+
+    #[test]
+    fn test_with_iter() {
+        // Arrange
+        let operation = Operation::new();
+        let expected_initialised = initialised::linear::Operation { neurons: 122 };
+        let mut iter = [].into_iter();
+
+        // Act
+        let (initialised, output_neurons) = operation.with_iter_private(&mut iter, 122).unwrap();
+
+        // Assert
+        assert_eq!(initialised, expected_initialised);
+        assert_eq!(output_neurons, 122);
+    }
+
+    #[test]
+    fn test_with_seed() {
+        // Arrange
+        let operation = Operation::new();
+        let expected_initialised = initialised::linear::Operation { neurons: 135 };
+
+        // Act
+        let (initialised, output_neurons) = operation.with_seed_private(42, 135);
+
+        // Assert
+        assert_eq!(initialised, expected_initialised);
+        assert_eq!(output_neurons, 135);
     }
 }
