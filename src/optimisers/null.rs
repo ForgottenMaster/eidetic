@@ -31,3 +31,20 @@ pub struct Optimiser<T>(PhantomData<T>);
 
 impl<T> Sealed for Optimiser<T> {}
 impl<T> optimisers::base::Optimiser for Optimiser<T> {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_null_optimiser_new() {
+        // Arrange
+        let expected = OptimiserFactory(());
+
+        // Act
+        let output = OptimiserFactory::new();
+
+        // Assert
+        assert_eq!(expected, output);
+    }
+}
