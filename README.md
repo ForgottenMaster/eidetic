@@ -14,6 +14,7 @@ This API is implemented with the following pillars:
 
 # TODO
 - [ ] Tanh activation
+- [ ] (Leaky) ReLu activation
 - [ ] Weight multiply
 - [ ] Bias add
 - [ ] Dropout
