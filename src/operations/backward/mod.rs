@@ -3,6 +3,7 @@
 //! having had the backward pass ran and ready for optimisation.
 
 pub mod input;
+pub mod linear;
 
 use crate::private::Sealed;
 

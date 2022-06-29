@@ -2,6 +2,7 @@
 //! initialised state.
 
 pub mod input;
+pub mod linear;
 
 use crate::private::Sealed;
 use crate::{ElementType, Result};

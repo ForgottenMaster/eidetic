@@ -3,4 +3,4 @@
 //! the level of unit that clients will generally compose together into
 //! networks.
 
-pub use crate::operations::uninitialised::input::Input;
+pub use crate::operations::uninitialised::input::Operation as Input;

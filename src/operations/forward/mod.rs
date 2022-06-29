@@ -4,6 +4,7 @@
 //! ready for running the backward pass.
 
 mod input;
+mod linear;
 
 use crate::private::Sealed;
 use crate::Result;

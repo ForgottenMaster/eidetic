@@ -2,6 +2,7 @@
 //! to operations and chains of operations in the trainable typestate.
 
 pub mod input;
+pub mod linear;
 
 use crate::operations::forward;
 use crate::private::Sealed;

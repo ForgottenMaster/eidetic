@@ -6,13 +6,13 @@ use crate::{Error, Result};
 
 #[derive(Debug, Eq, PartialEq)]
 #[cfg_attr(test, repr(C))] // code coverage hack, I dislike <100% in the report :(
-pub struct Operation(pub(crate) initialised::input::Operation);
+pub struct Operation(pub(crate) initialised::linear::Operation);
 
 impl Sealed for Operation {}
 impl trainable::Operation for Operation {
     type Input = Tensor<rank::Two>;
     type Output = Tensor<rank::Two>;
-    type Initialised = initialised::input::Operation;
+    type Initialised = initialised::linear::Operation;
 
     fn into_initialised(self) -> Self::Initialised {
         self.0

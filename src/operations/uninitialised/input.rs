@@ -10,11 +10,11 @@ use crate::Result;
 /// count is allowed to not be specified for the input. This is different from the Linear activation
 /// function for example where the output neuron count is the same as the input - hence they need to be
 /// two different functions.
-pub struct Input {
+pub struct Operation {
     neuron_count: usize,
 }
 
-impl Input {
+impl Operation {
     /// This function is used to construct a new Input operation with a given
     /// neuron count. If data is provided when running/training the network and the
     /// neuron/column count doesn't match then this will be an error.
@@ -24,8 +24,8 @@ impl Input {
     }
 }
 
-impl Sealed for Input {}
-impl UninitialisedOperation for Input {
+impl Sealed for Operation {}
+impl UninitialisedOperation for Operation {
     type Initialised = initialised::input::Operation;
 
     fn with_iter_private(
