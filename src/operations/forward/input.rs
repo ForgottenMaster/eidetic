@@ -29,3 +29,40 @@ impl<'a> forward::Operation for Forward<'a> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::operations::{initialised, ForwardOperation};
+
+    #[test]
+    fn test_backward_success() {
+        // Arrange
+        let mut operation =
+            trainable::input::Operation(initialised::input::Operation { neurons: 3 });
+        let forward = Forward(&mut operation);
+        let output_gradient = Tensor::<rank::Two>::new((1, 3), [1.0, 2.0, 3.0]).unwrap();
+        let expected = output_gradient.clone();
+
+        // Act
+        let input_gradient = forward.backward(output_gradient).unwrap().1;
+
+        // Assert
+        assert_eq!(input_gradient, expected);
+    }
+
+    #[test]
+    fn test_backward_failure() {
+        // Arrange
+        let mut operation =
+            trainable::input::Operation(initialised::input::Operation { neurons: 3 });
+        let forward = Forward(&mut operation);
+        let output_gradient = Tensor::<rank::Two>::new((1, 4), [1.0, 2.0, 3.0, 4.0]).unwrap();
+
+        // Act
+        let result = forward.backward(output_gradient);
+
+        // Assert
+        assert!(result.is_err());
+    }
+}
