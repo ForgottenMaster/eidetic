@@ -23,14 +23,22 @@ impl OptimiserFactory {
 }
 
 impl Sealed for OptimiserFactory {}
-impl optimisers::base::OptimiserFactory for OptimiserFactory {}
+impl<T> optimisers::base::OptimiserFactory<T> for OptimiserFactory {
+    type Optimiser = Optimiser<T>;
+    fn instantiate(&self) -> Self::Optimiser {
+        Optimiser(PhantomData)
+    }
+}
 
 /// This struct is the concrete optimiser that is produced by the
 /// null `OptimiserFactory`.
 pub struct Optimiser<T>(PhantomData<T>);
 
 impl<T> Sealed for Optimiser<T> {}
-impl<T> optimisers::base::Optimiser for Optimiser<T> {}
+impl<T> optimisers::base::Optimiser for Optimiser<T> {
+    type Parameter = T;
+    fn optimise(&mut self, _parameter: &mut Self::Parameter, _gradient: &Self::Parameter) {}
+}
 
 #[cfg(test)]
 mod tests {
