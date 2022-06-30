@@ -34,12 +34,11 @@ impl<T> optimisers::base::OptimiserFactory<T> for OptimiserFactory {
 /// null `OptimiserFactory`.
 #[derive(Debug, Eq, PartialEq)]
 #[repr(C)] // code coverage hack
-pub struct Optimiser<T>(PhantomData<T>);
+pub struct Optimiser<T>(PhantomData<T>, ());
 
 impl<T> Optimiser<T> {
-    #[must_use]
-    pub const fn new() -> Self {
-        Self(PhantomData)
+    const fn new() -> Self {
+        Self(PhantomData, ())
     }
 }
 
