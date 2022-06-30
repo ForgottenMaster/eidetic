@@ -12,7 +12,6 @@ use core::marker::PhantomData;
 /// one needs to provide an optimiser to the API but might not want to
 /// necessarily do anything.
 #[derive(Debug, Default, Eq, PartialEq)]
-#[repr(C)] // hack to prevent ZST being optimised out for code coverage reports
 pub struct OptimiserFactory(());
 
 impl OptimiserFactory {
@@ -27,15 +26,14 @@ impl Sealed for OptimiserFactory {}
 impl<T> optimisers::base::OptimiserFactory<T> for OptimiserFactory {
     type Optimiser = Optimiser<T>;
     fn instantiate(&self) -> Self::Optimiser {
-        Optimiser(PhantomData)
+        Optimiser(PhantomData, ())
     }
 }
 
 /// This struct is the concrete optimiser that is produced by the
 /// null `OptimiserFactory`.
 #[derive(Debug, Eq, PartialEq)]
-#[repr(C)] // hack to prevent this ZST being optimised out for code coverage reports
-pub struct Optimiser<T>(PhantomData<T>);
+pub struct Optimiser<T>(PhantomData<T>, ());
 
 impl<T> Sealed for Optimiser<T> {}
 impl<T> optimisers::base::Optimiser for Optimiser<T> {
@@ -63,7 +61,7 @@ mod tests {
     #[test]
     fn test_instantiate() {
         // Arrange
-        let expected: Optimiser<f64> = Optimiser(PhantomData);
+        let expected: Optimiser<f64> = Optimiser(PhantomData, ());
         let factory = OptimiserFactory::new();
 
         // Act
