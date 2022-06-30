@@ -33,12 +33,11 @@ impl<T> optimisers::base::OptimiserFactory<T> for OptimiserFactory {
 /// This struct is the concrete optimiser that is produced by the
 /// null `OptimiserFactory`.
 #[derive(Debug, Eq, PartialEq)]
-#[repr(C)] // code coverage hack
-pub struct Optimiser<T>(PhantomData<T>, ());
+pub struct Optimiser<T>(PhantomData<T>);
 
 impl<T> Optimiser<T> {
     const fn new() -> Self {
-        Self(PhantomData, ())
+        Self(PhantomData)
     }
 }
 
