@@ -26,14 +26,14 @@ impl Sealed for OptimiserFactory {}
 impl<T> optimisers::base::OptimiserFactory<T> for OptimiserFactory {
     type Optimiser = Optimiser<T>;
     fn instantiate(&self) -> Self::Optimiser {
-        Optimiser(PhantomData, ())
+        let optimiser: Optimiser<T> = Optimiser(PhantomData, ());
+        optimiser
     }
 }
 
 /// This struct is the concrete optimiser that is produced by the
 /// null `OptimiserFactory`.
 #[derive(Debug, Eq, PartialEq)]
-#[repr(C)] // Hack for the code coverage optimisations
 pub struct Optimiser<T>(PhantomData<T>, ());
 
 impl<T> Sealed for Optimiser<T> {}
@@ -70,6 +70,5 @@ mod tests {
 
         // Assert
         assert_eq!(optimiser, expected);
-        assert_eq!(core::mem::size_of::<Optimiser<f64>>(), 0);
     }
 }
