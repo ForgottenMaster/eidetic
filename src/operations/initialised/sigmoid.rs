@@ -30,7 +30,7 @@ impl InitialisedOperation for Operation {
     }
 }
 
-impl<T: OptimiserFactory<()>> WithOptimiser<T, ()> for Operation {
+impl<T: OptimiserFactory<()>> WithOptimiser<T> for Operation {
     type Trainable = trainable::sigmoid::Operation;
 
     fn with_optimiser(self, _optimiser: T) -> Self::Trainable {

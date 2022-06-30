@@ -41,9 +41,8 @@ pub trait Operation: Sealed {
 
 /// This trait is used on an Operation type in order to be able to take it
 /// to a trainable form. This is generic over the optimiser type.
-/// Generic parameter T is the optimiser factory to use and generic parameter U
-/// is the parameter type
-pub trait WithOptimiser<T, U>: Sealed {
+/// Generic parameter T is the optimiser factory to use
+pub trait WithOptimiser<T>: Sealed {
     /// The output type of object that represents the operation in a
     /// trainable state.
     type Trainable;
