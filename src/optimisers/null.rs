@@ -32,6 +32,7 @@ impl<T> optimisers::base::OptimiserFactory<T> for OptimiserFactory {
 
 /// This struct is the concrete optimiser that is produced by the
 /// null `OptimiserFactory`.
+#[derive(Debug, Eq, PartialEq)]
 pub struct Optimiser<T>(PhantomData<T>);
 
 impl<T> Sealed for Optimiser<T> {}
@@ -43,6 +44,7 @@ impl<T> optimisers::base::Optimiser for Optimiser<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::optimisers::base::OptimiserFactory as BaseOptimiserFactory;
 
     #[test]
     fn test_null_optimiser_new() {
@@ -54,5 +56,18 @@ mod tests {
 
         // Assert
         assert_eq!(expected, output);
+    }
+
+    #[test]
+    fn test_instantiate() {
+        // Arrange
+        let expected: Optimiser<f64> = Optimiser(PhantomData);
+        let factory = OptimiserFactory::new();
+
+        // Act
+        let optimiser = factory.instantiate();
+
+        // Assert
+        assert_eq!(optimiser, expected);
     }
 }
