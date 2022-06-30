@@ -38,7 +38,7 @@ pub struct Optimiser<T>(PhantomData<T>);
 
 impl<T> Optimiser<T> {
     #[must_use]
-    const fn new() -> Self {
+    pub const fn new() -> Self {
         Self(PhantomData)
     }
 }
