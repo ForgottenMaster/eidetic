@@ -37,6 +37,7 @@ impl<T> optimisers::base::OptimiserFactory<T> for OptimiserFactory {
 pub struct Optimiser<T>(PhantomData<T>);
 
 impl<T> Optimiser<T> {
+    #[must_use]
     const fn new() -> Self {
         Self(PhantomData)
     }
