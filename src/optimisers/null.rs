@@ -65,7 +65,7 @@ mod tests {
         let factory = OptimiserFactory::new();
 
         // Act
-        let optimiser = factory.instantiate();
+        let optimiser: Optimiser<f64> = factory.instantiate();
 
         // Assert
         assert_eq!(optimiser, expected);
