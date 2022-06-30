@@ -5,7 +5,6 @@
 
 use crate::optimisers;
 use crate::private::Sealed;
-use core::marker::PhantomData;
 
 /// This is an optimiser that does nothing during the optimisation
 /// step of training. Analagous to the Linear activation function where
@@ -24,7 +23,7 @@ impl OptimiserFactory {
 
 impl Sealed for OptimiserFactory {}
 impl<T> optimisers::base::OptimiserFactory<T> for OptimiserFactory {
-    type Optimiser = Optimiser<T>;
+    type Optimiser = Optimiser;
     fn instantiate(&self) -> Self::Optimiser {
         Optimiser::new()
     }
@@ -33,18 +32,17 @@ impl<T> optimisers::base::OptimiserFactory<T> for OptimiserFactory {
 /// This struct is the concrete optimiser that is produced by the
 /// null `OptimiserFactory`.
 #[derive(Debug, Eq, PartialEq)]
-pub struct Optimiser<T>(PhantomData<T>);
+pub struct Optimiser(());
 
-impl<T> Optimiser<T> {
+impl Optimiser {
     const fn new() -> Self {
-        Self(PhantomData)
+        Self(())
     }
 }
 
-impl<T> Sealed for Optimiser<T> {}
-impl<T> optimisers::base::Optimiser for Optimiser<T> {
-    type Parameter = T;
-    fn optimise(&mut self, _parameter: &mut Self::Parameter, _gradient: &Self::Parameter) {}
+impl Sealed for Optimiser {}
+impl<T> optimisers::base::Optimiser<T> for Optimiser {
+    fn optimise(&mut self, _parameter: &mut T, _gradient: &T) {}
 }
 
 #[cfg(test)]
@@ -57,11 +55,11 @@ mod tests {
     #[test]
     fn test_instantiate() {
         // Arrange
-        let expected: Optimiser<f64> = Optimiser::new();
+        let expected = Optimiser::new();
         let factory = OptimiserFactory::new();
 
         // Act
-        let optimiser = factory.instantiate();
+        let optimiser = BaseOptimiserFactory::<f64>::instantiate(&factory);
 
         // Assert
         assert_eq!(optimiser, expected);
