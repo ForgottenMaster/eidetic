@@ -12,6 +12,7 @@ use core::marker::PhantomData;
 /// one needs to provide an optimiser to the API but might not want to
 /// necessarily do anything.
 #[derive(Debug, Default, Eq, PartialEq)]
+#[repr(C)] // hack to prevent ZST being optimised out for code coverage reports
 pub struct OptimiserFactory(());
 
 impl OptimiserFactory {
