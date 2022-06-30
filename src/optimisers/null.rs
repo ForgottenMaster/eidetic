@@ -50,7 +50,9 @@ impl<T> optimisers::base::Optimiser for Optimiser<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::optimisers::base::Optimiser as BaseOptimiser;
     use crate::optimisers::base::OptimiserFactory as BaseOptimiserFactory;
+    use crate::tensors::*;
 
     #[test]
     fn test_instantiate() {
@@ -63,5 +65,16 @@ mod tests {
 
         // Assert
         assert_eq!(optimiser, expected);
+    }
+
+    #[test]
+    fn test_optimise() {
+        // Arrange
+        let mut optimiser = Optimiser::new();
+        let mut parameter = Tensor::<rank::Two>::new((1, 3), [1.0, 2.0, 3.0]).unwrap();
+        let gradient = Tensor::<rank::Two>::new((1, 3), [1.0, 2.0, 3.0]).unwrap();
+
+        // Act
+        optimiser.optimise(&mut parameter, &gradient);
     }
 }
