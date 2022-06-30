@@ -26,15 +26,20 @@ impl Sealed for OptimiserFactory {}
 impl<T> optimisers::base::OptimiserFactory<T> for OptimiserFactory {
     type Optimiser = Optimiser<T>;
     fn instantiate(&self) -> Self::Optimiser {
-        let optimiser: Optimiser<T> = Optimiser(PhantomData, ());
-        optimiser
+        Optimiser::new()
     }
 }
 
 /// This struct is the concrete optimiser that is produced by the
 /// null `OptimiserFactory`.
 #[derive(Debug, Eq, PartialEq)]
-pub struct Optimiser<T>(PhantomData<T>, ());
+pub struct Optimiser<T>(PhantomData<T>);
+
+impl<T> Optimiser<T> {
+    const fn new() -> Self {
+        Self(PhantomData)
+    }
+}
 
 impl<T> Sealed for Optimiser<T> {}
 impl<T> optimisers::base::Optimiser for Optimiser<T> {
@@ -48,25 +53,13 @@ mod tests {
     use crate::optimisers::base::OptimiserFactory as BaseOptimiserFactory;
 
     #[test]
-    fn test_null_optimiser_new() {
-        // Arrange
-        let expected = OptimiserFactory(());
-
-        // Act
-        let output = OptimiserFactory::new();
-
-        // Assert
-        assert_eq!(expected, output);
-    }
-
-    #[test]
     fn test_instantiate() {
         // Arrange
-        let expected: Optimiser<f64> = Optimiser(PhantomData, ());
+        let expected: Optimiser<f64> = Optimiser::new();
         let factory = OptimiserFactory::new();
 
         // Act
-        let optimiser: Optimiser<f64> = factory.instantiate();
+        let optimiser = factory.instantiate();
 
         // Assert
         assert_eq!(optimiser, expected);
