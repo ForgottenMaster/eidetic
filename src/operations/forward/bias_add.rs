@@ -38,13 +38,12 @@ impl<'a, T: 'a> ForwardOperation for Forward<'a, T> {
                 .into_shape((1, parameter_cols))
                 .unwrap();
             let parameter_gradient = Tensor(parameter_gradient);
-            Ok((
-                Self::Backward {
-                    borrow,
-                    parameter_gradient,
-                },
-                input_gradient,
-            ))
+            let backward = Self::Backward {
+                borrow,
+                parameter_gradient,
+            };
+            let returns = (backward, input_gradient);
+            Ok(returns)
         } else {
             Err(Error(()))
         }
