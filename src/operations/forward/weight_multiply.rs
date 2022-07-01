@@ -2,7 +2,6 @@ use crate::operations::{backward, forward, trainable, ForwardOperation};
 use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
 use crate::{Error, Result};
-use ndarray::Array;
 
 impl<'a, T: 'a> forward::Construct<'a> for trainable::weight_multiply::Operation<T> {
     type Forward = Forward<'a, T>;
@@ -11,6 +10,7 @@ impl<'a, T: 'a> forward::Construct<'a> for trainable::weight_multiply::Operation
     }
 }
 
+#[repr(C)] // Try to prevent false reports of uncovered lines, when we do in fact use it.
 pub struct Forward<'a, T: 'a> {
     borrow: &'a mut trainable::weight_multiply::Operation<T>,
 }
@@ -25,18 +25,18 @@ impl<'a, T: 'a> ForwardOperation for Forward<'a, T> {
         if output_gradient.0.ncols() == self.borrow.initialised.parameter.0.ncols()
             && self.borrow.last_input.0.nrows() == output_gradient.0.nrows()
         {
-            let output_gradient: Array<_, _> = output_gradient.0;
-            let parameter: Array<_, _> =
-                self.borrow.initialised.parameter.0.clone().reversed_axes();
-            let input_gradient: Array<_, _> = output_gradient.dot(&parameter);
-            let input_gradient: Tensor<_> = Tensor(input_gradient);
+            let input_gradient = Tensor(
+                output_gradient
+                    .0
+                    .dot(&self.borrow.initialised.parameter.0.clone().reversed_axes()),
+            );
             let parameter_gradient = Tensor(
                 self.borrow
                     .last_input
                     .0
                     .clone()
                     .reversed_axes()
-                    .dot(&output_gradient),
+                    .dot(&output_gradient.0),
             );
             Ok((
                 Self::Backward {
