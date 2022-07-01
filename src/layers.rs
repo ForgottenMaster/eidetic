@@ -10,4 +10,5 @@ pub use crate::operations::uninitialised::input::Operation as Input;
 pub trait Layer: crate::operations::UninitialisedOperation {}
 
 // REMOVE THESE ONCE WE HAVE THE DENSE LAYER
-pub use crate::operations::uninitialised::weight_multiply::Operation as REMOVE_THIS;
+pub use crate::operations::uninitialised::bias_add::Operation as BiasAdd;
+pub use crate::operations::uninitialised::weight_multiply::Operation as WeightMultiply;
