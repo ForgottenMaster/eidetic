@@ -2,7 +2,6 @@ use crate::operations::{backward, forward, trainable, ForwardOperation};
 use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
 use crate::{Error, Result};
-use ndarray::{Array, Ix2};
 
 impl<'a, T: 'a> forward::Construct<'a> for trainable::weight_multiply::Operation<T> {
     type Forward = Forward<'a, T>;
@@ -19,14 +18,17 @@ pub struct Forward<'a, T: 'a> {
 // coverage. Won't change the results, but hopefully will trick the code coverage
 impl<'a, T: 'a> Forward<'a, T> {
     fn get_input_gradient(&self, output_gradient: &Tensor<rank::Two>) -> Tensor<rank::Two> {
-        dot_product(
-            output_gradient,
-            &reversed_axes(&self.borrow.initialised.parameter),
-        )
+        let output_gradient = &output_gradient.0;
+        let reversed_axes = self.borrow.initialised.parameter.0.clone().reversed_axes();
+        let dot_product = output_gradient.dot(&reversed_axes);
+        Tensor(dot_product)
     }
 
     fn get_parameter_gradient(&self, output_gradient: &Tensor<rank::Two>) -> Tensor<rank::Two> {
-        dot_product(&reversed_axes(&self.borrow.last_input), output_gradient)
+        let output_gradient = &output_gradient.0;
+        let reversed_axes = self.borrow.last_input.0.clone().reversed_axes();
+        let dot_product = reversed_axes.dot(output_gradient);
+        Tensor(dot_product)
     }
 
     fn into_backward(
@@ -39,14 +41,6 @@ impl<'a, T: 'a> Forward<'a, T> {
             parameter_gradient,
         }
     }
-}
-
-fn reversed_axes(tensor: &Tensor<rank::Two>) -> Tensor<rank::Two> {
-    Tensor(tensor.0.clone().reversed_axes())
-}
-
-fn dot_product(first: &Tensor<rank::Two>, second: &Tensor<rank::Two>) -> Tensor<rank::Two> {
-    Tensor(Array::<_, Ix2>::dot(&first.0, &second.0))
 }
 
 impl<'a, T: 'a> Sealed for Forward<'a, T> {}
