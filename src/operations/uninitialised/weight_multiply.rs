@@ -8,7 +8,7 @@ use rand::{Rng, SeedableRng};
 
 /// This operation will perform a weighted sum of the parameters with the
 /// input assuming they're of compatible shapes.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct Operation {
     pub(crate) output_neurons: u16,
 }
