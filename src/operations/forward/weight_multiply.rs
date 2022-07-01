@@ -16,6 +16,29 @@ pub struct Forward<'a, T: 'a> {
 
 // Functions to try to work around the false reporting in code
 // coverage. Won't change the results, but hopefully will trick the code coverage
+impl<'a, T: 'a> Forward<'a, T> {
+    fn get_input_gradient(&self, output_gradient: &Tensor<rank::Two>) -> Tensor<rank::Two> {
+        dot_product(
+            output_gradient,
+            &reversed_axes(&self.borrow.initialised.parameter),
+        )
+    }
+
+    fn get_parameter_gradient(&self, output_gradient: &Tensor<rank::Two>) -> Tensor<rank::Two> {
+        dot_product(&reversed_axes(&self.borrow.last_input), output_gradient)
+    }
+
+    fn into_backward(
+        self,
+        parameter_gradient: Tensor<rank::Two>,
+    ) -> backward::weight_multiply::Operation<'a, T> {
+        backward::weight_multiply::Operation {
+            borrow: self.borrow,
+            parameter_gradient,
+        }
+    }
+}
+
 fn reversed_axes(tensor: &Tensor<rank::Two>) -> Tensor<rank::Two> {
     Tensor(tensor.0.clone().reversed_axes())
 }
@@ -34,19 +57,9 @@ impl<'a, T: 'a> ForwardOperation for Forward<'a, T> {
         if output_gradient.0.ncols() == self.borrow.initialised.parameter.0.ncols()
             && self.borrow.last_input.0.nrows() == output_gradient.0.nrows()
         {
-            let input_gradient = dot_product(
-                &output_gradient,
-                &reversed_axes(&self.borrow.initialised.parameter),
-            );
-            let parameter_gradient =
-                dot_product(&reversed_axes(&self.borrow.last_input), &output_gradient);
-            Ok((
-                Self::Backward {
-                    borrow: self.borrow,
-                    parameter_gradient,
-                },
-                input_gradient,
-            ))
+            let input_gradient = self.get_input_gradient(&output_gradient);
+            let parameter_gradient = self.get_parameter_gradient(&output_gradient);
+            Ok((self.into_backward(parameter_gradient), input_gradient))
         } else {
             Err(Error(()))
         }
