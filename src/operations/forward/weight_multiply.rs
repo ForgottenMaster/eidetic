@@ -10,7 +10,6 @@ impl<'a, T: 'a> forward::Construct<'a> for trainable::weight_multiply::Operation
     }
 }
 
-#[repr(C)] // Try to prevent false reports of uncovered lines, when we do in fact use it.
 pub struct Forward<'a, T: 'a> {
     borrow: &'a mut trainable::weight_multiply::Operation<T>,
 }
@@ -21,7 +20,7 @@ impl<'a, T: 'a> ForwardOperation for Forward<'a, T> {
     type Input = Tensor<rank::Two>;
     type Backward = backward::weight_multiply::Operation<'a, T>;
 
-    fn backward(self, output_gradient: Self::Output) -> Result<(Self::Backward, Self::Input)> {
+    fn backward(self, output_gradient: Tensor<rank::Two>) -> Result<(Self::Backward, Self::Input)> {
         if output_gradient.0.ncols() == self.borrow.initialised.parameter.0.ncols()
             && self.borrow.last_input.0.nrows() == output_gradient.0.nrows()
         {
