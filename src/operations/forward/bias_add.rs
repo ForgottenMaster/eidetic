@@ -27,17 +27,20 @@ impl<'a, T: 'a> ForwardOperation for Forward<'a, T> {
         let input_dim = self.borrow.last_input.0.raw_dim();
         if output_gradient_dim == input_dim {
             let input_gradient = Tensor(Array::ones(input_dim) * &output_gradient.0);
-            let parameter_gradient =
-                Array::ones(self.borrow.initialised.parameter.0.raw_dim()) * output_gradient.0;
-            let parameter_gradient = Tensor(
-                parameter_gradient
-                    .map_axis(Axis(0), |view| view.sum())
-                    .into_shape((1, parameter_gradient.ncols()))
-                    .unwrap(),
-            );
+            let borrow = self.borrow;
+            let initialised = &borrow.initialised;
+            let parameter = &initialised.parameter.0;
+            let parameter_dim = parameter.raw_dim();
+            let parameter_gradient = Array::ones(parameter_dim) * output_gradient.0;
+            let parameter_cols = parameter_gradient.ncols();
+            let parameter_gradient = parameter_gradient
+                .map_axis(Axis(0), |view| view.sum())
+                .into_shape((1, parameter_cols))
+                .unwrap();
+            let parameter_gradient = Tensor(parameter_gradient);
             Ok((
                 Self::Backward {
-                    borrow: self.borrow,
+                    borrow,
                     parameter_gradient,
                 },
                 input_gradient,
