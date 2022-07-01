@@ -2,6 +2,7 @@ use crate::operations::{backward, forward, trainable, ForwardOperation};
 use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
 use crate::{Error, Result};
+use ndarray::{Array, Ix2};
 
 impl<'a, T: 'a> forward::Construct<'a> for trainable::weight_multiply::Operation<T> {
     type Forward = Forward<'a, T>;
@@ -44,7 +45,7 @@ fn reversed_axes(tensor: &Tensor<rank::Two>) -> Tensor<rank::Two> {
 }
 
 fn dot_product(first: &Tensor<rank::Two>, second: &Tensor<rank::Two>) -> Tensor<rank::Two> {
-    Tensor(first.0.dot(&second.0))
+    Tensor(Array::<_, Ix2>::dot(&first.0, &second.0))
 }
 
 impl<'a, T: 'a> Sealed for Forward<'a, T> {}
