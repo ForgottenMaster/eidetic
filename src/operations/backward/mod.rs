@@ -7,6 +7,7 @@ pub mod linear;
 pub mod relu;
 pub mod sigmoid;
 pub mod tanh;
+pub mod weight_multiply;
 
 use crate::private::Sealed;
 

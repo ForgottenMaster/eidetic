@@ -25,7 +25,7 @@ impl trainable::Operation for Operation {
     where
         Self: forward::Construct<'a>,
     {
-        if self.0.neurons == input.0.ncols() {
+        if self.0.neurons as usize == input.0.ncols() {
             Ok((self.construct(), input))
         } else {
             Err(Error(()))

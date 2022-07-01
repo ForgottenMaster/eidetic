@@ -7,6 +7,7 @@ pub mod linear;
 pub mod relu;
 pub mod sigmoid;
 pub mod tanh;
+pub mod weight_multiply;
 
 use crate::operations::initialised;
 use crate::private::Sealed;
@@ -44,9 +45,9 @@ pub trait Operation: Sealed + Sized {
     fn with_iter_private(
         self,
         iter: &mut impl Iterator<Item = ElementType>,
-        input_neuron_count: usize,
-    ) -> Result<(Self::Initialised, usize)>;
+        input_neuron_count: u16,
+    ) -> Result<(Self::Initialised, u16)>;
 
     #[doc(hidden)]
-    fn with_seed_private(self, seed: u64, input_neuron_count: usize) -> (Self::Initialised, usize);
+    fn with_seed_private(self, seed: u64, input_neuron_count: u16) -> (Self::Initialised, u16);
 }

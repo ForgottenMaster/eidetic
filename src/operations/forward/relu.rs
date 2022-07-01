@@ -21,7 +21,7 @@ impl<'a> forward::Operation for Forward<'a> {
 
     fn backward(self, output_gradient: Self::Output) -> Result<(Self::Backward, Self::Input)> {
         let neurons = output_gradient.0.ncols();
-        let expected_neurons = self.0.initialised.neurons;
+        let expected_neurons = self.0.initialised.neurons as usize;
         if neurons == expected_neurons {
             let partial = self.0.last_output.0.mapv(|elem| {
                 if elem > 0.0 {

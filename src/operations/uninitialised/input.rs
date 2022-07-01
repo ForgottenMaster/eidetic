@@ -13,7 +13,7 @@ use crate::Result;
 /// two different functions.
 #[derive(Debug, Eq, PartialEq)]
 pub struct Operation {
-    neuron_count: usize,
+    neuron_count: u16,
 }
 
 impl Operation {
@@ -21,7 +21,7 @@ impl Operation {
     /// neuron count. If data is provided when running/training the network and the
     /// neuron/column count doesn't match then this will be an error.
     #[must_use]
-    pub const fn new(neuron_count: usize) -> Self {
+    pub const fn new(neuron_count: u16) -> Self {
         Self { neuron_count }
     }
 }
@@ -34,8 +34,8 @@ impl UninitialisedOperation for Operation {
     fn with_iter_private(
         self,
         _iter: &mut impl Iterator<Item = ElementType>,
-        _input_neuron_count: usize,
-    ) -> Result<(Self::Initialised, usize)> {
+        _input_neuron_count: u16,
+    ) -> Result<(Self::Initialised, u16)> {
         Ok((
             initialised::input::Operation {
                 neurons: self.neuron_count,
@@ -44,11 +44,7 @@ impl UninitialisedOperation for Operation {
         ))
     }
 
-    fn with_seed_private(
-        self,
-        _seed: u64,
-        _input_neuron_count: usize,
-    ) -> (Self::Initialised, usize) {
+    fn with_seed_private(self, _seed: u64, _input_neuron_count: u16) -> (Self::Initialised, u16) {
         (
             initialised::input::Operation {
                 neurons: self.neuron_count,

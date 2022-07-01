@@ -27,8 +27,8 @@ impl UninitialisedOperation for Operation {
     fn with_iter_private(
         self,
         _iter: &mut impl Iterator<Item = ElementType>,
-        input_neuron_count: usize,
-    ) -> Result<(Self::Initialised, usize)> {
+        input_neuron_count: u16,
+    ) -> Result<(Self::Initialised, u16)> {
         Ok((
             initialised::sigmoid::Operation {
                 neurons: input_neuron_count,
@@ -37,11 +37,7 @@ impl UninitialisedOperation for Operation {
         ))
     }
 
-    fn with_seed_private(
-        self,
-        _seed: u64,
-        input_neuron_count: usize,
-    ) -> (Self::Initialised, usize) {
+    fn with_seed_private(self, _seed: u64, input_neuron_count: u16) -> (Self::Initialised, u16) {
         (
             initialised::sigmoid::Operation {
                 neurons: input_neuron_count,

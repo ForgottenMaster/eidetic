@@ -8,3 +8,6 @@ pub use crate::operations::uninitialised::input::Operation as Input;
 /// This marker trait is used to identify those operations that are
 /// considered layers which will then be chainable.
 pub trait Layer: crate::operations::UninitialisedOperation {}
+
+// REMOVE THESE ONCE WE HAVE THE DENSE LAYER
+pub use crate::operations::uninitialised::weight_multiply::Operation as REMOVE_THIS;

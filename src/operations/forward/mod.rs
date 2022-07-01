@@ -8,6 +8,7 @@ mod linear;
 mod relu;
 mod sigmoid;
 mod tanh;
+mod weight_multiply;
 
 use crate::private::Sealed;
 use crate::Result;

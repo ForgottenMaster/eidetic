@@ -8,7 +8,7 @@ use core::iter::{empty, Empty};
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Operation {
-    pub(crate) neurons: usize,
+    pub(crate) neurons: u16,
 }
 
 impl Sealed for Operation {}
@@ -22,7 +22,7 @@ impl InitialisedOperation for Operation {
     }
 
     fn predict(&self, input: Self::Input) -> Result<Self::Output> {
-        if input.0.ncols() == self.neurons {
+        if input.0.ncols() == self.neurons as usize {
             Ok(Tensor(input.0.mapv(ElementType::tanh)))
         } else {
             Err(Error(()))
