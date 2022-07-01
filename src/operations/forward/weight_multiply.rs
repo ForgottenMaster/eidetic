@@ -10,9 +10,18 @@ impl<'a, T: 'a> forward::Construct<'a> for trainable::weight_multiply::Operation
     }
 }
 
-#[repr(C)] // code coverage hack to stop lines being falsely covered.
 pub struct Forward<'a, T: 'a> {
     borrow: &'a mut trainable::weight_multiply::Operation<T>,
+}
+
+// Functions to try to work around the false reporting in code
+// coverage. Won't change the results, but hopefully will trick the code coverage
+fn reversed_axes(tensor: &Tensor<rank::Two>) -> Tensor<rank::Two> {
+    Tensor(tensor.0.clone().reversed_axes())
+}
+
+fn dot_product(first: &Tensor<rank::Two>, second: &Tensor<rank::Two>) -> Tensor<rank::Two> {
+    Tensor(first.0.dot(&second.0))
 }
 
 impl<'a, T: 'a> Sealed for Forward<'a, T> {}
@@ -25,19 +34,12 @@ impl<'a, T: 'a> ForwardOperation for Forward<'a, T> {
         if output_gradient.0.ncols() == self.borrow.initialised.parameter.0.ncols()
             && self.borrow.last_input.0.nrows() == output_gradient.0.nrows()
         {
-            let input_gradient = Tensor(
-                output_gradient
-                    .0
-                    .dot(&self.borrow.initialised.parameter.0.clone().reversed_axes()),
+            let input_gradient = dot_product(
+                &output_gradient,
+                &reversed_axes(&self.borrow.initialised.parameter),
             );
-            let parameter_gradient = Tensor(
-                self.borrow
-                    .last_input
-                    .0
-                    .clone()
-                    .reversed_axes()
-                    .dot(&output_gradient.0),
-            );
+            let parameter_gradient =
+                dot_product(&reversed_axes(&self.borrow.last_input), &output_gradient);
             Ok((
                 Self::Backward {
                     borrow: self.borrow,

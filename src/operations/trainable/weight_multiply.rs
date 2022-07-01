@@ -6,7 +6,6 @@ use crate::tensors::{rank, Tensor};
 use crate::Result;
 
 #[derive(Debug, PartialEq)]
-#[repr(C)] // code coverage hack to stop lines being falsely covered.
 pub struct Operation<T> {
     pub(crate) optimiser: T,
     pub(crate) initialised: initialised::weight_multiply::Operation,
