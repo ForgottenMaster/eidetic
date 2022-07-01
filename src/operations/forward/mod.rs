@@ -3,6 +3,7 @@
 //! run on it for training and so will produce a structure
 //! ready for running the backward pass.
 
+mod bias_add;
 mod input;
 mod linear;
 mod relu;

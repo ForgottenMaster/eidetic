@@ -2,6 +2,7 @@
 //! final stage of an operation in a training epoch. That of the operation
 //! having had the backward pass ran and ready for optimisation.
 
+pub mod bias_add;
 pub mod input;
 pub mod linear;
 pub mod relu;

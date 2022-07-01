@@ -1,0 +1,109 @@
+use crate::operations::ForwardOperation;
+use crate::operations::{backward, forward, trainable};
+use crate::private::Sealed;
+use crate::tensors::{rank, Tensor};
+use crate::{Error, Result};
+use ndarray::{Array, Axis};
+
+impl<'a, T: 'a> forward::Construct<'a> for trainable::bias_add::Operation<T> {
+    type Forward = Forward<'a, T>;
+    fn construct(&'a mut self) -> Self::Forward {
+        Forward { borrow: self }
+    }
+}
+
+pub struct Forward<'a, T: 'a> {
+    borrow: &'a mut trainable::bias_add::Operation<T>,
+}
+
+impl<'a, T: 'a> Sealed for Forward<'a, T> {}
+impl<'a, T: 'a> ForwardOperation for Forward<'a, T> {
+    type Output = Tensor<rank::Two>;
+    type Input = Tensor<rank::Two>;
+    type Backward = backward::bias_add::Operation<'a, T>;
+
+    fn backward(self, output_gradient: Self::Output) -> Result<(Self::Backward, Self::Input)> {
+        let output_gradient_dim = output_gradient.0.raw_dim();
+        let input_dim = self.borrow.last_input.0.raw_dim();
+        if output_gradient_dim == input_dim {
+            let input_gradient = Tensor(Array::ones(input_dim) * &output_gradient.0);
+            let parameter_gradient =
+                Array::ones(self.borrow.initialised.parameter.0.raw_dim()) * output_gradient.0;
+            let parameter_gradient = Tensor(
+                parameter_gradient
+                    .map_axis(Axis(0), |view| view.sum())
+                    .into_shape((1, parameter_gradient.ncols()))
+                    .unwrap(),
+            );
+            Ok((
+                Self::Backward {
+                    borrow: self.borrow,
+                    parameter_gradient,
+                },
+                input_gradient,
+            ))
+        } else {
+            Err(Error(()))
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::operations::initialised;
+    use crate::optimisers::base::OptimiserFactory;
+    use crate::optimisers::NullOptimiser;
+
+    #[test]
+    fn test_backward_success() {
+        // Arrange
+        let optimiser =
+            <NullOptimiser as OptimiserFactory<f64>>::instantiate(&NullOptimiser::new());
+        let parameter = Tensor::<rank::Two>::new((1, 3), [1.0, 2.0, 3.0]).unwrap();
+        let initialised = initialised::bias_add::Operation { parameter };
+        let last_input = Tensor::<rank::Two>::new((2, 3), [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]).unwrap();
+        let mut train = trainable::bias_add::Operation {
+            optimiser,
+            initialised,
+            last_input,
+        };
+        let output_gradient =
+            Tensor::<rank::Two>::new((2, 3), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]).unwrap();
+        let expected_input_gradient =
+            Tensor::<rank::Two>::new((2, 3), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]).unwrap();
+        let expected_parameter_gradient =
+            Tensor::<rank::Two>::new((1, 3), [5.0, 7.0, 9.0]).unwrap();
+        let forward = Forward { borrow: &mut train };
+
+        // Act
+        let (backward, input_gradient) = forward.backward(output_gradient).unwrap();
+
+        // Assert
+        assert_eq!(input_gradient, expected_input_gradient);
+        assert_eq!(backward.parameter_gradient, expected_parameter_gradient);
+    }
+
+    #[test]
+    fn test_backward_failure() {
+        // Arrange
+        let optimiser =
+            <NullOptimiser as OptimiserFactory<f64>>::instantiate(&NullOptimiser::new());
+        let parameter = Tensor::<rank::Two>::new((1, 3), [1.0, 2.0, 3.0]).unwrap();
+        let initialised = initialised::bias_add::Operation { parameter };
+        let last_input = Tensor::<rank::Two>::new((2, 3), [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]).unwrap();
+        let mut train = trainable::bias_add::Operation {
+            optimiser,
+            initialised,
+            last_input,
+        };
+        let output_gradient = Tensor::<rank::Two>::new((2, 2), [1.0, 2.0, 3.0, 4.0]).unwrap();
+        let forward = Forward { borrow: &mut train };
+
+        // Act
+        let result = forward.backward(output_gradient);
+
+        // Assert
+        assert!(result.is_err());
+    }
+}

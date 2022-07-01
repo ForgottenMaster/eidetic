@@ -34,8 +34,9 @@ impl<T: OptimiserFactory<Tensor<rank::Two>>> WithOptimiser<T> for Operation {
     fn with_optimiser(self, factory: T) -> Self::Trainable {
         let optimiser = factory.instantiate();
         trainable::bias_add::Operation {
-            _optimiser: optimiser,
-            _initialised: self,
+            optimiser,
+            initialised: self,
+            last_input: Tensor::default(),
         }
     }
 }
@@ -119,8 +120,9 @@ mod tests {
         };
         let optimiser = NullOptimiser::new();
         let expected = trainable::bias_add::Operation {
-            _optimiser: <NullOptimiser as OptimiserFactory<()>>::instantiate(&optimiser),
-            _initialised: Operation { parameter },
+            optimiser: <NullOptimiser as OptimiserFactory<()>>::instantiate(&optimiser),
+            initialised: Operation { parameter },
+            last_input: Tensor::default(),
         };
 
         // Act
