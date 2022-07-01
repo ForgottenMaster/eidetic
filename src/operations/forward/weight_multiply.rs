@@ -33,8 +33,9 @@ impl<'a, T: 'a> Forward<'a, T> {
         self,
         parameter_gradient: Tensor<rank::Two>,
     ) -> backward::weight_multiply::Operation<'a, T> {
+        let borrow = self.borrow;
         backward::weight_multiply::Operation {
-            borrow: self.borrow,
+            borrow,
             parameter_gradient,
         }
     }
