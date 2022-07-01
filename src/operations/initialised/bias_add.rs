@@ -1,8 +1,10 @@
-use crate::operations::InitialisedOperation;
+use crate::operations::{trainable, InitialisedOperation, WithOptimiser};
+use crate::optimisers::base::OptimiserFactory;
 use crate::private::Sealed;
 use crate::tensors::{rank, Tensor, TensorIterator};
 use crate::{Error, Result};
 
+#[derive(Debug, PartialEq)]
 pub struct Operation {
     pub(crate) parameter: Tensor<rank::Two>,
 }
@@ -26,9 +28,22 @@ impl InitialisedOperation for Operation {
     }
 }
 
+impl<T: OptimiserFactory<Tensor<rank::Two>>> WithOptimiser<T> for Operation {
+    type Trainable = trainable::bias_add::Operation<T::Optimiser>;
+
+    fn with_optimiser(self, factory: T) -> Self::Trainable {
+        let optimiser = factory.instantiate();
+        trainable::bias_add::Operation {
+            _optimiser: optimiser,
+            _initialised: self,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::optimisers::NullOptimiser;
 
     #[test]
     fn test_iter() {
@@ -93,5 +108,25 @@ mod tests {
 
         // Assert
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_with_optimiser() {
+        // Arrange
+        let parameter = Tensor::<rank::Two>::new((1, 3), [1.0, 2.0, 3.0]).unwrap();
+        let operation = Operation {
+            parameter: parameter.clone(),
+        };
+        let optimiser = NullOptimiser::new();
+        let expected = trainable::bias_add::Operation {
+            _optimiser: <NullOptimiser as OptimiserFactory<()>>::instantiate(&optimiser),
+            _initialised: Operation { parameter },
+        };
+
+        // Act
+        let operation = operation.with_optimiser(optimiser);
+
+        // Assert
+        assert_eq!(operation, expected);
     }
 }

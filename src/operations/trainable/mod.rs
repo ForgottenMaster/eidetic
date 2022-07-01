@@ -1,6 +1,7 @@
 //! Module containing the traits and types relating
 //! to operations and chains of operations in the trainable typestate.
 
+pub mod bias_add;
 pub mod input;
 pub mod linear;
 pub mod relu;
