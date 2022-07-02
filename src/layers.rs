@@ -3,12 +3,9 @@
 //! the level of unit that clients will generally compose together into
 //! networks.
 
+pub use crate::operations::uninitialised::dense::Operation as Dense;
 pub use crate::operations::uninitialised::input::Operation as Input;
 
 /// This marker trait is used to identify those operations that are
 /// considered layers which will then be chainable.
 pub trait Layer: crate::operations::UninitialisedOperation {}
-
-// REMOVE THESE ONCE WE HAVE THE DENSE LAYER
-pub use crate::operations::uninitialised::bias_add::Operation as BiasAdd;
-pub use crate::operations::uninitialised::weight_multiply::Operation as WeightMultiply;

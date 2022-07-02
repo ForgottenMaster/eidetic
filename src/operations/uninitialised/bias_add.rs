@@ -11,7 +11,7 @@ use rand::{Rng, SeedableRng};
 /// before passing through an activation function.
 #[derive(Debug, Eq, PartialEq)]
 pub struct Operation {
-    xavier_lower_neuron_count: u16, // used as the "previous" neuron count for xavier initialisation
+    neurons: u16,
 }
 
 impl Operation {
@@ -19,10 +19,8 @@ impl Operation {
     /// the number of neurons for the xavier generation to be correctly used
     /// to initialise the weights.
     #[must_use]
-    pub const fn new(xavier_lower_neuron_count: u16) -> Self {
-        Self {
-            xavier_lower_neuron_count,
-        }
+    pub const fn new(neurons: u16) -> Self {
+        Self { neurons }
     }
 }
 
@@ -33,21 +31,18 @@ impl UninitialisedOperation for Operation {
     fn with_iter_private(
         self,
         iter: &mut impl Iterator<Item = ElementType>,
-        input_neuron_count: u16,
+        _input_neuron_count: u16,
     ) -> Result<(Self::Initialised, u16)> {
-        let weight_dim = (1, input_neuron_count as usize);
+        let weight_dim = (1, self.neurons as usize);
         let weight_count = weight_dim.0 * weight_dim.1;
         let parameter = Tensor::<rank::Two>::new(weight_dim, iter.take(weight_count))?;
-        Ok((
-            initialised::bias_add::Operation { parameter },
-            input_neuron_count,
-        ))
+        Ok((initialised::bias_add::Operation { parameter }, self.neurons))
     }
 
     fn with_seed_private(self, seed: u64, input_neuron_count: u16) -> (Self::Initialised, u16) {
         let mut generator = StdRng::seed_from_u64(seed);
-        let xavier_delta = ElementType::sqrt(6.0)
-            / ElementType::sqrt((self.xavier_lower_neuron_count + input_neuron_count).into());
+        let xavier_delta =
+            ElementType::sqrt(6.0) / ElementType::sqrt((input_neuron_count + self.neurons).into());
         // see Xavier initialization
         let mut iter = repeat_with(|| generator.gen_range(-xavier_delta..=xavier_delta));
         self.with_iter_private(&mut iter, input_neuron_count)
@@ -62,9 +57,9 @@ mod tests {
     #[test]
     fn test_with_iter_private_success() {
         // Arrange
-        let operation = Operation::new(3);
+        let operation = Operation::new(5);
         let mut iter = [1.0, 2.0, 3.0, 4.0, 5.0].into_iter();
-        let input_neuron_count = 5;
+        let input_neuron_count = 3;
 
         // Act
         let (operation, neuron_count) = operation
@@ -73,15 +68,15 @@ mod tests {
 
         // Assert
         assert_eq!(operation.parameter.0.ncols(), neuron_count as usize);
-        assert_eq!(input_neuron_count, neuron_count);
+        assert_eq!(neuron_count, 5);
     }
 
     #[test]
     fn test_with_iter_private_failure() {
         // Arrange
-        let operation = Operation::new(3);
+        let operation = Operation::new(5);
         let mut iter = [1.0, 2.0, 3.0].into_iter();
-        let input_neuron_count = 5;
+        let input_neuron_count = 3;
 
         // Act
         let result = operation.with_iter_private(&mut iter, input_neuron_count);
@@ -93,25 +88,25 @@ mod tests {
     #[test]
     fn test_with_seed() {
         // Arrange
-        let operation = Operation::new(3);
+        let operation = Operation::new(5);
         let seed = 42;
         let input_neuron_count = 5;
 
         #[cfg(feature = "f32")]
         let expected = Tensor::<rank::Two>::new(
             (1, 5),
-            [-0.63495296, 0.045998752, -0.435198, 0.074002385, 0.63813376],
+            [-0.5679192, 0.041142583, -0.38925293, 0.06618971, 0.5707642],
         )
         .unwrap();
         #[cfg(not(feature = "f32"))]
         let expected = Tensor::<rank::Two>::new(
             (1, 5),
             [
-                0.04599878171019156,
-                0.07400223431629038,
-                0.23636448517715036,
-                -0.16298293564719446,
-                -0.8065418982113659,
+                0.041142561114465015,
+                0.06618961056723727,
+                0.2114108225291399,
+                -0.14577636931184024,
+                -0.7213930044409321,
             ],
         )
         .unwrap();
@@ -121,6 +116,6 @@ mod tests {
 
         // Assert
         assert_eq!(operation.parameter, expected);
-        assert_eq!(neuron_count, input_neuron_count);
+        assert_eq!(neuron_count, 5);
     }
 }
