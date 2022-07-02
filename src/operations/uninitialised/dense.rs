@@ -40,14 +40,13 @@ where
         iter: &mut impl Iterator<Item = ElementType>,
         input_neuron_count: u16,
     ) -> Result<(Self::Initialised, u16)> {
-        let (weight_multiply, output_neurons) = self
-            .weight_multiply
-            .with_iter_private(iter, input_neuron_count)?;
+        let weight_multiply = self.weight_multiply;
+        let weight_multiply = weight_multiply.with_iter_private(iter, input_neuron_count);
+        let (weight_multiply, output_neurons) = weight_multiply?;
         let (bias_add, _) = self.bias_add.with_iter_private(iter, input_neuron_count)?;
-        let activation_function = self
-            .activation_function
-            .with_iter_private(iter, output_neurons)?
-            .0;
+        let activation_function = self.activation_function;
+        let activation_function = activation_function.with_iter_private(iter, output_neurons);
+        let activation_function = activation_function?.0;
         let initialised = Self::Initialised {
             weight_multiply,
             bias_add,
