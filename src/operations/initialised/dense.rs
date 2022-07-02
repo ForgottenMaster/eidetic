@@ -1,4 +1,5 @@
 use crate::operations::{initialised, trainable, InitialisedOperation, WithOptimiser};
+use crate::optimisers::base::OptimiserFactory;
 use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
 use crate::Result;
@@ -40,9 +41,8 @@ impl<T: InitialisedOperation<Input = Tensor<rank::Two>, Output = Tensor<rank::Tw
     }
 }
 
-impl<T, U: Clone> WithOptimiser<U> for Operation<T>
+impl<T, U: Clone + OptimiserFactory<Tensor<rank::Two>>> WithOptimiser<U> for Operation<T>
 where
-    initialised::weight_multiply::Operation: WithOptimiser<U>,
     initialised::bias_add::Operation: WithOptimiser<U>,
     T: WithOptimiser<U>,
 {
