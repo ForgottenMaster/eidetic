@@ -3,15 +3,8 @@ use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
 use crate::{Error, Result};
 
-impl<'a> forward::Construct<'a> for trainable::input::Operation {
-    type Forward = Forward<'a>;
-    fn construct(&'a mut self) -> Self::Forward {
-        Forward::<'a>(self)
-    }
-}
-
 #[derive(Debug, Eq, PartialEq)]
-pub struct Forward<'a>(&'a mut trainable::input::Operation);
+pub struct Forward<'a>(pub(crate) &'a mut trainable::input::Operation);
 
 impl Sealed for Forward<'_> {}
 impl<'a> forward::Operation for Forward<'a> {

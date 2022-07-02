@@ -1,19 +1,12 @@
 use crate::operations::ForwardOperation;
-use crate::operations::{backward, forward, trainable};
+use crate::operations::{backward, trainable};
 use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
 use crate::{Error, Result};
 use ndarray::{Array, Axis};
 
-impl<'a, T: 'a> forward::Construct<'a> for trainable::bias_add::Operation<T> {
-    type Forward = Forward<'a, T>;
-    fn construct(&'a mut self) -> Self::Forward {
-        Forward { borrow: self }
-    }
-}
-
 pub struct Forward<'a, T: 'a> {
-    borrow: &'a mut trainable::bias_add::Operation<T>,
+    pub(crate) borrow: &'a mut trainable::bias_add::Operation<T>,
 }
 
 impl<'a, T: 'a> Sealed for Forward<'a, T> {}

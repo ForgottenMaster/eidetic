@@ -1,4 +1,3 @@
-use crate::operations::forward::Construct;
 use crate::operations::InitialisedOperation;
 use crate::operations::{forward, initialised, trainable};
 use crate::private::Sealed;
@@ -13,31 +12,29 @@ pub struct Operation {
 
 impl Sealed for Operation {}
 impl trainable::Operation for Operation {
-    type Input = Tensor<rank::Two>;
-    type Output = Tensor<rank::Two>;
     type Initialised = initialised::relu::Operation;
 
     fn into_initialised(self) -> Self::Initialised {
         self.initialised
     }
+}
 
-    fn forward<'a>(
-        &'a mut self,
-        input: Self::Input,
-    ) -> Result<(<Self as forward::Construct<'a>>::Forward, Self::Output)>
-    where
-        Self: forward::Construct<'a>,
-    {
+impl<'a> forward::Forward<'a> for Operation {
+    type Input = Tensor<rank::Two>;
+    type Output = Tensor<rank::Two>;
+    type Forward = forward::relu::Forward<'a>;
+
+    fn forward(&'a mut self, input: Self::Input) -> Result<(Self::Forward, Self::Output)> {
         self.last_output = self.initialised.predict(input)?;
         let clone = self.last_output.clone();
-        Ok((self.construct(), clone))
+        Ok((forward::relu::Forward(self), clone))
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::operations::TrainableOperation;
+    use crate::operations::{Forward, TrainableOperation};
 
     #[test]
     fn test_into_initialised() {

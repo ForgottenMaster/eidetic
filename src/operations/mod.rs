@@ -10,7 +10,7 @@ mod trainable;
 pub(crate) mod uninitialised;
 
 pub use backward::Operation as BackwardOperation;
-pub use forward::Construct as ConstructForward;
+pub use forward::Forward;
 pub use forward::Operation as ForwardOperation;
 pub use initialised::Operation as InitialisedOperation;
 pub use initialised::WithOptimiser;

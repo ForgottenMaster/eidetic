@@ -1,5 +1,4 @@
-use crate::operations::forward::Construct;
-use crate::operations::{initialised, InitialisedOperation, TrainableOperation};
+use crate::operations::{forward, initialised, InitialisedOperation, TrainableOperation};
 use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
 use crate::Result;
@@ -13,24 +12,22 @@ pub struct Operation<T> {
 
 impl<T> Sealed for Operation<T> {}
 impl<T> TrainableOperation for Operation<T> {
-    type Input = Tensor<rank::Two>;
-    type Output = Tensor<rank::Two>;
     type Initialised = initialised::bias_add::Operation;
 
     fn into_initialised(self) -> Self::Initialised {
         self.initialised
     }
+}
 
-    fn forward<'a>(
-        &'a mut self,
-        input: Self::Input,
-    ) -> Result<(<Self as Construct<'a>>::Forward, Self::Output)>
-    where
-        Self: Construct<'a>,
-    {
+impl<'a, T: 'a> forward::Forward<'a> for Operation<T> {
+    type Input = Tensor<rank::Two>;
+    type Output = Tensor<rank::Two>;
+    type Forward = forward::bias_add::Forward<'a, T>;
+
+    fn forward(&'a mut self, input: Self::Input) -> Result<(Self::Forward, Self::Output)> {
         self.last_input = input.clone();
         let output = self.initialised.predict(input)?;
-        let forward = self.construct();
+        let forward = forward::bias_add::Forward { borrow: self };
         Ok((forward, output))
     }
 }
@@ -38,6 +35,7 @@ impl<T> TrainableOperation for Operation<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::operations::Forward;
     use crate::optimisers::base::OptimiserFactory;
     use crate::optimisers::NullOptimiser;
 

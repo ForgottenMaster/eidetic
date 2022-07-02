@@ -1,4 +1,3 @@
-use crate::operations::forward::Construct;
 use crate::operations::{forward, initialised, trainable};
 use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
@@ -10,23 +9,21 @@ pub struct Operation(pub(crate) initialised::linear::Operation);
 
 impl Sealed for Operation {}
 impl trainable::Operation for Operation {
-    type Input = Tensor<rank::Two>;
-    type Output = Tensor<rank::Two>;
     type Initialised = initialised::linear::Operation;
 
     fn into_initialised(self) -> Self::Initialised {
         self.0
     }
+}
 
-    fn forward<'a>(
-        &'a mut self,
-        input: Self::Input,
-    ) -> Result<(<Self as forward::Construct<'a>>::Forward, Self::Output)>
-    where
-        Self: forward::Construct<'a>,
-    {
+impl<'a> forward::Forward<'a> for Operation {
+    type Input = Tensor<rank::Two>;
+    type Output = Tensor<rank::Two>;
+    type Forward = forward::linear::Forward<'a>;
+
+    fn forward(&'a mut self, input: Self::Input) -> Result<(Self::Forward, Self::Output)> {
         if self.0.neurons as usize == input.0.ncols() {
-            Ok((self.construct(), input))
+            Ok((forward::linear::Forward(self), input))
         } else {
             Err(Error(()))
         }
@@ -36,7 +33,7 @@ impl trainable::Operation for Operation {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::operations::TrainableOperation;
+    use crate::operations::{Forward, TrainableOperation};
 
     #[test]
     fn test_into_initialised() {

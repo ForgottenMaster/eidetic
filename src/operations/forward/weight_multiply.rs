@@ -1,17 +1,10 @@
-use crate::operations::{backward, forward, trainable, ForwardOperation};
+use crate::operations::{backward, trainable, ForwardOperation};
 use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
 use crate::{Error, Result};
 
-impl<'a, T: 'a> forward::Construct<'a> for trainable::weight_multiply::Operation<T> {
-    type Forward = Forward<'a, T>;
-    fn construct(&'a mut self) -> Self::Forward {
-        Forward { borrow: self }
-    }
-}
-
 pub struct Forward<'a, T: 'a> {
-    borrow: &'a mut trainable::weight_multiply::Operation<T>,
+    pub(crate) borrow: &'a mut trainable::weight_multiply::Operation<T>,
 }
 
 // Functions to try to work around the false reporting in code

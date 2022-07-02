@@ -3,33 +3,37 @@
 //! run on it for training and so will produce a structure
 //! ready for running the backward pass.
 
-mod bias_add;
-mod input;
-mod linear;
-mod relu;
-mod sigmoid;
-mod tanh;
-mod weight_multiply;
+pub mod bias_add;
+pub mod input;
+pub mod linear;
+pub mod relu;
+pub mod sigmoid;
+pub mod tanh;
+pub mod weight_multiply;
 
+use crate::operations::TrainableOperation;
 use crate::private::Sealed;
 use crate::Result;
 
-/// This trait is used to allow us to produce a specific concrete type for a given
-/// lifetime for an implementation specific to a trainable operation.
-/// This is required because we can't have higher kinded lifetimes (or generic associated types)
-/// on the trainable trait and so can't be generic over all lifetimes in a "Forward" associated type.
-///
-/// Instead then, we implement this trait for our lifetime that matches the borrow on self, and then
-/// we can name the correct concrete type in the Output associated type which binds the borrow and
-/// the input together.
-pub trait Construct<'a>: Sealed {
+/// This trait begins a forward pass on an operation and is required to be separate from
+/// the `TrainableOperation` trait because we need to vary the `Forward` handle type based on
+/// the lifetime of the borrow to self.
+pub trait Forward<'a>: Sealed + TrainableOperation {
+    /// The type of the input passed into the forward pass.
+    type Input;
+
+    /// The type of the output emitted from the forward pass.
+    type Output;
+
     /// This associated type defines the concrete output type for this forward pass
     /// given the lifetime we were given.
     type Forward;
 
-    /// Constructs a new instance of the Forward type given a mutable
-    /// reference to the Operation type.
-    fn construct(&'a mut self) -> Self::Forward;
+    /// Begins the forward pass of the operation, with the given input.
+    ///
+    /// # Errors
+    /// `Error` if the forward pass can't be performed such as due to the input being incorrectly shaped.
+    fn forward(&'a mut self, input: Self::Input) -> Result<(Self::Forward, Self::Output)>;
 }
 
 /// This trait is used to encompass the functionality of an operation that has had
