@@ -7,7 +7,7 @@ use core::marker::PhantomData;
 /// gradient descent (SGD) optimisation strategy which is
 /// simply updating the parameter with some proportion of
 /// the gradient.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct OptimiserFactory {
     learning_rate: ElementType,
 }

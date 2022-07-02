@@ -1,4 +1,5 @@
 use crate::activations::ActivationFunction;
+use crate::layers::Layer;
 use crate::operations::{initialised, uninitialised, InitialisedOperation, UninitialisedOperation};
 use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
@@ -27,6 +28,11 @@ impl<T: ActivationFunction> Operation<T> {
     }
 }
 
+impl<T: ActivationFunction> Layer for Operation<T> where
+    <T as UninitialisedOperation>::Initialised:
+        InitialisedOperation<Input = Tensor<rank::Two>, Output = Tensor<rank::Two>>
+{
+}
 impl<T> Sealed for Operation<T> {}
 impl<T: ActivationFunction> UninitialisedOperation for Operation<T>
 where

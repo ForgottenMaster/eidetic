@@ -10,7 +10,7 @@ use crate::private::Sealed;
 /// step of training. Analagous to the Linear activation function where
 /// one needs to provide an optimiser to the API but might not want to
 /// necessarily do anything.
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct OptimiserFactory(());
 
 impl OptimiserFactory {

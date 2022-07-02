@@ -1,4 +1,4 @@
-use crate::operations::{initialised, InitialisedOperation};
+use crate::operations::{initialised, trainable, InitialisedOperation, WithOptimiser};
 use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
 use crate::Result;
@@ -40,9 +40,37 @@ impl<T: InitialisedOperation<Input = Tensor<rank::Two>, Output = Tensor<rank::Tw
     }
 }
 
+impl<T, U: Clone> WithOptimiser<U> for Operation<T>
+where
+    initialised::weight_multiply::Operation: WithOptimiser<U>,
+    initialised::bias_add::Operation: WithOptimiser<U>,
+    T: WithOptimiser<U>,
+{
+    type Trainable = trainable::dense::Operation<
+        <initialised::weight_multiply::Operation as WithOptimiser<U>>::Trainable,
+        <initialised::bias_add::Operation as WithOptimiser<U>>::Trainable,
+        <T as WithOptimiser<U>>::Trainable,
+    >;
+
+    fn with_optimiser(self, factory: U) -> Self::Trainable {
+        let weight_multiply = self.weight_multiply.with_optimiser(factory.clone());
+        let bias_add = self.bias_add.with_optimiser(factory.clone());
+        let activation_function = self.activation_function.with_optimiser(factory);
+        Self::Trainable {
+            _weight_multiply: weight_multiply,
+            _bias_add: bias_add,
+            _activation_function: activation_function,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::activations::ReLU;
+    use crate::operations::uninitialised;
+    use crate::operations::UninitialisedOperation;
+    use crate::optimisers::NullOptimiser;
 
     #[test]
     fn test_iter() {
@@ -128,5 +156,43 @@ mod tests {
 
         // Assert
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_with_optimiser() {
+        // Arrange
+        let activation = ReLU::new();
+        let neurons = 3;
+        let input_neurons = 2;
+        let mut iter = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 4.0, 7.0, 2.0].into_iter();
+        let dense = uninitialised::dense::Operation::new(neurons, activation);
+        let (dense, _) = dense.with_iter_private(&mut iter, input_neurons).unwrap();
+        let factory = NullOptimiser::new();
+        let weight_multiply = uninitialised::weight_multiply::Operation::new(neurons);
+        let mut iter = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0].into_iter();
+        let (weight_multiply, _) = weight_multiply
+            .with_iter_private(&mut iter, input_neurons)
+            .unwrap();
+        let _weight_multiply = weight_multiply.with_optimiser(factory.clone());
+        let bias_add = uninitialised::bias_add::Operation::new(neurons);
+        let mut iter = [4.0, 7.0, 2.0].into_iter();
+        let (bias_add, _) = bias_add.with_iter_private(&mut iter, neurons).unwrap();
+        let _bias_add = bias_add.with_optimiser(factory.clone());
+        let activation_function = ReLU::new();
+        let (activation_function, _) = activation_function
+            .with_iter_private(&mut [].into_iter(), neurons)
+            .unwrap();
+        let _activation_function = activation_function.with_optimiser(factory.clone());
+        let expected = trainable::dense::Operation {
+            _weight_multiply,
+            _bias_add,
+            _activation_function,
+        };
+
+        // Act
+        let dense = dense.with_optimiser(factory);
+
+        // Assert
+        assert_eq!(dense, expected);
     }
 }

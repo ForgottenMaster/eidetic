@@ -2,6 +2,7 @@
 //! to operations and chains of operations in the trainable typestate.
 
 pub mod bias_add;
+pub mod dense;
 pub mod input;
 pub mod linear;
 pub mod relu;
