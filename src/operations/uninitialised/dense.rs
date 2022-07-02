@@ -57,16 +57,17 @@ where
     }
 
     fn with_seed_private(self, seed: u64, input_neuron_count: u16) -> (Self::Initialised, u16) {
-        let (weight_multiply, output_neurons) = self
-            .weight_multiply
-            .with_seed_private(seed, input_neuron_count);
-        let (bias_add, _) = self
-            .bias_add
-            .with_seed_private(seed + 1, input_neuron_count);
-        let activation_function = self
-            .activation_function
-            .with_seed_private(seed + 2, output_neurons)
-            .0;
+        let weight_multiply = self.weight_multiply;
+        let (weight_multiply, output_neurons) =
+            weight_multiply.with_seed_private(seed, input_neuron_count);
+
+        let bias_add = self.bias_add;
+        let (bias_add, _) = bias_add.with_seed_private(seed + 1, input_neuron_count);
+
+        let activation_function = self.activation_function;
+        let (activation_function, _) =
+            activation_function.with_seed_private(seed + 2, output_neurons);
+
         let initialised = Self::Initialised {
             weight_multiply,
             bias_add,
