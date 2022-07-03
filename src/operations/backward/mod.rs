@@ -3,6 +3,7 @@
 //! having had the backward pass ran and ready for optimisation.
 
 pub mod bias_add;
+pub mod dense;
 pub mod input;
 pub mod linear;
 pub mod relu;

@@ -51,9 +51,9 @@ impl<
         let (bias_add, input) = self.bias_add.forward(input)?;
         let (activation_function, output) = self.activation_function.forward(input)?;
         let forward = forward::dense::Forward {
-            _weight_multiply: weight_multiply,
-            _bias_add: bias_add,
-            _activation_function: activation_function,
+            weight_multiply,
+            bias_add,
+            activation_function,
         };
         Ok((forward, output))
     }
