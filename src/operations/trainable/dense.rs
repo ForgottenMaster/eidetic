@@ -1,5 +1,6 @@
-use crate::operations::{initialised, TrainableOperation};
+use crate::operations::{forward, initialised, Forward, TrainableOperation};
 use crate::private::Sealed;
+use crate::Result;
 
 #[derive(Debug, PartialEq)]
 pub struct Operation<T, U, V> {
@@ -29,10 +30,41 @@ impl<
     }
 }
 
+impl<
+        'a,
+        T: Forward<'a> + TrainableOperation<Initialised = initialised::weight_multiply::Operation>,
+        U: Forward<'a, Input = <T as Forward<'a>>::Output>
+            + TrainableOperation<Initialised = initialised::bias_add::Operation>,
+        V: Forward<'a, Input = <U as Forward<'a>>::Output> + TrainableOperation,
+    > Forward<'a> for Operation<T, U, V>
+{
+    type Input = <T as Forward<'a>>::Input;
+    type Output = <V as Forward<'a>>::Output;
+    type Forward = forward::dense::Forward<
+        <T as Forward<'a>>::Forward,
+        <U as Forward<'a>>::Forward,
+        <V as Forward<'a>>::Forward,
+    >;
+
+    fn forward(&'a mut self, input: Self::Input) -> Result<(Self::Forward, Self::Output)> {
+        let (weight_multiply, input) = self.weight_multiply.forward(input)?;
+        let (bias_add, input) = self.bias_add.forward(input)?;
+        let (activation_function, output) = self.activation_function.forward(input)?;
+        let forward = forward::dense::Forward {
+            _weight_multiply: weight_multiply,
+            _bias_add: bias_add,
+            _activation_function: activation_function,
+        };
+        Ok((forward, output))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::operations::trainable;
+    use crate::activations::Sigmoid;
+    use crate::layers::Dense;
+    use crate::operations::{trainable, UninitialisedOperation, WithOptimiser};
     use crate::optimisers::base::OptimiserFactory;
     use crate::optimisers::NullOptimiser;
     use crate::tensors::{rank, Tensor};
@@ -75,6 +107,26 @@ mod tests {
 
         // Act
         let output = trainable.into_initialised();
+
+        // Assert
+        assert_eq!(output, expected);
+    }
+
+    #[test]
+    fn test_forward() {
+        // Arrange
+        let dense = Dense::new(1, Sigmoid::new());
+        let (dense, _) = dense.with_seed_private(42, 3);
+        let mut dense = dense.with_optimiser(NullOptimiser::new());
+        let input = Tensor::<rank::Two>::new((2, 3), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]).unwrap();
+        #[cfg(not(feature = "f32"))]
+        let expected =
+            Tensor::<rank::Two>::new((2, 1), [0.8695131771282456, 0.9679719806197726]).unwrap();
+        #[cfg(feature = "f32")]
+        let expected = Tensor::<rank::Two>::new((2, 1), [0.17140509, 0.0026758423]).unwrap();
+
+        // Act
+        let (_, output) = dense.forward(input).unwrap();
 
         // Assert
         assert_eq!(output, expected);
