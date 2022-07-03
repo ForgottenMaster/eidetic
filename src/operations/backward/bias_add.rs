@@ -3,6 +3,7 @@ use crate::optimisers::base::Optimiser;
 use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
 
+#[derive(Debug, PartialEq)]
 pub struct Operation<'a, T: 'a> {
     pub(crate) borrow: &'a mut trainable::bias_add::Operation<T>,
     pub(crate) parameter_gradient: Tensor<rank::Two>,

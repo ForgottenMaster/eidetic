@@ -29,9 +29,9 @@ impl<
         let (bias_add, output_gradient) = self.bias_add.backward(output_gradient)?;
         let (weight_multiply, input_gradient) = self.weight_multiply.backward(output_gradient)?;
         let backward = Self::Backward {
-            _weight_multiply: weight_multiply,
-            _bias_add: bias_add,
-            _activation_function: activation_function,
+            weight_multiply,
+            bias_add,
+            activation_function,
         };
         Ok((backward, input_gradient))
     }

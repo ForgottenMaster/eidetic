@@ -1,6 +1,7 @@
 use crate::operations::BackwardOperation;
 use crate::private::Sealed;
 
+#[derive(Debug, PartialEq)]
 pub struct Operation(pub(crate) ());
 
 impl Sealed for Operation {}
