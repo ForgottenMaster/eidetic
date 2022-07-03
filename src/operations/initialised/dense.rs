@@ -57,9 +57,9 @@ where
         let bias_add = self.bias_add.with_optimiser(factory.clone());
         let activation_function = self.activation_function.with_optimiser(factory);
         Self::Trainable {
-            _weight_multiply: weight_multiply,
-            _bias_add: bias_add,
-            _activation_function: activation_function,
+            weight_multiply,
+            bias_add,
+            activation_function,
         }
     }
 }
@@ -173,20 +173,20 @@ mod tests {
         let (weight_multiply, _) = weight_multiply
             .with_iter_private(&mut iter, input_neurons)
             .unwrap();
-        let _weight_multiply = weight_multiply.with_optimiser(factory.clone());
+        let weight_multiply = weight_multiply.with_optimiser(factory.clone());
         let bias_add = uninitialised::bias_add::Operation::new(neurons);
         let mut iter = [4.0, 7.0, 2.0].into_iter();
         let (bias_add, _) = bias_add.with_iter_private(&mut iter, neurons).unwrap();
-        let _bias_add = bias_add.with_optimiser(factory.clone());
+        let bias_add = bias_add.with_optimiser(factory.clone());
         let activation_function = ReLU::new();
         let (activation_function, _) = activation_function
             .with_iter_private(&mut [].into_iter(), neurons)
             .unwrap();
-        let _activation_function = activation_function.with_optimiser(factory.clone());
+        let activation_function = activation_function.with_optimiser(factory.clone());
         let expected = trainable::dense::Operation {
-            _weight_multiply,
-            _bias_add,
-            _activation_function,
+            weight_multiply,
+            bias_add,
+            activation_function,
         };
 
         // Act
