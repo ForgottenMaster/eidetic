@@ -116,4 +116,15 @@ mod tests {
         // Assert
         assert_eq!(parameter, expected);
     }
+
+    #[test]
+    fn test_dummy_optimiser_optimise_with_unit() {
+        // Arrange
+        let mut parameter = ();
+        let gradient = ();
+        let mut optimiser = DummyOptimiser;
+
+        // Act
+        optimiser.optimise(&mut parameter, &gradient);
+    }
 }
