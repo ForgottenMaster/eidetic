@@ -1,7 +1,7 @@
 use crate::operations::BackwardOperation;
 use crate::private::Sealed;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct Operation<T, U, V> {
     pub(crate) weight_multiply: T,
     pub(crate) bias_add: U,
@@ -31,13 +31,13 @@ mod tests {
     use crate::tensors::{rank, Tensor};
 
     #[derive(Clone)]
-    struct DummyOptimiserFactory;
+    struct DummyOptimiserFactory(());
 
     impl OptimiserFactory<Tensor<rank::Two>> for DummyOptimiserFactory {
         type Optimiser = DummyOptimiser;
 
         fn instantiate(&self) -> Self::Optimiser {
-            DummyOptimiser
+            DummyOptimiser(())
         }
     }
 
@@ -45,11 +45,11 @@ mod tests {
         type Optimiser = DummyOptimiser;
 
         fn instantiate(&self) -> Self::Optimiser {
-            DummyOptimiser
+            DummyOptimiser(())
         }
     }
 
-    struct DummyOptimiser;
+    struct DummyOptimiser(());
 
     impl Optimiser<Tensor<rank::Two>> for DummyOptimiser {
         fn optimise(&mut self, parameter: &mut Tensor<rank::Two>, gradient: &Tensor<rank::Two>) {
@@ -66,7 +66,7 @@ mod tests {
         // Arrange
         let dense = Dense::new(1, Sigmoid::new());
         let (dense, _) = dense.with_seed_private(42, 3);
-        let mut dense = dense.with_optimiser(DummyOptimiserFactory);
+        let mut dense = dense.with_optimiser(DummyOptimiserFactory(()));
         let input = Tensor::<rank::Two>::new((2, 3), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]).unwrap();
         let (forward, _) = dense.forward(input).unwrap();
         let output_gradient = Tensor::<rank::Two>::new((2, 1), [1.0, 1.0]).unwrap();

@@ -2,7 +2,7 @@ use crate::operations::{forward, initialised, Forward, TrainableOperation};
 use crate::private::Sealed;
 use crate::Result;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct Operation<T, U, V> {
     pub(crate) weight_multiply: T,
     pub(crate) bias_add: U,

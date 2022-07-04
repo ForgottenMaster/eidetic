@@ -24,8 +24,9 @@ impl<
     >;
 
     fn backward(self, output_gradient: Self::Output) -> Result<(Self::Backward, Self::Input)> {
-        let (activation_function, output_gradient) =
-            self.activation_function.backward(output_gradient)?;
+        let activation_function = self.activation_function;
+        let activation_function_result = activation_function.backward(output_gradient);
+        let (activation_function, output_gradient) = activation_function_result?;
         let (bias_add, output_gradient) = self.bias_add.backward(output_gradient)?;
         let (weight_multiply, input_gradient) = self.weight_multiply.backward(output_gradient)?;
         let backward = Self::Backward {
