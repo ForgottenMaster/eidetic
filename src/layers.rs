@@ -4,6 +4,7 @@
 //! networks.
 
 pub use crate::operations::uninitialised::dense::Operation as Dense;
+pub use crate::operations::uninitialised::dropout::Operation as Dropout;
 pub use crate::operations::uninitialised::input::Operation as Input;
 
 /// This marker trait is used to identify those operations that are
