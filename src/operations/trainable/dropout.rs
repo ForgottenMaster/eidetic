@@ -111,4 +111,19 @@ mod tests {
         assert_eq!(forward, expected_forward);
         assert_eq!(output, expected_output);
     }
+
+    #[test]
+    fn test_forward_without_seed() {
+        // Arrange
+        let mut trainable = Operation {
+            initialised: initialised::dropout::Operation {
+                keep_probability: 0.6,
+                seed: None,
+            },
+        };
+        let input = Tensor::<rank::Two>::new((1, 3), [1.0, 2.0, 3.0]).unwrap();
+
+        // Act
+        trainable.forward(input).unwrap();
+    }
 }
