@@ -31,13 +31,21 @@ impl UninitialisedOperation for Operation {
         input_neuron_count: u16,
     ) -> Result<(Self::Initialised, u16)> {
         let keep_probability = self.keep_probability;
-        let initialised = Self::Initialised { keep_probability };
+        let seed: Option<u64> = None;
+        let initialised = Self::Initialised {
+            keep_probability,
+            seed,
+        };
         Ok((initialised, input_neuron_count))
     }
 
-    fn with_seed_private(self, _seed: u64, input_neuron_count: u16) -> (Self::Initialised, u16) {
+    fn with_seed_private(self, seed: u64, input_neuron_count: u16) -> (Self::Initialised, u16) {
         let keep_probability = self.keep_probability;
-        let initialised = Self::Initialised { keep_probability };
+        let seed = Some(seed);
+        let initialised = Self::Initialised {
+            keep_probability,
+            seed,
+        };
         (initialised, input_neuron_count)
     }
 }
@@ -65,7 +73,14 @@ mod tests {
         let mut iter = [].into_iter();
         let keep_probability = 0.8;
         let input_neuron_count = 3;
-        let expected = (initialised::dropout::Operation { keep_probability }, 3);
+        let seed: Option<u64> = None;
+        let expected = (
+            initialised::dropout::Operation {
+                keep_probability,
+                seed,
+            },
+            3,
+        );
         let uninitialised = Operation::new(keep_probability);
 
         // Act
@@ -83,7 +98,13 @@ mod tests {
         let seed = 42;
         let keep_probability = 0.8;
         let input_neuron_count = 3;
-        let expected = (initialised::dropout::Operation { keep_probability }, 3);
+        let expected = (
+            initialised::dropout::Operation {
+                keep_probability,
+                seed: Some(seed),
+            },
+            3,
+        );
         let uninitialised = Operation::new(keep_probability);
 
         // Act
