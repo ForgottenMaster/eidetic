@@ -2,7 +2,6 @@ use crate::operations::{forward, initialised, Forward, TrainableOperation};
 use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
 use crate::Result;
-use core::iter::repeat_with;
 use rand::rngs::StdRng;
 use rand::{thread_rng, Rng, SeedableRng};
 
@@ -37,9 +36,14 @@ impl<'a> Forward<'a> for Operation {
         let dims = input.0.raw_dim();
         let element_count = dims[0] * dims[1];
         let keep_probability = self.initialised.keep_probability;
-        let iter = repeat_with(|| random.gen_range(0.0..=1.0))
-            .map(|elem| if elem <= keep_probability { 1.0 } else { 0.0 })
-            .take(element_count);
+        let iter = (0..element_count).map(|_| {
+            let gen = random.gen_range(0.0..=1.0);
+            if gen <= keep_probability {
+                1.0
+            } else {
+                0.0
+            }
+        });
         let mask = Tensor::<rank::Two>::new((dims[0], dims[1]), iter).unwrap();
         let output = Tensor(input.0 * &mask.0);
         let forward = Self::Forward {
