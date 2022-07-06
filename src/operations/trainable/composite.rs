@@ -40,8 +40,8 @@ where
         let (lhs_forward, input) = self.lhs.forward(input)?;
         let (rhs_forward, output) = self.rhs.forward(input)?;
         let forward = Self::Forward {
-            _lhs: lhs_forward,
-            _rhs: rhs_forward,
+            lhs: lhs_forward,
+            rhs: rhs_forward,
         };
         Ok((forward, output))
     }
@@ -104,7 +104,7 @@ mod tests {
             .with_seed(41)
             .with_optimiser(NullOptimiser::new());
         let input = Tensor::<rank::Two>::new((2, 2), [1.0, 2.0, 3.0, 4.0]).unwrap();
-        
+
         // Act
         let result = operation.forward(input);
 
