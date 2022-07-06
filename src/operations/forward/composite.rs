@@ -24,8 +24,8 @@ where
         let (rhs_backward, output_gradient) = self.rhs.backward(output_gradient)?;
         let (lhs_backward, input_gradient) = self.lhs.backward(output_gradient)?;
         let backward = Self::Backward {
-            _lhs: lhs_backward,
-            _rhs: rhs_backward,
+            lhs: lhs_backward,
+            rhs: rhs_backward,
         };
         Ok((backward, input_gradient))
     }
