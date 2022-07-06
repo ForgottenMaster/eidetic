@@ -2,6 +2,7 @@
 //! initialised state.
 
 pub mod bias_add;
+pub mod composite;
 pub mod dense;
 pub mod dropout;
 pub mod input;

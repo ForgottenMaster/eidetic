@@ -1,3 +1,4 @@
+use crate::operations::uninitialised::composite::ChainTarget;
 use crate::operations::{initialised, UninitialisedOperation};
 use crate::private::Sealed;
 use crate::{ElementType, Result};
@@ -21,7 +22,7 @@ impl Operation {
 }
 
 impl Sealed for Operation {}
-
+impl ChainTarget for Operation {}
 impl UninitialisedOperation for Operation {
     type Initialised = initialised::dropout::Operation;
 

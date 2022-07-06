@@ -1,4 +1,5 @@
 use crate::activations::ActivationFunction;
+use crate::operations::uninitialised::composite::ChainTarget;
 use crate::operations::{initialised, uninitialised, InitialisedOperation, UninitialisedOperation};
 use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
@@ -28,6 +29,7 @@ impl<T: ActivationFunction> Operation<T> {
 }
 
 impl<T> Sealed for Operation<T> {}
+impl<T> ChainTarget for Operation<T> {}
 impl<T: ActivationFunction> UninitialisedOperation for Operation<T>
 where
     <T as UninitialisedOperation>::Initialised:

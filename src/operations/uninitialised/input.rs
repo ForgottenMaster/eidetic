@@ -1,5 +1,5 @@
-use crate::operations::initialised;
-use crate::operations::UninitialisedOperation;
+use crate::operations::uninitialised::composite::{Chain, ChainTarget};
+use crate::operations::{initialised, UninitialisedOperation};
 use crate::private::Sealed;
 use crate::ElementType;
 use crate::Result;
@@ -26,6 +26,8 @@ impl Operation {
 }
 
 impl Sealed for Operation {}
+impl Chain for Operation {}
+impl ChainTarget for Operation {}
 impl UninitialisedOperation for Operation {
     type Initialised = initialised::input::Operation;
 
