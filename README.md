@@ -16,6 +16,11 @@ This API is implemented with the following pillars:
 - [ ] Mean squared error loss
 - [ ] Softmax cross entropy loss
 - [ ] Operation chaining
+    - [ ] WithOptimiser
+    - [ ] TrainableOperation
+    - [ ] Forward
+    - [ ] ForwardOperation
+    - [ ] BackwardOperation
 - [ ] SGD optimiser (with momentum)
 - [ ] Learning rate linear decay
 - [ ] Learning rate exponential decay
