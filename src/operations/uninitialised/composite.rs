@@ -38,7 +38,6 @@ impl<T, U> ChainTarget for Operation<T, U> {}
 impl<T: UninitialisedOperation, U: UninitialisedOperation> UninitialisedOperation
     for Operation<T, U>
 where
-    <T as UninitialisedOperation>::Initialised: InitialisedOperation,
     <U as UninitialisedOperation>::Initialised: InitialisedOperation<
         Input = <<T as UninitialisedOperation>::Initialised as InitialisedOperation>::Output,
     >,
