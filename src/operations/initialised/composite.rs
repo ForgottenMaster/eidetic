@@ -1,4 +1,4 @@
-use crate::operations::InitialisedOperation;
+use crate::operations::{trainable, InitialisedOperation, WithOptimiser};
 use crate::private::Sealed;
 use crate::Result;
 use core::iter::Chain;
@@ -35,11 +35,35 @@ impl<
     }
 }
 
+impl<T, U, V> WithOptimiser<V> for Operation<T, U>
+where
+    T: WithOptimiser<V>,
+    U: WithOptimiser<V>,
+    V: Clone,
+{
+    type Trainable = trainable::composite::Operation<
+        <T as WithOptimiser<V>>::Trainable,
+        <U as WithOptimiser<V>>::Trainable,
+    >;
+
+    fn with_optimiser(self, optimiser: V) -> Self::Trainable {
+        let lhs = self.lhs.with_optimiser(optimiser.clone());
+        let rhs = self.rhs.with_optimiser(optimiser);
+        Self::Trainable {
+            _lhs: lhs,
+            _rhs: rhs,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::activations::{ReLU, Sigmoid};
     use crate::layers::{Chain, Dense, Input};
-    use crate::operations::{InitialisedOperation, UninitialisedOperation};
+    use crate::operations::{
+        trainable, InitialisedOperation, UninitialisedOperation, WithOptimiser,
+    };
+    use crate::optimisers::NullOptimiser;
     use crate::tensors::{rank, Tensor};
 
     #[test]
@@ -91,5 +115,35 @@ mod tests {
 
         // Assert
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_with_optimiser() {
+        // Arrange
+        let operation = Input::new(2)
+            .chain(Dense::new(3, ReLU::new()))
+            .with_iter([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 4.0, 7.0, 2.0].into_iter())
+            .unwrap();
+        let factory = NullOptimiser::new();
+        let expected = trainable::composite::Operation {
+            _lhs: Input::new(2)
+                .with_iter([].into_iter())
+                .unwrap()
+                .with_optimiser(factory.clone()),
+            _rhs: Dense::new(3, ReLU::new())
+                .with_iter_private(
+                    &mut [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 4.0, 7.0, 2.0].into_iter(),
+                    2,
+                )
+                .unwrap()
+                .0
+                .with_optimiser(factory.clone()),
+        };
+
+        // Act
+        let output = operation.with_optimiser(factory);
+
+        // Assert
+        assert_eq!(output, expected);
     }
 }
