@@ -6,7 +6,7 @@ use crate::{ElementType, Result};
 /// layer. This is most likely constructed by calling the `.chain(ChainTarget)` method
 /// on a `Chain` implementation, which is implemented by the input layer and the composite
 /// layer itself.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct Operation<T, U> {
     lhs: T,
     rhs: U,
