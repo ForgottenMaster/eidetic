@@ -4,6 +4,7 @@
 //! ready for running the backward pass.
 
 pub mod bias_add;
+pub mod composite;
 pub mod dense;
 pub mod dropout;
 pub mod input;
