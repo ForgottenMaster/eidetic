@@ -49,10 +49,7 @@ where
     fn with_optimiser(self, optimiser: V) -> Self::Trainable {
         let lhs = self.lhs.with_optimiser(optimiser.clone());
         let rhs = self.rhs.with_optimiser(optimiser);
-        Self::Trainable {
-            _lhs: lhs,
-            _rhs: rhs,
-        }
+        Self::Trainable { lhs, rhs }
     }
 }
 
@@ -126,11 +123,11 @@ mod tests {
             .unwrap();
         let factory = NullOptimiser::new();
         let expected = trainable::composite::Operation {
-            _lhs: Input::new(2)
+            lhs: Input::new(2)
                 .with_iter([].into_iter())
                 .unwrap()
                 .with_optimiser(factory.clone()),
-            _rhs: Dense::new(3, ReLU::new())
+            rhs: Dense::new(3, ReLU::new())
                 .with_iter_private(
                     &mut [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 4.0, 7.0, 2.0].into_iter(),
                     2,
