@@ -13,7 +13,6 @@ This API is implemented with the following pillars:
 4. **Correctness** - We make use of unit testing and documentation testing to verify that the API is correct and functions as expected. Any example code in documentation will be correct and compile
 
 # TODO
-- [ ] Mean squared error loss
 - [ ] Softmax cross entropy loss
 - [ ] SGD optimiser (with momentum)
 - [ ] Learning rate linear decay
