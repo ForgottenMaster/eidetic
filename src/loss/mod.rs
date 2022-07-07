@@ -3,8 +3,10 @@
 //! various loss functions we can use.
 
 mod mean_squared_error;
+mod softmax_cross_entropy;
 
 pub use mean_squared_error::MeanSquaredError;
+pub use softmax_cross_entropy::SoftmaxCrossEntropy;
 
 use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
