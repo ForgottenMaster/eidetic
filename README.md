@@ -15,5 +15,4 @@ This API is implemented with the following pillars:
 # TODO
 - [ ] SGD Optimiser
 - [ ] SGD Optimiser (with momentum)
-- [ ] Learning rate exponential decay
 - [ ] Trainer

@@ -1,12 +1,14 @@
 //! This module will contain all the handlers for tracking and updating the
 //! learning rate for use with optimisers such as SGD.
 
+mod exponential_decay;
 mod fixed;
 mod linear_decay;
 
 use crate::private::Sealed;
 use crate::ElementType;
 
+pub use exponential_decay::LearningRateHandler as ExponentialDecayLearningRateHandler;
 pub use fixed::LearningRateHandler as FixedLearningRateHandler;
 pub use linear_decay::LearningRateHandler as LinearDecayLearningRateHandler;
 
