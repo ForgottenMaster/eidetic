@@ -1,8 +1,12 @@
 //! This module will contain all the handlers for tracking and updating the
 //! learning rate for use with optimisers such as SGD.
 
+mod fixed;
+
 use crate::private::Sealed;
 use crate::ElementType;
+
+pub use fixed::LearningRateHandler as FixedLearningRateHandler;
 
 /// This trait defines the functionality for a type to be used
 /// in optimisation to handle and provide the learning rate. Is able
