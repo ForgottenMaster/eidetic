@@ -23,7 +23,7 @@ impl super::LearningRateHandler for LearningRateHandler {
         self.learning_rate
     }
 
-    fn init(&mut self, _epochs: u32) {}
+    fn init(&mut self, _epochs: u16) {}
 
     fn end_epoch(&mut self) {}
 }

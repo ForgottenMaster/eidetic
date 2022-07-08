@@ -2,11 +2,13 @@
 //! learning rate for use with optimisers such as SGD.
 
 mod fixed;
+mod linear_decay;
 
 use crate::private::Sealed;
 use crate::ElementType;
 
 pub use fixed::LearningRateHandler as FixedLearningRateHandler;
+pub use linear_decay::LearningRateHandler as LinearDecayLearningRateHandler;
 
 /// This trait defines the functionality for a type to be used
 /// in optimisation to handle and provide the learning rate. Is able
@@ -21,7 +23,7 @@ pub trait LearningRateHandler: Sealed {
     /// Called at the beginning of training with the number of epochs
     /// we will be running over. Can be used to determine the increments
     /// for learning rate update each epoch.
-    fn init(&mut self, epochs: u32);
+    fn init(&mut self, epochs: u16);
 
     /// Called at the end of every epoch and provides an opportunity to update
     /// the learning rate for next time.
