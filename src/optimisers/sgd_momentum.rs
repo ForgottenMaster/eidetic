@@ -58,9 +58,8 @@ impl<T, R: Rank> Sealed for Optimiser<T, R> {}
 impl<T: LearningRateHandler, R: Rank> optimisers::base::Optimiser<Tensor<R>> for Optimiser<T, R> {
     fn optimise(&mut self, parameter: &mut Tensor<R>, gradient: &Tensor<R>) {
         let (parameter, gradient) = (&mut parameter.0, &gradient.0);
-        let velocity = self
-            .velocity
-            .get_or_insert_with(|| Array::zeros(parameter.raw_dim()));
+        let velocity = &mut self.velocity;
+        let velocity = velocity.get_or_insert_with(|| Array::zeros(parameter.raw_dim()));
         let momentum = self.momentum;
         let learning_rate = self.learning_rate_handler.learning_rate();
         azip!((parameter in parameter, gradient in gradient, velocity in velocity) {
@@ -80,13 +79,18 @@ impl<T: LearningRateHandler, R: Rank> optimisers::base::Optimiser<Tensor<R>> for
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::activations::Linear;
     use crate::layers::{Chain, Dense, Input};
     use crate::operations::{
         BackwardOperation, Forward, ForwardOperation, InitialisedOperation, TrainableOperation,
         UninitialisedOperation, WithOptimiser,
     };
-    use crate::optimisers::learning_rate_handlers::FixedLearningRateHandler;
+    use crate::optimisers::base::Optimiser as BaseOptimiser;
+    use crate::optimisers::base::OptimiserFactory as BaseOptimiserFactory;
+    use crate::optimisers::learning_rate_handlers::{
+        FixedLearningRateHandler, LinearDecayLearningRateHandler,
+    };
     use crate::optimisers::SGDMomentum;
     use crate::tensors::{rank, Tensor};
 
@@ -187,5 +191,42 @@ mod tests {
         expected.zip(output).for_each(|(expected, output)| {
             assert_eq!(expected, output);
         });
+    }
+
+    #[test]
+    fn test_instantiate_with_unit() {
+        // Arrange
+        let optimiser = OptimiserFactory::new(FixedLearningRateHandler::new(0.01), 0.9);
+        let expected =
+            <NullOptimiser as BaseOptimiserFactory<()>>::instantiate(&NullOptimiser::new());
+
+        // Act
+        let optimiser =
+            <OptimiserFactory<FixedLearningRateHandler> as BaseOptimiserFactory<()>>::instantiate(
+                &optimiser,
+            );
+
+        // Assert
+        assert_eq!(optimiser, expected);
+    }
+
+    #[test]
+    fn test_learning_rate_update_functions() {
+        // Arrange
+        let mut optimiser: Optimiser<_, rank::Two> = Optimiser {
+            learning_rate_handler: LinearDecayLearningRateHandler::new(0.1, 0.01),
+            velocity: None,
+            momentum: 0.9,
+        };
+        let mut expected = LinearDecayLearningRateHandler::new(0.1, 0.01);
+        expected.init(3);
+        expected.end_epoch();
+
+        // Act
+        optimiser.init(3);
+        optimiser.end_epoch();
+
+        // Assert
+        assert_eq!(optimiser.learning_rate_handler, expected);
     }
 }
