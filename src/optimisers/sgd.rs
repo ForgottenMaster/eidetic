@@ -1,5 +1,6 @@
 use crate::optimisers;
 use crate::optimisers::learning_rate_handlers::LearningRateHandler;
+use crate::optimisers::NullOptimiser;
 use crate::private::Sealed;
 use crate::tensors::rank::Rank;
 use crate::tensors::Tensor;
@@ -35,12 +36,10 @@ impl<T: LearningRateHandler + Clone, R: Rank> optimisers::base::OptimiserFactory
     }
 }
 
-impl<T: Clone> optimisers::base::OptimiserFactory<()> for OptimiserFactory<T> {
-    type Optimiser = Optimiser<T>;
+impl<T> optimisers::base::OptimiserFactory<()> for OptimiserFactory<T> {
+    type Optimiser = <NullOptimiser as optimisers::base::OptimiserFactory<()>>::Optimiser;
     fn instantiate(&self) -> Self::Optimiser {
-        Self::Optimiser {
-            learning_rate_handler: self.learning_rate_handler.clone(),
-        }
+        <NullOptimiser as optimisers::base::OptimiserFactory<()>>::instantiate(&NullOptimiser::new())
     }
 }
 
@@ -73,16 +72,19 @@ impl<T> optimisers::base::Optimiser<()> for Optimiser<T> {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::activations::Linear;
     use crate::layers::{Chain, Dense, Input};
     use crate::operations::{
         BackwardOperation, Forward, ForwardOperation, InitialisedOperation, TrainableOperation,
         UninitialisedOperation, WithOptimiser,
     };
+    use crate::optimisers::base::OptimiserFactory as BaseOptimiserFactory;
     use crate::optimisers::learning_rate_handlers::{
         ExponentialDecayLearningRateHandler, FixedLearningRateHandler,
         LinearDecayLearningRateHandler,
     };
+    use crate::optimisers::NullOptimiser;
     use crate::optimisers::SGD;
     use crate::tensors::{rank, Tensor};
 
@@ -246,5 +248,22 @@ mod tests {
         expected.zip(output).for_each(|(expected, output)| {
             assert_eq!(expected, output);
         });
+    }
+
+    #[test]
+    fn test_instantiate_with_unit() {
+        // Arrange
+        let optimiser = OptimiserFactory::new(FixedLearningRateHandler::new(0.01));
+        let expected =
+            <NullOptimiser as BaseOptimiserFactory<()>>::instantiate(&NullOptimiser::new());
+
+        // Act
+        let optimiser =
+            <OptimiserFactory<FixedLearningRateHandler> as BaseOptimiserFactory<()>>::instantiate(
+                &optimiser,
+            );
+
+        // Assert
+        assert_eq!(optimiser, expected);
     }
 }
