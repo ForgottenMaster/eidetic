@@ -3,7 +3,7 @@ use crate::ElementType;
 
 /// This is a provider for a constant learning rate that doesn't change or degrade
 /// based on epoch. It's the most basic type of learning rate handling.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct LearningRateHandler {
     learning_rate: ElementType,
 }

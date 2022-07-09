@@ -4,6 +4,7 @@ use crate::ElementType;
 /// A structure representing an exponentially decaying learning rate
 /// which will decay per epoch from the given starting rate to the given
 /// ending rate.
+#[derive(Clone, Debug, PartialEq)]
 pub struct LearningRateHandler {
     starting_rate: ElementType,
     ending_rate: ElementType,
