@@ -5,7 +5,7 @@ use crate::tensors::{rank, Tensor};
 use crate::{ElementType, Result};
 use core::iter::{empty, Empty};
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Operation {
     pub(crate) keep_probability: ElementType,
     pub(crate) seed: Option<u64>, // used during forward pass to generate dropout mask

@@ -5,7 +5,7 @@ use crate::Result;
 use rand::rngs::StdRng;
 use rand::{thread_rng, Rng, SeedableRng};
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Operation {
     pub(crate) initialised: initialised::dropout::Operation,
 }
@@ -133,5 +133,24 @@ mod tests {
 
         // Act
         trainable.forward(input).unwrap();
+    }
+
+    #[test]
+    fn test_idempotent_functions() {
+        // Arrange
+        let mut trainable = Operation {
+            initialised: initialised::dropout::Operation {
+                keep_probability: 0.6,
+                seed: None,
+            },
+        };
+        let expected = trainable.clone();
+
+        // Act
+        trainable.init(3);
+        trainable.end_epoch();
+
+        // Assert
+        assert_eq!(trainable, expected);
     }
 }
