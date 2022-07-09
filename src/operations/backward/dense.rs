@@ -133,4 +133,24 @@ mod tests {
         // Act
         optimiser.optimise(&mut parameter, &gradient);
     }
+
+    #[test]
+    fn test_empty_functions_for_tensors() {
+        // Arrange
+        let optimiser: &mut dyn Optimiser<Tensor<rank::Two>> = &mut DummyOptimiser;
+
+        // Act
+        optimiser.init(3);
+        optimiser.end_epoch();
+    }
+
+    #[test]
+    fn test_empty_functions_for_unit() {
+        // Arrange
+        let optimiser: &mut dyn Optimiser<()> = &mut DummyOptimiser;
+
+        // Act
+        optimiser.init(3);
+        optimiser.end_epoch();
+    }
 }
