@@ -21,7 +21,7 @@ fn _generate_batches<'a>(
 
 fn _permute_data(
     mut batch: Array<ElementType, Ix2>,
-    targets: Array<ElementType, Ix2>,
+    targets: &Array<ElementType, Ix2>,
     seed: u64,
 ) -> (Array<ElementType, Ix2>, Array<ElementType, Ix2>) {
     // get dimensions for later use.
@@ -33,7 +33,7 @@ fn _permute_data(
     let mut random_generator = StdRng::seed_from_u64(seed);
 
     // join batch and targets together side by side for row permutation
-    batch.append(Axis(1), (&targets).into()).unwrap();
+    batch.append(Axis(1), targets.into()).unwrap();
 
     // permute the rows of the axis, don't re-use the indices though as we want
     // to juggle them around.
@@ -119,7 +119,7 @@ mod tests {
         let seed = 42;
 
         // Act
-        let (batch, targets) = _permute_data(batch, targets, seed);
+        let (batch, targets) = _permute_data(batch, &targets, seed);
         let expected = batch.mapv(|elem| 100.0 + elem);
 
         // Assert
