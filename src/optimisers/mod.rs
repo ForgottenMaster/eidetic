@@ -4,7 +4,9 @@
 pub(crate) mod base;
 pub mod learning_rate_handlers;
 pub(crate) mod null;
-pub(crate) mod sgd;
+mod sgd;
+mod sgd_momentum;
 
 pub use null::OptimiserFactory as NullOptimiser;
 pub use sgd::OptimiserFactory as SGD;
+pub use sgd_momentum::OptimiserFactory as SGDMomentum;
