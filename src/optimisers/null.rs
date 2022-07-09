@@ -43,6 +43,8 @@ impl Optimiser {
 impl Sealed for Optimiser {}
 impl<T> optimisers::base::Optimiser<T> for Optimiser {
     fn optimise(&mut self, _parameter: &mut T, _gradient: &T) {}
+    fn init(&mut self, _epochs: u16) {}
+    fn end_epoch(&mut self) {}
 }
 
 #[cfg(test)]

@@ -28,6 +28,18 @@ impl<
             activation_function,
         }
     }
+
+    fn init(&mut self, epochs: u16) {
+        self.weight_multiply.init(epochs);
+        self.bias_add.init(epochs);
+        self.activation_function.init(epochs);
+    }
+
+    fn end_epoch(&mut self) {
+        self.weight_multiply.end_epoch();
+        self.bias_add.end_epoch();
+        self.activation_function.end_epoch();
+    }
 }
 
 impl<

@@ -16,6 +16,7 @@ pub mod operations;
 pub mod optimisers;
 mod private;
 pub mod tensors;
+pub mod training;
 
 #[cfg(feature = "thiserror")]
 use thiserror::Error;

@@ -3,65 +3,72 @@ use crate::optimisers::learning_rate_handlers::LearningRateHandler;
 use crate::private::Sealed;
 use crate::tensors::rank::Rank;
 use crate::tensors::Tensor;
-use core::cell::RefCell;
 
 /// This is an implementation of a standard stochastic
 /// gradient descent (SGD) optimisation strategy which is
 /// simply updating the parameter with some proportion of
 /// the gradient.
 #[derive(Clone, Debug, PartialEq)]
-pub struct OptimiserFactory<'a, T> {
-    learning_rate_handler: &'a RefCell<T>,
+pub struct OptimiserFactory<T> {
+    learning_rate_handler: T,
 }
 
-impl<'a, T> OptimiserFactory<'a, T> {
+impl<T> OptimiserFactory<T> {
     /// Constructs a new instance of the SGD optimiser with the
     /// given learning rate handler to get the learning rate from.
     #[must_use]
-    pub const fn new(learning_rate_handler: &'a RefCell<T>) -> Self {
+    pub const fn new(learning_rate_handler: T) -> Self {
         Self {
             learning_rate_handler,
         }
     }
 }
 
-impl<'a, T: LearningRateHandler, R: Rank> optimisers::base::OptimiserFactory<Tensor<R>>
-    for OptimiserFactory<'a, T>
+impl<T: LearningRateHandler + Clone, R: Rank> optimisers::base::OptimiserFactory<Tensor<R>>
+    for OptimiserFactory<T>
 {
-    type Optimiser = Optimiser<'a, T>;
+    type Optimiser = Optimiser<T>;
     fn instantiate(&self) -> Self::Optimiser {
         Self::Optimiser {
-            learning_rate_handler: self.learning_rate_handler,
+            learning_rate_handler: self.learning_rate_handler.clone(),
         }
     }
 }
 
-impl<'a, T> optimisers::base::OptimiserFactory<()> for OptimiserFactory<'a, T> {
-    type Optimiser = Optimiser<'a, T>;
+impl<T: Clone> optimisers::base::OptimiserFactory<()> for OptimiserFactory<T> {
+    type Optimiser = Optimiser<T>;
     fn instantiate(&self) -> Self::Optimiser {
         Self::Optimiser {
-            learning_rate_handler: self.learning_rate_handler,
+            learning_rate_handler: self.learning_rate_handler.clone(),
         }
     }
 }
 
-pub struct Optimiser<'a, T> {
-    learning_rate_handler: &'a RefCell<T>,
+pub struct Optimiser<T> {
+    learning_rate_handler: T,
 }
 
-impl<'a, T> Sealed for Optimiser<'a, T> {}
-impl<'a, T: LearningRateHandler, R: Rank> optimisers::base::Optimiser<Tensor<R>>
-    for Optimiser<'a, T>
-{
+impl<T> Sealed for Optimiser<T> {}
+impl<T: LearningRateHandler, R: Rank> optimisers::base::Optimiser<Tensor<R>> for Optimiser<T> {
     fn optimise(&mut self, parameter: &mut Tensor<R>, gradient: &Tensor<R>) {
         let parameter = &mut parameter.0;
         let gradient = &gradient.0;
-        let learning_rate = self.learning_rate_handler.borrow().learning_rate();
+        let learning_rate = self.learning_rate_handler.learning_rate();
         *parameter = &*parameter - (gradient * learning_rate);
     }
+
+    fn init(&mut self, epochs: u16) {
+        self.learning_rate_handler.init(epochs);
+    }
+
+    fn end_epoch(&mut self) {
+        self.learning_rate_handler.end_epoch();
+    }
 }
-impl<'a, T> optimisers::base::Optimiser<()> for Optimiser<'a, T> {
+impl<T> optimisers::base::Optimiser<()> for Optimiser<T> {
     fn optimise(&mut self, _parameter: &mut (), _gradient: &()) {}
+    fn init(&mut self, _epochs: u16) {}
+    fn end_epoch(&mut self) {}
 }
 
 #[cfg(test)]
@@ -73,24 +80,22 @@ mod tests {
         UninitialisedOperation, WithOptimiser,
     };
     use crate::optimisers::learning_rate_handlers::{
-        ExponentialDecayLearningRateHandler, FixedLearningRateHandler, LearningRateHandler,
+        ExponentialDecayLearningRateHandler, FixedLearningRateHandler,
         LinearDecayLearningRateHandler,
     };
     use crate::optimisers::SGD;
     use crate::tensors::{rank, Tensor};
-    use core::cell::RefCell;
 
     #[test]
     fn test_optimise_idempotent() {
         // Arrange
-        let learning_rate_handler = RefCell::new(FixedLearningRateHandler::new(0.0));
         let network = Input::new(3)
             .chain(Dense::new(2, Linear::new()))
             .chain(Dense::new(1, Linear::new()));
         let network = network
             .with_iter([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0].into_iter())
             .unwrap();
-        let mut network = network.with_optimiser(SGD::new(&learning_rate_handler));
+        let mut network = network.with_optimiser(SGD::new(FixedLearningRateHandler::new(0.0)));
         let input = Tensor::<rank::Two>::new((2, 3), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]).unwrap();
         let output_gradient = Tensor::<rank::Two>::new((2, 1), [1.0, 2.0]).unwrap();
         network
@@ -113,14 +118,13 @@ mod tests {
     #[test]
     fn test_optimise_fixed_rate() {
         // Arrange
-        let learning_rate_handler = RefCell::new(FixedLearningRateHandler::new(0.001));
         let network = Input::new(3)
             .chain(Dense::new(2, Linear::new()))
             .chain(Dense::new(1, Linear::new()));
         let network = network
             .with_iter([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0].into_iter())
             .unwrap();
-        let mut network = network.with_optimiser(SGD::new(&learning_rate_handler));
+        let mut network = network.with_optimiser(SGD::new(FixedLearningRateHandler::new(0.001)));
         let input = Tensor::<rank::Two>::new((2, 3), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]).unwrap();
         let output_gradient = Tensor::<rank::Two>::new((2, 1), [1.0, 2.0]).unwrap();
         network
@@ -148,18 +152,18 @@ mod tests {
     #[test]
     fn test_optimise_linear_rate() {
         // Arrange
-        let learning_rate_handler = RefCell::new(LinearDecayLearningRateHandler::new(0.01, 0.001));
         let network = Input::new(3)
             .chain(Dense::new(2, Linear::new()))
             .chain(Dense::new(1, Linear::new()));
         let network = network
             .with_iter([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0].into_iter())
             .unwrap();
-        let mut network = network.with_optimiser(SGD::new(&learning_rate_handler));
+        let mut network =
+            network.with_optimiser(SGD::new(LinearDecayLearningRateHandler::new(0.01, 0.001)));
         let input = Tensor::<rank::Two>::new((2, 3), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]).unwrap();
         let output_gradient = Tensor::<rank::Two>::new((2, 1), [1.0, 2.0]).unwrap();
-        learning_rate_handler.borrow_mut().init(3);
-        learning_rate_handler.borrow_mut().end_epoch();
+        network.init(3);
+        network.end_epoch();
         network
             .forward(input)
             .unwrap()
@@ -192,19 +196,19 @@ mod tests {
     #[test]
     fn test_optimise_exponential_rate() {
         // Arrange
-        let learning_rate_handler =
-            RefCell::new(ExponentialDecayLearningRateHandler::new(0.01, 0.001));
         let network = Input::new(3)
             .chain(Dense::new(2, Linear::new()))
             .chain(Dense::new(1, Linear::new()));
         let network = network
             .with_iter([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0].into_iter())
             .unwrap();
-        let mut network = network.with_optimiser(SGD::new(&learning_rate_handler));
+        let mut network = network.with_optimiser(SGD::new(
+            ExponentialDecayLearningRateHandler::new(0.01, 0.001),
+        ));
         let input = Tensor::<rank::Two>::new((2, 3), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]).unwrap();
         let output_gradient = Tensor::<rank::Two>::new((2, 1), [1.0, 2.0]).unwrap();
-        learning_rate_handler.borrow_mut().init(3);
-        learning_rate_handler.borrow_mut().end_epoch();
+        network.init(3);
+        network.end_epoch();
         network
             .forward(input)
             .unwrap()

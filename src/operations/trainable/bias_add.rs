@@ -1,4 +1,5 @@
 use crate::operations::{forward, initialised, InitialisedOperation, TrainableOperation};
+use crate::optimisers::base::Optimiser;
 use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
 use crate::Result;
@@ -11,15 +12,23 @@ pub struct Operation<T> {
 }
 
 impl<T> Sealed for Operation<T> {}
-impl<T> TrainableOperation for Operation<T> {
+impl<T: Optimiser<Tensor<rank::Two>>> TrainableOperation for Operation<T> {
     type Initialised = initialised::bias_add::Operation;
 
     fn into_initialised(self) -> Self::Initialised {
         self.initialised
     }
+
+    fn init(&mut self, epochs: u16) {
+        self.optimiser.init(epochs);
+    }
+
+    fn end_epoch(&mut self) {
+        self.optimiser.end_epoch();
+    }
 }
 
-impl<'a, T: 'a> forward::Forward<'a> for Operation<T> {
+impl<'a, T: 'a + Optimiser<Tensor<rank::Two>>> forward::Forward<'a> for Operation<T> {
     type Input = Tensor<rank::Two>;
     type Output = Tensor<rank::Two>;
     type Forward = forward::bias_add::Forward<'a, T>;
@@ -70,7 +79,7 @@ mod tests {
         // Arrange
         let parameter = Tensor::<rank::Two>::new((1, 5), [1.0, 2.0, 3.0, 4.0, 5.0]).unwrap();
         let mut operation = Operation {
-            optimiser: (),
+            optimiser: <NullOptimiser as OptimiserFactory<()>>::instantiate(&NullOptimiser::new()),
             initialised: initialised::bias_add::Operation { parameter },
             last_input: Tensor::default(),
         };
@@ -97,7 +106,7 @@ mod tests {
         // Arrange
         let parameter = Tensor::<rank::Two>::new((2, 3), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]).unwrap();
         let mut operation = Operation {
-            optimiser: (),
+            optimiser: <NullOptimiser as OptimiserFactory<()>>::instantiate(&NullOptimiser::new()),
             initialised: initialised::bias_add::Operation { parameter },
             last_input: Tensor::default(),
         };
@@ -115,7 +124,7 @@ mod tests {
         // Arrange
         let parameter = Tensor::<rank::Two>::new((1, 3), [1.0, 2.0, 3.0]).unwrap();
         let mut operation = Operation {
-            optimiser: (),
+            optimiser: <NullOptimiser as OptimiserFactory<()>>::instantiate(&NullOptimiser::new()),
             initialised: initialised::bias_add::Operation { parameter },
             last_input: Tensor::default(),
         };

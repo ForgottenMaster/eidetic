@@ -55,10 +55,16 @@ mod tests {
         fn optimise(&mut self, parameter: &mut Tensor<rank::Two>, gradient: &Tensor<rank::Two>) {
             *parameter = Tensor(&parameter.0 - &gradient.0);
         }
+
+        fn init(&mut self, _epochs: u16) {}
+
+        fn end_epoch(&mut self) {}
     }
 
     impl Optimiser<()> for DummyOptimiser {
         fn optimise(&mut self, _parameter: &mut (), _gradient: &()) {}
+        fn init(&mut self, _epochs: u16) {}
+        fn end_epoch(&mut self) {}
     }
 
     #[test]

@@ -24,6 +24,16 @@ where
         let rhs = self.rhs.into_initialised();
         Self::Initialised { lhs, rhs }
     }
+
+    fn init(&mut self, epochs: u16) {
+        self.lhs.init(epochs);
+        self.rhs.init(epochs);
+    }
+
+    fn end_epoch(&mut self) {
+        self.lhs.end_epoch();
+        self.rhs.end_epoch();
+    }
 }
 
 impl<'a, T, U> Forward<'a> for Operation<T, U>

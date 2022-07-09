@@ -27,4 +27,13 @@ pub trait Operation: Sealed {
     /// to be used for inference, or allows a different optimiser to be
     /// used (though the optimiser obviously starts from scratch).
     fn into_initialised(self) -> Self::Initialised;
+
+    /// This function can be called at the beginning of training by the trainer
+    /// to initialise the optimisers in the network if needed to account for the
+    /// specific number of epochs we'll be training over.
+    fn init(&mut self, epochs: u16);
+
+    /// This function can be called at the end of an epoch by the trainer to provide
+    /// a chance to update any internal optimisers as needed.
+    fn end_epoch(&mut self);
 }

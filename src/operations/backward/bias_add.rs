@@ -30,6 +30,10 @@ mod tests {
         fn optimise(&mut self, parameter: &mut Tensor<rank::Two>, gradient: &Tensor<rank::Two>) {
             *parameter = Tensor(parameter.0.clone() - gradient.0.clone());
         }
+
+        fn init(&mut self, _epochs: u16) {}
+
+        fn end_epoch(&mut self) {}
     }
 
     #[test]

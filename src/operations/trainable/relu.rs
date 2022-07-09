@@ -17,6 +17,10 @@ impl trainable::Operation for Operation {
     fn into_initialised(self) -> Self::Initialised {
         self.initialised
     }
+
+    fn init(&mut self, _epochs: u16) {}
+
+    fn end_epoch(&mut self) {}
 }
 
 impl<'a> forward::Forward<'a> for Operation {
