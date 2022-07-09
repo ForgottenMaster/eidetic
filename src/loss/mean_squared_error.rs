@@ -72,4 +72,19 @@ mod tests {
         assert_eq!(loss, expected_loss);
         assert_eq!(output_gradient, expected_output_gradient);
     }
+
+    #[test]
+    fn test_loss_error() {
+        // Arrange
+        let mse = MeanSquaredError::new();
+        let predictions = Tensor::<rank::Two>::new((3, 1), [23.0, -17.0, 22.0]).unwrap();
+        let targets =
+            Tensor::<rank::Two>::new((3, 2), [12.0, 13.0, -7.0, 12.0, 13.0, -7.0]).unwrap();
+
+        // Act
+        let result = mse.loss(&predictions, &targets);
+
+        // Assert
+        assert!(result.is_err());
+    }
 }
