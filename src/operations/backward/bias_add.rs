@@ -61,4 +61,14 @@ mod tests {
         // Assert
         assert_eq!(train.initialised.parameter, expected);
     }
+
+    #[test]
+    fn test_empty_functions() {
+        // Arrange
+        let mut optimiser = DummyOptimiser;
+
+        // Act
+        optimiser.init(3);
+        optimiser.end_epoch();
+    }
 }
