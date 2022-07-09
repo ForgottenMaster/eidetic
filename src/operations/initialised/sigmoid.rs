@@ -6,7 +6,7 @@ use crate::tensors::{rank, Tensor};
 use crate::{ElementType, Error, Result};
 use core::iter::{empty, Empty};
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Operation {
     pub(crate) neurons: u16,
 }

@@ -4,7 +4,7 @@ use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
 use crate::Result;
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Operation {
     pub(crate) initialised: initialised::relu::Operation,
     pub(crate) last_output: Tensor<rank::Two>,
@@ -101,5 +101,25 @@ mod tests {
 
         // Assert
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_idempotent_functions() {
+        // Arrange
+        let mut trainable = Operation {
+            initialised: initialised::relu::Operation {
+                neurons: 2,
+                factor: 0.01,
+            },
+            last_output: Tensor::default(),
+        };
+        let expected = trainable.clone();
+
+        // Act
+        trainable.init(3);
+        trainable.end_epoch();
+
+        // Assert
+        assert_eq!(trainable, expected);
     }
 }
