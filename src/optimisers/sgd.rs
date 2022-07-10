@@ -64,11 +64,6 @@ impl<T: LearningRateHandler, R: Rank> optimisers::base::Optimiser<Tensor<R>> for
         self.learning_rate_handler.end_epoch();
     }
 }
-impl<T> optimisers::base::Optimiser<()> for Optimiser<T> {
-    fn optimise(&mut self, _parameter: &mut (), _gradient: &()) {}
-    fn init(&mut self, _epochs: u16) {}
-    fn end_epoch(&mut self) {}
-}
 
 #[cfg(test)]
 mod tests {
