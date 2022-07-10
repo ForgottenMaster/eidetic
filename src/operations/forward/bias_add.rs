@@ -5,12 +5,12 @@ use crate::tensors::{rank, Tensor};
 use crate::{Error, Result};
 use ndarray::{Array, Axis};
 
-pub struct Forward<'a, T: 'a> {
+pub struct Operation<'a, T: 'a> {
     pub(crate) borrow: &'a mut trainable::bias_add::Operation<T>,
 }
 
-impl<'a, T: 'a> Sealed for Forward<'a, T> {}
-impl<'a, T: 'a> ForwardOperation for Forward<'a, T> {
+impl<'a, T: 'a> Sealed for Operation<'a, T> {}
+impl<'a, T: 'a> ForwardOperation for Operation<'a, T> {
     type Output = Tensor<rank::Two>;
     type Input = Tensor<rank::Two>;
     type Backward = backward::bias_add::Operation<'a, T>;
@@ -69,7 +69,7 @@ mod tests {
             Tensor::<rank::Two>::new((2, 3), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]).unwrap();
         let expected_parameter_gradient =
             Tensor::<rank::Two>::new((1, 3), [5.0, 7.0, 9.0]).unwrap();
-        let forward = Forward { borrow: &mut train };
+        let forward = Operation { borrow: &mut train };
 
         // Act
         let (backward, input_gradient) = forward.backward(output_gradient).unwrap();
@@ -93,7 +93,7 @@ mod tests {
             last_input,
         };
         let output_gradient = Tensor::<rank::Two>::new((2, 2), [1.0, 2.0, 3.0, 4.0]).unwrap();
-        let forward = Forward { borrow: &mut train };
+        let forward = Operation { borrow: &mut train };
 
         // Act
         let result = forward.backward(output_gradient);
