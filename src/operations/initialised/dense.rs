@@ -5,7 +5,7 @@ use crate::tensors::{rank, Tensor};
 use crate::Result;
 use core::iter::Chain;
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Operation<T> {
     pub(crate) weight_multiply: initialised::weight_multiply::Operation,
     pub(crate) bias_add: initialised::bias_add::Operation,

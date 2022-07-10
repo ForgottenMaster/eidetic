@@ -4,7 +4,7 @@ use crate::private::Sealed;
 use crate::tensors::{rank, Tensor, TensorIterator};
 use crate::{Error, Result};
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Operation {
     pub(crate) parameter: Tensor<rank::Two>,
 }
