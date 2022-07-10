@@ -325,7 +325,7 @@ mod tests {
             ));
         let loss_function = MeanSquaredError::new();
         let training_batch = Tensor::<rank::Two>::new((1, 2), [1.0, 2.0]).unwrap();
-        let training_targets = Tensor::<rank::Two>::new((1, 2), [1.0, 2.0]).unwrap();
+        let training_targets = Tensor::<rank::Two>::new((2, 1), [1.0, 2.0]).unwrap();
         let testing_batch = Tensor::<rank::Two>::new((1, 2), [1.0, 2.0]).unwrap();
         let testing_targets = Tensor::<rank::Two>::new((1, 1), [1.0]).unwrap();
 
