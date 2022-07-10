@@ -308,4 +308,74 @@ mod tests {
         );
         assert_eq!(testing_targets, testing_outputs);
     }
+
+    #[test]
+    fn test_training_failure() {
+        // Arrange
+        let network = Input::new(2)
+            .chain(Dense::new(10, Tanh::new()))
+            .chain(Dense::new(1, Linear::new()))
+            .with_seed(42)
+            .with_optimiser(SGDMomentum::new(
+                LinearDecayLearningRateHandler::new(0.1, 0.01),
+                0.9,
+            ));
+        let loss_function = MeanSquaredError::new();
+        let training_batch = Tensor::<rank::Two>::new((1, 2), [1.0, 2.0]).unwrap();
+        let training_targets = Tensor::<rank::Two>::new((1, 2), [1.0, 2.0]).unwrap();
+        let testing_batch = Tensor::<rank::Two>::new((1, 2), [1.0, 2.0]).unwrap();
+        let testing_targets = Tensor::<rank::Two>::new((1, 1), [1.0]).unwrap();
+
+        // Act
+        let result = train(
+            network,
+            &loss_function,
+            training_batch,
+            training_targets,
+            &testing_batch,
+            &testing_targets,
+            1000,
+            10,
+            5,
+            42,
+        );
+
+        // Assert
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_training_exhausts() {
+        // Arrange
+        let network = Input::new(2)
+            .chain(Dense::new(10, Tanh::new()))
+            .chain(Dense::new(1, Linear::new()))
+            .with_seed(42)
+            .with_optimiser(SGDMomentum::new(
+                LinearDecayLearningRateHandler::new(0.1, 0.01),
+                0.9,
+            ));
+        let loss_function = MeanSquaredError::new();
+        let training_batch = Tensor::<rank::Two>::new((1, 2), [1.0, 2.0]).unwrap();
+        let training_targets = Tensor::<rank::Two>::new((1, 1), [1.0]).unwrap();
+        let testing_batch = Tensor::<rank::Two>::new((1, 2), [1.0, 2.0]).unwrap();
+        let testing_targets = Tensor::<rank::Two>::new((1, 1), [1.0]).unwrap();
+
+        // Act
+        let result = train(
+            network,
+            &loss_function,
+            training_batch,
+            training_targets,
+            &testing_batch,
+            &testing_targets,
+            10,
+            10,
+            5,
+            42,
+        );
+
+        // Assert
+        assert!(result.is_ok());
+    }
 }
