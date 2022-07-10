@@ -86,64 +86,66 @@ where
     if (batch_train.nrows() != targets_train.nrows())
         || (batch_test.0.nrows() != targets_test.0.nrows())
     {
-        return Err(Error(()));
-    }
+        Err(Error(()))
+    } else {
+        // make the network trainable first.
+        let mut best_loss: Option<ElementType> = None;
+        let mut best_network: Option<N> = None;
+        network.init(epochs);
 
-    // make the network trainable first.
-    let mut best_loss: Option<ElementType> = None;
-    let mut best_network: Option<N> = None;
-    network.init(epochs);
+        // loop number of epochs. For each one, permute data, generate batches
+        // and every "eval_every" epochs, check against testing data.
+        for e in 0..epochs {
+            // potentially store the last model if this is an epoch where we may need to return to it.
+            let last_model = if (e + 1) % eval_every == 0 {
+                Some(network.clone())
+            } else {
+                None
+            };
 
-    // loop number of epochs. For each one, permute data, generate batches
-    // and every "eval_every" epochs, check against testing data.
-    for e in 0..epochs {
-        // potentially store the last model if this is an epoch where we may need to return to it.
-        let last_model = if (e + 1) % eval_every == 0 {
-            Some(network.clone())
-        } else {
-            None
-        };
-
-        // permute data first, using seed + epoch number for randomness.
-        // then generate the batches, and for each one run a training pass for it.
-        let epoch_seed = seed + u64::from(e);
-        let (batch_train, targets_train) =
-            permute_data(batch_train.clone(), &targets_train, epoch_seed);
-        for (batch, targets) in generate_batches(&batch_train, &targets_train, batch_size) {
-            let (batch, targets) = (Tensor(batch), Tensor(targets));
-            let (forward, output) = network.forward(batch)?;
-            let (_, loss_gradient) = loss_function.loss(&output, &targets)?;
-            let (backward, _) = forward.backward(loss_gradient)?;
-            backward.optimise();
-        }
-
-        // if we're on an epoch that's evaluating the loss against the test batch,
-        // then we will do this and early out if the loss worsens.
-        if let Some(mut last_model) = last_model {
-            // determine the loss against test data.
-            let (_, output) = last_model.forward(batch_test.clone())?;
-            let (loss, _) = loss_function.loss(&output, targets_test)?;
-
-            // if we have a previous best loss and it's less than the
-            // current loss, then early return previous network.
-            if let Some(best_loss) = best_loss {
-                if best_loss < loss.abs() {
-                    return best_network.ok_or(Error(()));
-                }
+            // permute data first, using seed + epoch number for randomness.
+            // then generate the batches, and for each one run a training pass for it.
+            let epoch_seed = seed + u64::from(e);
+            let epoch_batch_train = batch_train.clone();
+            let epoch_targets_train = &targets_train;
+            let permuted = permute_data(epoch_batch_train, epoch_targets_train, epoch_seed);
+            let (batch_train, targets_train) = permuted;
+            for (batch, targets) in generate_batches(&batch_train, &targets_train, batch_size) {
+                let (batch, targets) = (Tensor(batch), Tensor(targets));
+                let (forward, output) = network.forward(batch)?;
+                let (_, loss_gradient) = loss_function.loss(&output, &targets)?;
+                let (backward, _) = forward.backward(loss_gradient)?;
+                backward.optimise();
             }
 
-            best_loss = Some(loss.abs());
-            best_network = Some(last_model);
+            // if we're on an epoch that's evaluating the loss against the test batch,
+            // then we will do this and early out if the loss worsens.
+            if let Some(mut last_model) = last_model {
+                // determine the loss against test data.
+                let (_, output) = last_model.forward(batch_test.clone())?;
+                let (loss, _) = loss_function.loss(&output, targets_test)?;
+
+                // if we have a previous best loss and it's less than the
+                // current loss, then early return previous network.
+                if let Some(best_loss) = best_loss {
+                    if best_loss < loss.abs() {
+                        return best_network.ok_or(Error(()));
+                    }
+                }
+
+                best_loss = Some(loss.abs());
+                best_network = Some(last_model);
+            }
+
+            // Update the network to update the optimisers, etc. at the end of the epoch.
+            if e < (epochs - 1) {
+                network.end_epoch();
+            }
         }
 
-        // Update the network to update the optimisers, etc. at the end of the epoch.
-        if e < (epochs - 1) {
-            network.end_epoch();
-        }
+        // get the trained network out of the training wrapper.
+        Ok(network)
     }
-
-    // get the trained network out of the training wrapper.
-    Ok(network)
 }
 
 #[cfg(test)]
