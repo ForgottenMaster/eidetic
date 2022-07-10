@@ -48,6 +48,7 @@ impl<T> optimisers::base::OptimiserFactory<()> for OptimiserFactory<T> {
     }
 }
 
+#[derive(Clone, Debug, PartialEq)]
 pub struct Optimiser<T, R: Rank> {
     learning_rate_handler: T,
     velocity: Option<Array<ElementType, R::Internal>>,

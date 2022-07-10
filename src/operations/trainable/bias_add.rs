@@ -4,7 +4,7 @@ use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
 use crate::Result;
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Operation<T> {
     pub(crate) optimiser: T,
     pub(crate) initialised: initialised::bias_add::Operation,

@@ -2,7 +2,7 @@ use crate::operations::{forward, initialised, Forward, TrainableOperation};
 use crate::private::Sealed;
 use crate::Result;
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Operation<T, U> {
     pub(crate) lhs: T,
     pub(crate) rhs: U,

@@ -31,7 +31,7 @@ impl<T> optimisers::base::OptimiserFactory<T> for OptimiserFactory {
 
 /// This struct is the concrete optimiser that is produced by the
 /// null `OptimiserFactory`.
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Optimiser(());
 
 impl Optimiser {

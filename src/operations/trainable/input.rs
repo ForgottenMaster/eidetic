@@ -3,7 +3,7 @@ use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
 use crate::{Error, Result};
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 #[repr(C)] // code coverage hack, I dislike <100% in the report :(
 pub struct Operation(pub(crate) initialised::input::Operation);
 
