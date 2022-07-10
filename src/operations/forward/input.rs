@@ -4,10 +4,10 @@ use crate::tensors::{rank, Tensor};
 use crate::{Error, Result};
 
 #[derive(Debug, Eq, PartialEq)]
-pub struct Forward<'a>(pub(crate) &'a mut trainable::input::Operation);
+pub struct Operation<'a>(pub(crate) &'a mut trainable::input::Operation);
 
-impl Sealed for Forward<'_> {}
-impl<'a> forward::Operation for Forward<'a> {
+impl Sealed for Operation<'_> {}
+impl<'a> forward::Operation for Operation<'a> {
     type Output = Tensor<rank::Two>;
     type Input = Tensor<rank::Two>;
     type Backward = backward::input::Operation;
@@ -33,7 +33,7 @@ mod tests {
         // Arrange
         let mut operation =
             trainable::input::Operation(initialised::input::Operation { neurons: 3 });
-        let forward = Forward(&mut operation);
+        let forward = Operation(&mut operation);
         let output_gradient = Tensor::<rank::Two>::new((1, 3), [1.0, 2.0, 3.0]).unwrap();
         let expected = output_gradient.clone();
 
@@ -49,7 +49,7 @@ mod tests {
         // Arrange
         let mut operation =
             trainable::input::Operation(initialised::input::Operation { neurons: 3 });
-        let forward = Forward(&mut operation);
+        let forward = Operation(&mut operation);
         let output_gradient = Tensor::<rank::Two>::new((1, 4), [1.0, 2.0, 3.0, 4.0]).unwrap();
 
         // Act

@@ -3,13 +3,13 @@ use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
 use crate::{Error, Result};
 
-pub struct Forward<'a, T: 'a> {
+pub struct Operation<'a, T: 'a> {
     pub(crate) borrow: &'a mut trainable::weight_multiply::Operation<T>,
 }
 
 // Functions to try to work around the false reporting in code
 // coverage. Won't change the results, but hopefully will trick the code coverage
-impl<'a, T: 'a> Forward<'a, T> {
+impl<'a, T: 'a> Operation<'a, T> {
     fn get_input_gradient(&self, output_gradient: &Tensor<rank::Two>) -> Tensor<rank::Two> {
         let output_gradient = &output_gradient.0;
         let reversed_axes = self.borrow.initialised.parameter.0.clone().reversed_axes();
@@ -36,8 +36,8 @@ impl<'a, T: 'a> Forward<'a, T> {
     }
 }
 
-impl<'a, T: 'a> Sealed for Forward<'a, T> {}
-impl<'a, T: 'a> ForwardOperation for Forward<'a, T> {
+impl<'a, T: 'a> Sealed for Operation<'a, T> {}
+impl<'a, T: 'a> ForwardOperation for Operation<'a, T> {
     type Output = Tensor<rank::Two>;
     type Input = Tensor<rank::Two>;
     type Backward = backward::weight_multiply::Operation<'a, T>;
@@ -83,7 +83,7 @@ mod tests {
             Tensor::<rank::Two>::new((2, 3), [7.0, 8.0, 9.0, 7.0, 8.0, 9.0]).unwrap();
         let expected_parameter_gradient =
             Tensor::<rank::Two>::new((3, 1), [5.0, 7.0, 9.0]).unwrap();
-        let forward = Forward { borrow: &mut train };
+        let forward = Operation { borrow: &mut train };
 
         // Act
         let (backward, input_gradient) = forward.backward(output_gradient).unwrap();
@@ -111,7 +111,7 @@ mod tests {
         };
         let output_gradient =
             Tensor::<rank::Two>::new((3, 2), [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]).unwrap();
-        let forward = Forward { borrow: &mut train };
+        let forward = Operation { borrow: &mut train };
 
         // Act
         let result = forward.backward(output_gradient);

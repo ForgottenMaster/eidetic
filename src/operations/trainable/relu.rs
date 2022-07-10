@@ -26,12 +26,12 @@ impl trainable::Operation for Operation {
 impl<'a> forward::Forward<'a> for Operation {
     type Input = Tensor<rank::Two>;
     type Output = Tensor<rank::Two>;
-    type Forward = forward::relu::Forward<'a>;
+    type Forward = forward::relu::Operation<'a>;
 
     fn forward(&'a mut self, input: Self::Input) -> Result<(Self::Forward, Self::Output)> {
         self.last_output = self.initialised.predict(input)?;
         let clone = self.last_output.clone();
-        Ok((forward::relu::Forward(self), clone))
+        Ok((forward::relu::Operation(self), clone))
     }
 }
 

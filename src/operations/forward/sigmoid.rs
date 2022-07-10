@@ -4,10 +4,10 @@ use crate::tensors::{rank, Tensor};
 use crate::{Error, Result};
 
 #[derive(Debug, PartialEq)]
-pub struct Forward<'a>(pub(crate) &'a mut trainable::sigmoid::Operation);
+pub struct Operation<'a>(pub(crate) &'a mut trainable::sigmoid::Operation);
 
-impl Sealed for Forward<'_> {}
-impl<'a> forward::Operation for Forward<'a> {
+impl Sealed for Operation<'_> {}
+impl<'a> forward::Operation for Operation<'a> {
     type Output = Tensor<rank::Two>;
     type Input = Tensor<rank::Two>;
     type Backward = backward::sigmoid::Operation;
@@ -41,7 +41,7 @@ mod tests {
             initialised: initialised::sigmoid::Operation { neurons: 3 },
             last_output,
         };
-        let forward = Forward(&mut operation);
+        let forward = Operation(&mut operation);
         let output_gradient = Tensor::<rank::Two>::new((1, 3), [1.0, 1.0, 1.0]).unwrap();
         #[cfg(feature = "f32")]
         let expected =
@@ -65,7 +65,7 @@ mod tests {
             initialised: initialised::sigmoid::Operation { neurons: 3 },
             last_output: Tensor::default(),
         };
-        let forward = Forward(&mut operation);
+        let forward = Operation(&mut operation);
         let output_gradient = Tensor::<rank::Two>::new((1, 4), [1.0, 2.0, 3.0, 4.0]).unwrap();
 
         // Act

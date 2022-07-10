@@ -23,11 +23,11 @@ impl trainable::Operation for Operation {
 impl<'a> forward::Forward<'a> for Operation {
     type Input = Tensor<rank::Two>;
     type Output = Tensor<rank::Two>;
-    type Forward = forward::input::Forward<'a>;
+    type Forward = forward::input::Operation<'a>;
 
     fn forward(&'a mut self, input: Self::Input) -> Result<(Self::Forward, Self::Output)> {
         if self.0.neurons as usize == input.0.ncols() {
-            Ok((forward::input::Forward(self), input))
+            Ok((forward::input::Operation(self), input))
         } else {
             Err(Error(()))
         }

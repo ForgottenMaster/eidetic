@@ -31,12 +31,12 @@ impl<T: Optimiser<Tensor<rank::Two>>> trainable::Operation for Operation<T> {
 impl<'a, T: 'a + Optimiser<Tensor<rank::Two>>> forward::Forward<'a> for Operation<T> {
     type Input = Tensor<rank::Two>;
     type Output = Tensor<rank::Two>;
-    type Forward = forward::weight_multiply::Forward<'a, T>;
+    type Forward = forward::weight_multiply::Operation<'a, T>;
 
     fn forward(&'a mut self, input: Self::Input) -> Result<(Self::Forward, Self::Output)> {
         self.last_input = input.clone();
         let output = self.initialised.predict(input)?;
-        let forward = forward::weight_multiply::Forward { borrow: self };
+        let forward = forward::weight_multiply::Operation { borrow: self };
         Ok((forward, output))
     }
 }
