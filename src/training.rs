@@ -106,8 +106,9 @@ where
 
         // permute data first, using seed + epoch number for randomness.
         // then generate the batches, and for each one run a training pass for it.
+        let epoch_seed = seed + u64::from(e);
         let (batch_train, targets_train) =
-            permute_data(batch_train.clone(), &targets_train, seed + u64::from(e));
+            permute_data(batch_train.clone(), &targets_train, epoch_seed);
         for (batch, targets) in generate_batches(&batch_train, &targets_train, batch_size) {
             let (batch, targets) = (Tensor(batch), Tensor(targets));
             let (forward, output) = network.forward(batch)?;
