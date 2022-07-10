@@ -152,7 +152,7 @@ where
 mod tests {
     use super::*;
     use crate::activations::{Linear, Tanh};
-    use crate::layers::{Chain, Dense, Input};
+    use crate::layers::{Chain, Dense, Dropout, Input};
     use crate::loss::MeanSquaredError;
     use crate::operations::{InitialisedOperation, UninitialisedOperation, WithOptimiser};
     use crate::optimisers::learning_rate_handlers::LinearDecayLearningRateHandler;
@@ -235,6 +235,7 @@ mod tests {
         // Arrange
         let network = Input::new(2)
             .chain(Dense::new(10, Tanh::new()))
+            .chain(Dropout::new(0.99))
             .chain(Dense::new(1, Linear::new()))
             .with_seed(42)
             .with_optimiser(SGDMomentum::new(
