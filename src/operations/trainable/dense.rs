@@ -1,4 +1,4 @@
-use crate::operations::{forward, initialised, Forward, TrainableOperation};
+use crate::operations::{forward, initialised, Forward, ForwardOperation, TrainableOperation};
 use crate::private::Sealed;
 use crate::Result;
 
@@ -49,6 +49,11 @@ impl<
             + TrainableOperation<Initialised = initialised::bias_add::Operation>,
         V: Forward<'a, Input = <U as Forward<'a>>::Output> + TrainableOperation,
     > Forward<'a> for Operation<T, U, V>
+where
+    <U as Forward<'a>>::Forward: ForwardOperation<
+        Input = <<T as Forward<'a>>::Forward as ForwardOperation>::Output,
+        Output = <<V as Forward<'a>>::Forward as ForwardOperation>::Input,
+    >,
 {
     type Input = <T as Forward<'a>>::Input;
     type Output = <V as Forward<'a>>::Output;

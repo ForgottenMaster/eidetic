@@ -1,4 +1,4 @@
-use crate::operations::{forward, initialised, Forward, TrainableOperation};
+use crate::operations::{forward, initialised, Forward, ForwardOperation, TrainableOperation};
 use crate::private::Sealed;
 use crate::Result;
 
@@ -40,6 +40,8 @@ impl<'a, T, U> Forward<'a> for Operation<T, U>
 where
     T: Forward<'a>,
     U: Forward<'a, Input = <T as Forward<'a>>::Output>,
+    <U as Forward<'a>>::Forward:
+        ForwardOperation<Input = <<T as Forward<'a>>::Forward as ForwardOperation>::Output>,
 {
     type Input = <T as Forward<'a>>::Input;
     type Output = <U as Forward<'a>>::Output;

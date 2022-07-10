@@ -1,4 +1,5 @@
 use crate::operations::{backward, trainable, ForwardOperation};
+use crate::optimisers::base::Optimiser;
 use crate::private::Sealed;
 use crate::tensors::{rank, Tensor};
 use crate::{Error, Result};
@@ -37,7 +38,7 @@ impl<'a, T: 'a> Operation<'a, T> {
 }
 
 impl<'a, T: 'a> Sealed for Operation<'a, T> {}
-impl<'a, T: 'a> ForwardOperation for Operation<'a, T> {
+impl<'a, T: 'a + Optimiser<Tensor<rank::Two>>> ForwardOperation for Operation<'a, T> {
     type Output = Tensor<rank::Two>;
     type Input = Tensor<rank::Two>;
     type Backward = backward::weight_multiply::Operation<'a, T>;

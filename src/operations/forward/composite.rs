@@ -10,8 +10,8 @@ pub struct Operation<T, U> {
 impl<T, U> Sealed for Operation<T, U> {}
 impl<T, U> ForwardOperation for Operation<T, U>
 where
-    T: ForwardOperation<Output = <U as ForwardOperation>::Input>,
-    U: ForwardOperation,
+    T: ForwardOperation,
+    U: ForwardOperation<Input = <T as ForwardOperation>::Output>,
 {
     type Output = <U as ForwardOperation>::Output;
     type Input = <T as ForwardOperation>::Input;

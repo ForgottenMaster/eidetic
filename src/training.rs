@@ -3,10 +3,7 @@
 //! number of epochs with a certain optimisation strategy, etc.
 
 use crate::loss::Loss;
-use crate::operations::{
-    BackwardOperation, Forward, ForwardOperation, InitialisedOperation, TrainableOperation,
-    WithOptimiser,
-};
+use crate::operations::{BackwardOperation, Forward, ForwardOperation, TrainableOperation};
 use crate::tensors::{rank, Tensor};
 use crate::{ElementType, Error, Result};
 use ndarray::{Array, ArrayView, Axis, Ix2};
@@ -66,9 +63,8 @@ fn permute_data(
 /// Returns an `eidetic::Error` if the shapes of batches or targets don't agree with the network, or if the number of
 /// rows in a batch doesn't match the number of rows in a targets tensor.
 #[allow(clippy::too_many_arguments)]
-pub fn train<N, O>(
-    network: N,
-    optimiser_factory: O,
+pub fn train<N>(
+    mut network: N,
     loss_function: &impl Loss,
     batch_train: Tensor<rank::Two>,
     targets_train: Tensor<rank::Two>,
@@ -80,16 +76,9 @@ pub fn train<N, O>(
     seed: u64,
 ) -> Result<N>
 where
-    N: InitialisedOperation<Input = Tensor<rank::Two>, Output = Tensor<rank::Two>>
-        + WithOptimiser<O>
+    for<'a> N: TrainableOperation
+        + Forward<'a, Input = Tensor<rank::Two>, Output = Tensor<rank::Two>>
         + Clone,
-    <N as WithOptimiser<O>>::Trainable: TrainableOperation<Initialised = N>
-        + Clone
-        + for<'a> Forward<'a, Input = Tensor<rank::Two>, Output = Tensor<rank::Two>>,
-    for<'a> <<N as WithOptimiser<O>>::Trainable as Forward<'a>>::Forward:
-        ForwardOperation<Output = Tensor<rank::Two>>,
-    for<'a> <<<N as WithOptimiser<O>>::Trainable as Forward<'a>>::Forward as ForwardOperation>::Backward:
-        BackwardOperation,
 {
     // check the input data is correctly shaped first (number of rows in the
     // batch should match number of rows in the targets).
@@ -103,7 +92,6 @@ where
     // make the network trainable first.
     let mut best_loss: Option<ElementType> = None;
     let mut best_network: Option<N> = None;
-    let mut network = network.with_optimiser(optimiser_factory);
     network.init(epochs);
 
     // loop number of epochs. For each one, permute data, generate batches
@@ -111,7 +99,7 @@ where
     for e in 0..epochs {
         // potentially store the last model if this is an epoch where we may need to return to it.
         let last_model = if (e + 1) % eval_every == 0 {
-            Some(network.clone().into_initialised())
+            Some(network.clone())
         } else {
             None
         };
@@ -130,9 +118,9 @@ where
 
         // if we're on an epoch that's evaluating the loss against the test batch,
         // then we will do this and early out if the loss worsens.
-        if let Some(last_model) = last_model {
+        if let Some(mut last_model) = last_model {
             // determine the loss against test data.
-            let output = last_model.predict(batch_test.clone())?;
+            let (_, output) = last_model.forward(batch_test.clone())?;
             let (loss, _) = loss_function.loss(&output, targets_test)?;
 
             // if we have a previous best loss and it's less than the
@@ -154,12 +142,20 @@ where
     }
 
     // get the trained network out of the training wrapper.
-    Ok(network.into_initialised())
+    Ok(network)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::activations::{Linear, Tanh};
+    use crate::layers::{Chain, Dense, Input};
+    use crate::loss::MeanSquaredError;
+    use crate::operations::{InitialisedOperation, UninitialisedOperation, WithOptimiser};
+    use crate::optimisers::learning_rate_handlers::LinearDecayLearningRateHandler;
+    use crate::optimisers::SGDMomentum;
+    use rand::distributions::Standard;
+    use rand::Rng;
 
     #[test]
     fn test_generate_batches_with_size_greater_than_rows() {
@@ -229,5 +225,87 @@ mod tests {
 
         // Assert
         assert_eq!(targets, expected);
+    }
+
+    #[test]
+    fn test_training() {
+        // Arrange
+        let network = Input::new(2)
+            .chain(Dense::new(10, Tanh::new()))
+            .chain(Dense::new(1, Linear::new()))
+            .with_seed(42)
+            .with_optimiser(SGDMomentum::new(
+                LinearDecayLearningRateHandler::new(0.1, 0.01),
+                0.9,
+            ));
+        let loss_function = MeanSquaredError::new();
+
+        const TRAINING_BATCH_COUNT: usize = 100;
+        let training_batch = Tensor::<rank::Two>::new(
+            (TRAINING_BATCH_COUNT, 2),
+            StdRng::seed_from_u64(42)
+                .sample_iter(Standard)
+                .take(TRAINING_BATCH_COUNT * 2),
+        )
+        .unwrap();
+        let training_targets = Tensor::<rank::Two>::new(
+            (TRAINING_BATCH_COUNT, 1),
+            training_batch
+                .0
+                .as_slice()
+                .unwrap()
+                .chunks(2)
+                .map(|slice| (slice[0] < slice[1]) as u64 as ElementType),
+        )
+        .unwrap();
+
+        const TESTING_BATCH_COUNT: usize = 20;
+        let testing_batch = Tensor::<rank::Two>::new(
+            (TESTING_BATCH_COUNT, 2),
+            StdRng::seed_from_u64(43)
+                .sample_iter(Standard)
+                .take(TESTING_BATCH_COUNT * 2),
+        )
+        .unwrap();
+        let testing_targets = Tensor::<rank::Two>::new(
+            (TESTING_BATCH_COUNT, 1),
+            testing_batch
+                .0
+                .as_slice()
+                .unwrap()
+                .chunks(2)
+                .map(|slice| (slice[0] < slice[1]) as u64 as ElementType),
+        )
+        .unwrap();
+
+        // Act
+        let network = train(
+            network,
+            &loss_function,
+            training_batch,
+            training_targets,
+            &testing_batch,
+            &testing_targets,
+            1000,
+            10,
+            5,
+            42,
+        )
+        .unwrap()
+        .into_initialised();
+
+        // Assert
+        let mut testing_outputs = network.predict(testing_batch).unwrap();
+        testing_outputs
+            .0
+            .mapv_inplace(|elem| if elem < 0.5 { 0.0 } else { 1.0 });
+        assert_eq!(
+            loss_function
+                .loss(&testing_outputs, &testing_targets)
+                .unwrap()
+                .0,
+            0.0
+        );
+        assert_eq!(testing_targets, testing_outputs);
     }
 }

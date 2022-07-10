@@ -14,7 +14,7 @@ pub mod sigmoid;
 pub mod tanh;
 pub mod weight_multiply;
 
-use crate::operations::TrainableOperation;
+use crate::operations::{BackwardOperation, ForwardOperation, TrainableOperation};
 use crate::private::Sealed;
 use crate::Result;
 
@@ -30,7 +30,7 @@ pub trait Forward<'a>: Sealed + TrainableOperation {
 
     /// This associated type defines the concrete output type for this forward pass
     /// given the lifetime we were given.
-    type Forward;
+    type Forward: ForwardOperation<Output = Self::Output>;
 
     /// Begins the forward pass of the operation, with the given input.
     ///
@@ -53,7 +53,7 @@ pub trait Operation: Sealed {
     /// This is the type representing this Operation that has had the backward
     /// pass run and is now ready to apply gradients using the optimiser that should
     /// be built in.
-    type Backward;
+    type Backward: BackwardOperation;
 
     /// This function maps the forward pass to a backward one, calculating the
     /// gradients ready for optimisation.
