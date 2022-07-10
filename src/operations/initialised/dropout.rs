@@ -29,10 +29,7 @@ impl InitialisedOperation for Operation {
     }
 }
 
-impl<T> WithOptimiser<T> for Operation
-where
-    T: OptimiserFactory<()>,
-{
+impl<T: OptimiserFactory<()>> WithOptimiser<T> for Operation {
     type Trainable = trainable::dropout::Operation;
 
     fn with_optimiser(self, _optimiser: T) -> Self::Trainable {
