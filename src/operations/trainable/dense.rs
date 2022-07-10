@@ -52,7 +52,7 @@ impl<
 {
     type Input = <T as Forward<'a>>::Input;
     type Output = <V as Forward<'a>>::Output;
-    type Forward = forward::dense::Forward<
+    type Forward = forward::dense::Operation<
         <T as Forward<'a>>::Forward,
         <U as Forward<'a>>::Forward,
         <V as Forward<'a>>::Forward,
@@ -62,7 +62,7 @@ impl<
         let (weight_multiply, input) = self.weight_multiply.forward(input)?;
         let (bias_add, input) = self.bias_add.forward(input)?;
         let (activation_function, output) = self.activation_function.forward(input)?;
-        let forward = forward::dense::Forward {
+        let forward = forward::dense::Operation {
             weight_multiply,
             bias_add,
             activation_function,

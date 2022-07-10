@@ -2,18 +2,18 @@ use crate::operations::{backward, ForwardOperation};
 use crate::private::Sealed;
 use crate::Result;
 
-pub struct Forward<T, U, V> {
+pub struct Operation<T, U, V> {
     pub(crate) weight_multiply: T,
     pub(crate) bias_add: U,
     pub(crate) activation_function: V,
 }
 
-impl<T, U, V> Sealed for Forward<T, U, V> {}
+impl<T, U, V> Sealed for Operation<T, U, V> {}
 impl<
         T: ForwardOperation<Output = <U as ForwardOperation>::Input>,
         U: ForwardOperation<Output = <V as ForwardOperation>::Input>,
         V: ForwardOperation,
-    > ForwardOperation for Forward<T, U, V>
+    > ForwardOperation for Operation<T, U, V>
 {
     type Output = <V as ForwardOperation>::Output;
     type Input = <T as ForwardOperation>::Input;
