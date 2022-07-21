@@ -10,8 +10,13 @@ ndarray = "0.15.4"
 ndarray-rand = "0.14.0"
 rand = "0.8.5"
 thiserror = {version = "1.0.31", optional = true}
+mnist = {version = "0.5.0", optional = true}
 
 [features]
 f32 = []
 std = []
 thiserror = ["dep:thiserror", "std"]
+
+[[example]]
+name = "mnist-classification"
+required-features = ["mnist"]
