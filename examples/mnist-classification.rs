@@ -18,10 +18,10 @@ use std::path::Path;
 
 // hyperparameters for training.
 const LEARNING_RATE: ElementType = 0.001;
-const EPOCHS: u16 = 5;
+const EPOCHS: u16 = 100;
 const EVAL_EVERY: u16 = 1;
-const BATCH_SIZE: usize = 60_000;
-const SEED: u64 = 42;
+const BATCH_SIZE: usize = 16;
+const SEED: u64 = 43;
 
 fn main() {
     // Read input data as eidetic compatible tensors.
@@ -102,7 +102,7 @@ fn get_trained_network(
     // The structure of the uninitialised network doesn't depend on whether we've recorded
     // the weights previously or not.
     let network = Input::new(784)
-        .chain(Dense::new(50, Tanh::new()))
+        .chain(Dense::new(784, Tanh::new()))
         .chain(Dense::new(10, Linear::new()));
 
     // Get the path for the trained weights.
