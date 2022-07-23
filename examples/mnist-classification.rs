@@ -1,4 +1,4 @@
-use eidetic::activations::{Linear, ReLU};
+use eidetic::activations::{Linear, ReLU, Tanh};
 use eidetic::layers::{Chain, Dense, Dropout, Input};
 use eidetic::loss::SoftmaxCrossEntropy;
 use eidetic::operations::{
@@ -12,17 +12,17 @@ use eidetic::ElementType;
 use mnist::*;
 use ndarray::Array;
 use std::any::type_name;
-use std::fs::{read, write};
+use std::fs::{create_dir_all, read, write};
 use std::mem::size_of;
 use std::path::Path;
 
 // hyperparameters for training.
 const LEARNING_RATE: ElementType = 0.001;
-const EPOCHS: u16 = 1;
-const MOMENTUM: ElementType = 0.01;
-const KEEP_PROBABILITY: ElementType = 0.99;
-const EVAL_EVERY: u16 = 10;
-const BATCH_SIZE: usize = 512;
+const EPOCHS: u16 = 2;
+const MOMENTUM: ElementType = 0.9;
+const KEEP_PROBABILITY: ElementType = 0.5;
+const EVAL_EVERY: u16 = 1;
+const BATCH_SIZE: usize = 64;
 const SEED: u64 = 42;
 
 fn main() {
@@ -104,27 +104,26 @@ fn get_trained_network(
     // The structure of the uninitialised network doesn't depend on whether we've recorded
     // the weights previously or not.
     let network = Input::new(784)
-        .chain(Dense::new(50, ReLU::new()))
+        .chain(Dense::new(300, Tanh::new()))
         .chain(Dropout::new(KEEP_PROBABILITY))
+        .chain(Dense::new(100, ReLU::new()))
         .chain(Dense::new(10, Linear::new()));
 
     // Get the path for the trained weights.
-    let path_string = format!(
-        "examples/data/output/mnist-classification/weights-{}.bin",
-        type_name::<ElementType>()
-    );
-    let path = Path::new(&path_string);
+    let dir_path = Path::new("examples/data/output/mnist-classification");
+    let file_path_string = format!("weights-{}.bin", type_name::<ElementType>());
+    let file_path = dir_path.join(file_path_string);
     println!(
         "Looking for recorded weights in file at path: {}...",
-        path.display()
+        file_path.display()
     );
 
     // If a file at that path exists, then just use the data inside of the file as
     // the weights for the neural network. Otherwise, we'll want to run full training on the
     // network and stash the weights after training.
-    if path.exists() {
+    if file_path.exists() {
         println!("Using recorded weights...");
-        let bytes = read(path).unwrap();
+        let bytes = read(file_path).unwrap();
         let weights = bytes
             .chunks(size_of::<ElementType>())
             .map(|chunk| ElementType::from_be_bytes(chunk.try_into().unwrap()));
@@ -153,7 +152,8 @@ fn get_trained_network(
             .iter()
             .flat_map(|elem| elem.to_be_bytes().into_iter())
             .collect::<Vec<_>>();
-        write(path, bytes).unwrap();
+        create_dir_all(dir_path).unwrap();
+        write(file_path, bytes).unwrap();
         network
     }
 }
