@@ -11,3 +11,24 @@ This API is implemented with the following pillars:
 2. **Embeddable** - The library doesn't use the standard library or a runtime so can be used in embedded environments
 3. **Foolproof** - We will make copious use of typestates and error handling to ensure that the API cannot be misused in any way. Where possible correct API usage will be verified by the compiler
 4. **Correctness** - We make use of unit testing and documentation testing to verify that the API is correct and functions as expected. Any example code in documentation will be correct and compile
+
+## Documentation
+Documentation can be generated and opened in browser with the following command:
+
+```
+cargo doc --no-deps --open
+```
+
+which will contain more information about using the Eidetic API.
+
+## Examples
+All examples can be found in the examples folder and can be run with the following format of command:
+
+```
+cargo run --release --example <example_name> --features="required-features"
+```
+
+If an example is run and it requires any features to be activated, it will notify you and you can simply enable those features.
+
+## Website
+The whole process of my learning deep learning by going through this book, the development of the initial version of the Eidetic API, and the refactor into this newer (slightly) more powerful version can be found documented in the articles on my website which can be found [HERE](https://forgottenmaster.github.io/posts/machinelearning/deeplearningfromscratch/). 
