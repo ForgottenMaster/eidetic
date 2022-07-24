@@ -1,11 +1,11 @@
-use eidetic::activations::{Linear, Tanh};
-use eidetic::layers::{Chain, Dense, Input};
+use eidetic::activations::{Linear, ReLU};
+use eidetic::layers::{Chain, Dense, Dropout, Input};
 use eidetic::loss::SoftmaxCrossEntropy;
 use eidetic::operations::{
     InitialisedOperation, TrainableOperation, UninitialisedOperation, WithOptimiser,
 };
 use eidetic::optimisers::learning_rate_handlers::FixedLearningRateHandler;
-use eidetic::optimisers::SGD;
+use eidetic::optimisers::SGDMomentum;
 use eidetic::tensors::{rank, Tensor};
 use eidetic::training::train;
 use eidetic::ElementType;
@@ -18,10 +18,12 @@ use std::path::Path;
 
 // hyperparameters for training.
 const LEARNING_RATE: ElementType = 0.001;
-const EPOCHS: u16 = 100;
+const EPOCHS: u16 = 10;
+const MOMENTUM: ElementType = 0.9;
+const KEEP_PROBABILITY: ElementType = 0.5;
 const EVAL_EVERY: u16 = 1;
-const BATCH_SIZE: usize = 16;
-const SEED: u64 = 43;
+const BATCH_SIZE: usize = 64;
+const SEED: u64 = 42;
 
 fn main() {
     // Read input data as eidetic compatible tensors.
@@ -59,7 +61,7 @@ fn main() {
 
 fn read_mnist_data() -> InputData {
     // Read the Mnist data which is completely flattened.
-    let Mnist {
+    let NormalizedMnist {
         trn_img,
         trn_lbl,
         tst_img,
@@ -68,7 +70,8 @@ fn read_mnist_data() -> InputData {
     } = MnistBuilder::new()
         .label_format_one_hot()
         .base_path("examples/data/input/mnist")
-        .finalize();
+        .finalize()
+        .normalize();
 
     // Convert the input data into tensors which are what the eidetic API uses.
     // Note that most layers expect rank 2 tensors so we'll need to reshape the
@@ -102,7 +105,9 @@ fn get_trained_network(
     // The structure of the uninitialised network doesn't depend on whether we've recorded
     // the weights previously or not.
     let network = Input::new(784)
-        .chain(Dense::new(784, Tanh::new()))
+        .chain(Dense::new(784, ReLU::new()))
+        .chain(Dropout::new(KEEP_PROBABILITY))
+        .chain(Dense::new(784, ReLU::new()))
         .chain(Dense::new(10, Linear::new()));
 
     // Get the path for the trained weights.
@@ -127,9 +132,10 @@ fn get_trained_network(
     } else {
         println!("Training a new neural network from seed ({SEED})...");
         let network = train(
-            network
-                .with_seed(SEED)
-                .with_optimiser(SGD::new(FixedLearningRateHandler::new(LEARNING_RATE))),
+            network.with_seed(SEED).with_optimiser(SGDMomentum::new(
+                FixedLearningRateHandler::new(LEARNING_RATE),
+                MOMENTUM,
+            )),
             &SoftmaxCrossEntropy::new(),
             training_images,
             training_labels,
