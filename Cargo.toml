@@ -20,3 +20,8 @@ thiserror = ["dep:thiserror", "std"]
 [[example]]
 name = "mnist-classification"
 required-features = ["mnist"]
+
+[workspace]
+members = [
+    "eidetic-abstract"
+]
