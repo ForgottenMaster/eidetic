@@ -10,7 +10,9 @@
 #![deny(warnings, missing_docs, clippy::all)]
 
 mod backend;
+mod backend_data_type;
 mod tensor;
 
 pub use backend::*;
+pub use backend_data_type::*;
 pub use tensor::*;
