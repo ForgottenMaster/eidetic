@@ -13,3 +13,4 @@ mod backend;
 mod tensor;
 
 pub use backend::*;
+pub use tensor::*;
