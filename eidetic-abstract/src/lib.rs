@@ -11,8 +11,10 @@
 
 mod backend;
 mod backend_data_type;
+mod error;
 mod tensor;
 
 pub use backend::*;
 pub use backend_data_type::*;
+pub use error::*;
 pub use tensor::*;
