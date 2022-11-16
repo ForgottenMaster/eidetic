@@ -7,7 +7,7 @@ use thiserror::Error;
 pub enum Error {
     /// This variant is used when the construction of a tensor could not be performed successfully due to having
     /// insufficient elements.
-    #[cfg_attr(feature = "thiserror", error("Tensor could not be constructed. Requested shape was given as ({}, {}, {}, {}), but there were only {number_of_elements} elements.", requested_shape.0, requested_shape.1, requested_shape.2, requested_shape.3))]
+    #[cfg_attr(feature = "thiserror", error("Tensor could not be constructed. Requested shape was given as {requested_shape:?}, but there were only {number_of_elements} elements."))]
     TensorConstruction {
         /// The shape that was requested for the rank 4 tensor.
         requested_shape: (usize, usize, usize, usize),
