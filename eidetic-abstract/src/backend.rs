@@ -1,4 +1,4 @@
-use crate::{BackendDataType, Tensor};
+use crate::TensorCreate;
 
 /// This trait defines the operations that must be supported by a given concrete backend
 /// such as ndarray or arrayfire in order to be usable by the Eidetic framework.
@@ -12,11 +12,7 @@ use crate::{BackendDataType, Tensor};
 /// For different backends that support the same data storage type, the user should be free to
 /// select a different backend without changing any of the Eidetic framework, and the results should
 /// be identical.
-pub trait Backend {
-    /// The associated type to use when we want to represent our tensors.
-    /// Must implement Tensor for the data type we're storing.
-    ///
-    /// # Generics
-    /// T is the underlying data type stored in the tensor. Must be supported by this backend.
-    type Tensor<T: BackendDataType<Self>>: Tensor<T>;
-}
+///
+/// # Generics
+/// T is the underlying data type for elements in the tensors we're operating on.
+pub trait Backend<T>: TensorCreate<T> {}

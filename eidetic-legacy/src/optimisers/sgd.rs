@@ -9,7 +9,7 @@ use crate::tensors::Tensor;
 /// gradient descent (SGD) optimisation strategy which is
 /// simply updating the parameter with some proportion of
 /// the gradient.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct OptimiserFactory<T> {
     learning_rate_handler: T,
 }
@@ -43,7 +43,7 @@ impl<T> optimisers::base::OptimiserFactory<()> for OptimiserFactory<T> {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Optimiser<T> {
     learning_rate_handler: T,
 }

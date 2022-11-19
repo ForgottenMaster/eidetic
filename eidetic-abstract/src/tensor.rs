@@ -1,5 +1,3 @@
-use crate::Result;
-
 /// This trait should be implemented by whichever type Eidetic should use
 /// to represent the tensors it is operating on. For simplicity Eidetic assumes
 /// all tensors to be rank 4 with the following structure (batch, layer, row, column/feature).
@@ -22,13 +20,4 @@ use crate::Result;
 ///
 /// # Generics
 /// T is the underlying data type stored in the tensor.
-pub trait Tensor<T>: IntoIterator<Item = T> + Sized {
-    /// This function constructs a new instance of the Tensor from an iterator over its elements
-    /// and a given set of dimensions for the constructed Tensor.
-    ///
-    /// # Errors
-    /// Returns an error if the product of the dimensions provided is greater than the amount of elements
-    /// that the iterator yields.
-    fn from_iter(dims: (usize, usize, usize, usize), iter: impl Iterator<Item = T>)
-        -> Result<Self>;
-}
+pub trait Tensor<T>: IntoIterator<Item = T> {}
