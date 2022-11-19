@@ -12,9 +12,7 @@
 mod backend;
 mod error;
 mod tensor;
-mod tensor_create;
 
 pub use backend::*;
 pub use error::*;
 pub use tensor::*;
-pub use tensor_create::*;
