@@ -12,6 +12,7 @@ pub trait TensorCreate<T> {
     /// Returns an error if the given shape doesn't match the number of elements in the
     /// iterator.
     fn tensor_create(
+        &self,
         shape: (usize, usize, usize, usize),
         iter: impl Iterator<Item = T>,
     ) -> Result<Self::Output>;
