@@ -19,5 +19,6 @@
 /// major form to column major).
 ///
 /// # Generics
+/// 'a is the lifetime of the backend that the Tensor is tied to, allowing for RAII style logic on the backend.
 /// T is the underlying data type stored in the tensor.
-pub trait Tensor<T>: IntoIterator<Item = T> {}
+pub trait Tensor<'a, T>: IntoIterator<Item = T> {}

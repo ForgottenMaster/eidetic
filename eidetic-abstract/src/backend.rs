@@ -18,16 +18,24 @@ use crate::{Result, Tensor};
 pub trait Backend<T> {
     /// The concrete tensor type in use by the backend for elements of
     /// type T. All operations will be performed using operands of this tensor type.
-    type Tensor: Tensor<T>;
+    ///
+    /// # Generics
+    /// 'a is the lifetime that the Tensor should be tied to, which is the lifetime of this backend.
+    type Tensor<'a>: Tensor<'a, T>
+    where
+        Self: 'a;
 
     /// Tries to create a new tensor from a given 4D shape tuple and an iterator
     /// of elements.
     ///
     /// # Errors
     /// Backend should return an error of type eidetic::Error::TensorConstruction if there are insufficient elements in the iterator.
-    fn create_tensor(
-        &self,
+    ///
+    /// # Generics
+    /// 'a is the lifetime of the borrow of self that the Tensor should be tied to, to ensure it doesn't outlive the backend.
+    fn create_tensor<'a>(
+        &'a self,
         shape: (usize, usize, usize, usize),
         iter: impl Iterator<Item = T>,
-    ) -> Result<Self::Tensor>;
+    ) -> Result<Self::Tensor<'a>>;
 }
