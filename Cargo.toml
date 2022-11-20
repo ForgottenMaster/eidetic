@@ -1,5 +1,4 @@
 [workspace]
 members = [
-    "eidetic-abstract",
-    "eidetic-legacy"
+    "eidetic-abstract"
 ]
