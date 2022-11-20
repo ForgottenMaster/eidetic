@@ -30,12 +30,9 @@ pub trait Backend<T> {
     ///
     /// # Errors
     /// Backend should return an error of type eidetic::Error::TensorConstruction if there are insufficient elements in the iterator.
-    ///
-    /// # Generics
-    /// 'a is the lifetime of the borrow of self that the Tensor should be tied to, to ensure it doesn't outlive the backend.
-    fn create_tensor<'a>(
-        &'a self,
+    fn create_tensor(
+        &self,
         shape: (usize, usize, usize, usize),
         iter: impl Iterator<Item = T>,
-    ) -> Result<Self::Tensor<'a>>;
+    ) -> Result<Self::Tensor<'_>>;
 }
