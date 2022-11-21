@@ -3,7 +3,6 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![deny(warnings, missing_docs, clippy::all)]
 
-use core::marker::PhantomData;
 use ndarray::{Array, Ix4};
 
 /// The structure that will be used as the backend for ndarray backend.
@@ -15,7 +14,7 @@ pub struct Backend;
 /// # Generics
 /// 'a is the lifetime of the Backend borrow
 /// T is the data type of the underlying elements
-pub struct Tensor<'a, T>(PhantomData<&'a ()>, Array<T, Ix4>);
+pub struct Tensor<'a, T>(&'a Backend, Array<T, Ix4>);
 
 macro_rules! implement_backend {
     ($type:ty) => {
@@ -36,7 +35,7 @@ macro_rules! implement_backend {
                         requested_shape: shape,
                     })
                 } else {
-                    Ok(Tensor(PhantomData, flat.into_shape(shape).unwrap()))
+                    Ok(Tensor(self, flat.into_shape(shape).unwrap()))
                 }
             }
         }

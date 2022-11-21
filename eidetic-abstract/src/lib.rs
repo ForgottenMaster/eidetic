@@ -29,7 +29,7 @@ fn test_backend_impl<T: PartialEq>(
     input_data: impl Iterator<Item = T> + Clone,
 ) {
     test_tensor_create_failure(backend, input_data.clone());
-    test_tensor_create_success(backend, input_data.clone());
+    test_tensor_create_success(backend, input_data);
 }
 
 fn test_tensor_create_failure<T>(backend: &impl Backend<T>, input_data: impl Iterator<Item = T>) {
