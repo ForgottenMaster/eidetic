@@ -7,6 +7,7 @@
 
 mod backend;
 mod error;
+mod sealed;
 mod tensor;
 
 pub use backend::*;
