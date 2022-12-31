@@ -14,7 +14,7 @@ impl<'a> forward::Operation for Operation<'a> {
 
     fn backward(self, output_gradient: Self::Output) -> Result<(Self::Backward, Self::Input)> {
         if output_gradient.0.raw_dim() == self.0.last_output.0.raw_dim() {
-            let partial = self.0.last_output.0.mapv(|elem| 1.0 - elem * elem);
+            let partial = self.0.last_output.0.mapv(|elem| elem.mul_add(-elem, 1.0));
             let input_gradient = Tensor(partial * output_gradient.0);
             Ok((backward::tanh::Operation(()), input_gradient))
         } else {
@@ -68,12 +68,12 @@ mod tests {
         let expected = Tensor::<rank::Two>::new(
             (2, 3),
             [
-                0.41997433,
+                0.4199743,
                 0.14130163,
-                0.029597998,
-                0.0053634644,
-                0.00090777874,
-                0.00014734268,
+                0.029597946,
+                0.0053635724,
+                0.0009077375,
+                0.00014734178,
             ],
         )
         .unwrap();
@@ -83,10 +83,10 @@ mod tests {
             [
                 0.41997434161402614,
                 0.14130164970632886,
-                0.029598111496320634,
-                0.005363802732103462,
-                0.0009079161547193015,
-                0.00014745928443171685,
+                0.0295981114963205,
+                0.005363802732103666,
+                0.0009079161547192634,
+                0.00014745928443181785,
             ],
         )
         .unwrap();
